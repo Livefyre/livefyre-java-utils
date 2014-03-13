@@ -26,7 +26,7 @@ Creating tokens:
 **User auth token:**
 ```java
 public String example() {
-	return Livefyre.getNetwork("networkName", "networkKey").getUserAuthToken();
+	return Livefyre.getNetwork("networkName", "networkKey").getUserAuthToken("userId", "displayName", "timeTillExpire");
 }
 ```
 
