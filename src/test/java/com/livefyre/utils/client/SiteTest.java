@@ -4,10 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.security.InvalidKeyException;
+
 import org.junit.Test;
 
-import com.livefyre.utils.client.Livefyre;
-import com.livefyre.utils.client.Site;
+import com.livefyre.utils.core.LivefyreJwtUtil;
 import com.livefyre.utils.core.StreamType;
 
 public class SiteTest {
@@ -16,28 +17,37 @@ public class SiteTest {
     
     @Test
     public void testSiteCreation() {
+        Network network = Livefyre.getNetwork("", "");
         try {
-            Livefyre.getSite("", null);
+            network.getSite("", null);
             fail("siteKey cannot be null");
         } catch(NullPointerException ex) {}
         try {
-            Livefyre.getSite(null, "");
+            network.getSite(null, "");
             fail("siteId cannot be null");
         } catch(NullPointerException ex) {}
-        Site site = Livefyre.getSite("", "");
+        Site site = network.getSite("", "");
         assertNotNull(site);
     }
     
     @Test
     public void testSiteCollectionToken() {
-        Site site = Livefyre.getSite(SITE_ID, SITE_KEY);
+        Site site = Livefyre.getNetwork("", "").getSite(SITE_ID, SITE_KEY);
         String token = site.getCollectionMetaToken("test", "testId", "testUrl", "testTags");
         assertNotNull(token);
-        assertEquals(site.getCollectionContent(token), "testUrl");
+        try {
+            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("url").getAsString(), "testUrl");
+        } catch (InvalidKeyException e) {
+            fail("shouldn't fail");
+        }
         
         token = site.getCollectionMetaToken("test", "testId", "testUrl", "testTags", StreamType.REVIEWS);
         assertNotNull(token);
-        assertEquals(site.getCollectionContent(token), "testUrl");
+        try {
+            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("type").getAsString(), "reviews");
+        } catch (InvalidKeyException e) {
+            fail("shouldn't fail");
+        }
     }
     
     @Test
@@ -73,7 +83,12 @@ public class SiteTest {
         } catch(NullPointerException ex) {}
         try {
             site.getCollectionContent("");
-            fail("displayName cannot be null");
+            fail("siteId cannot be null");
+        } catch(NullPointerException ex) {}
+        site.setSiteId("");
+        try {
+            site.getCollectionContent("");
+            fail("networkName cannot be null");
         } catch(NullPointerException ex) {}
     }
 }

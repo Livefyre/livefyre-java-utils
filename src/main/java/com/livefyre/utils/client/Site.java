@@ -3,17 +3,24 @@ package com.livefyre.utils.client;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 
-import net.oauth.jsontoken.JsonToken;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.livefyre.utils.core.LivefyreException;
 import com.livefyre.utils.core.LivefyreJwtUtil;
 import com.livefyre.utils.core.StreamType;
 import com.livefyre.utils.core.TokenException;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 
 public class Site {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
     
+    private String networkName = null;
     private String siteId = null;
     private String siteKey = null;
     
@@ -26,9 +33,11 @@ public class Site {
      * @param siteKey secret key for site. cannot be null
      * @throws NullPointerException if siteId or key is null
      */
-    public Site(String siteId, String siteKey) {
+    public Site(String networkName, String siteId, String siteKey) {
+        Preconditions.checkNotNull(networkName);
         Preconditions.checkNotNull(siteId);
         Preconditions.checkNotNull(siteKey);
+        this.networkName = networkName;
         this.siteId = siteId;
         this.siteKey = siteKey;
     }
@@ -67,6 +76,16 @@ public class Site {
     }
     
     /**
+     * Helper method for getCollectionContent. Returns a JsonObject which is typically more managable.
+     * @param articleId articleId for the content to be retrieved
+     * @return JsonObject containing collection content
+     * @see getCollectionContent(String articleId)
+     */
+    public JsonObject getCollectionContentJson(String articleId) {
+        return (JsonObject) new JsonParser().parse(getCollectionContent(articleId));
+    }
+    
+    /**
      * Gets collection content (SEO) for this Site. siteKey must be set before calling this method.
      * Get user generated content for a pre-existing collection. Returns user generated content (UGC) as an HTML fragment.
      * Customers can embed the UGC on the page that’s returned in the initial response so crawlers can index the UGC
@@ -75,22 +94,38 @@ public class Site {
      * Note, only use getContent if you want to make UGC available to crawlers that don’t execute javascript.
      * livefyre.js handles displaying collection content on article pages otherwise.
      * 
-     * @param collectionMetaToken collection token to be decrypted
-     * @return collection content
-     * @throws NullPointerException if collectionMetaToken or siteKey is null
+     * GET http://bootstrap.{network}/bs3/{network}/{siteId}/{b64articleId}/init/
+     * 
+     * @param articleId articleId for the content to be retrieved
+     * @return String containing collection content
+     * @throws NullPointerException if articleId or siteId is null
      * @throws TokenException if there is an issue decrypting the token
+     * @throws LivefyreException if there is an issue contacting Livefyre
+     * @see <a href="http://docs.livefyre.com/developers/reference/http-reference/#section-22">documentation</a>
      */
-    public String getCollectionContent(String collectionMetaToken) {
-        Preconditions.checkNotNull(collectionMetaToken);
-        Preconditions.checkNotNull(this.siteKey);
-        try {
-            JsonToken json = LivefyreJwtUtil.decodeJwt(this.siteKey, collectionMetaToken);
-            JsonObject jsonObj = json.getPayloadAsJsonObject();
-            
-            return jsonObj.get("url").getAsString();
-        } catch (InvalidKeyException e) {
-            throw new TokenException("Failure decrypting token." +e);
+    public String getCollectionContent(String articleId) {
+        Preconditions.checkNotNull(articleId);
+        Preconditions.checkNotNull(this.siteId);
+        Preconditions.checkNotNull(this.networkName);
+        
+        ClientResponse response = Client.create()
+                .resource(String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init",
+                        this.networkName, this.siteId, Base64.encodeBase64URLSafeString(articleId.getBytes())))
+                .accept(MediaType.APPLICATION_JSON)
+                .get(ClientResponse.class);
+        if (response.getStatus() != 200) {
+            throw new LivefyreException("Error contacting Livefyre. Status code: " +response.getStatus());
         }
+        return response.getEntity(String.class);
+    }
+    
+    public String getNetworkName() {
+        return networkName;
+    }
+
+    public Site setNetworkName(String networkName) {
+        this.networkName = networkName;
+        return this;
     }
     
     public String getSiteId() {
@@ -102,11 +137,11 @@ public class Site {
         return this;
     }
 
-    public String getKey() {
+    public String getSiteKey() {
         return siteKey;
     }
 
-    public Site setKey(String key) {
+    public Site setSiteKey(String key) {
         this.siteKey = key;
         return this;
     }

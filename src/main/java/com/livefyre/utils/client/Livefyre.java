@@ -18,15 +18,4 @@ public class Livefyre {
     public static Network getNetwork(String networkName, String networkKey) {
         return new Network(networkName, networkKey);
     }
-
-    /**
-     * Returns an instance of a Livefyre site object.
-     * 
-     * @param siteId Livefyre-provided site id
-     * @param siteKey The Livefyre-provided key for this particular site.
-     * @return a Site object
-     */
-    public static Site getSite(String siteId, String siteKey) {
-        return new Site(siteId, siteKey);
-    }
 }

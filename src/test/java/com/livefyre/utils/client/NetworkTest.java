@@ -6,9 +6,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.livefyre.utils.client.Livefyre;
-import com.livefyre.utils.client.Network;
-
 public class NetworkTest {
     private static final String NETWORK = "test.fyre.com";
     private static final String NETWORK_KEY = "testkeytest";
@@ -28,15 +25,12 @@ public class NetworkTest {
     }
     
     @Test
-    public void testNetworkSetUserSync() {
+    public void testNetworkSetUserSyncId() {
         Network network = Livefyre.getNetwork(NETWORK, NETWORK_KEY);
         try {
             network.setUserSyncUrl("http://thisisa.test.url/");
             fail("network must contain {id}");
         } catch (IllegalArgumentException e) {}
-        
-        network.setUserSyncUrl("http://thisisa.test.url/{id}/");
-        network.syncUser("system");
     }
     
     @Test

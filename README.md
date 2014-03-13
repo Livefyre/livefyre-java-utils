@@ -21,7 +21,22 @@ Add this dependency to your project's POM:
 Usage
 =====
 
-See tests for examples.
+To send Livefyre a user sync url and then have Livefyre pull user data from that url:
+
+	public void example() {
+		Network network = Livefyre.getNetwork("networkName", "networkKey");
+        network.setUserSyncUrl("http://thisisa.test.url/{id}/");
+        network.syncUser("system");
+	}
+        
+To retrieve content collection data as a string and json object from Livefyre (note that both are in JSON, but the latter is encapsulated in a JsonObject):
+
+	public void example() {
+        Site site = Livefyre.getNetwork("networkName", "networkKey").getSite("siteId", "siteSecret");
+        String content = site.getCollectionContent("articleId");
+
+        JsonObject jsonObject = site.getCollectionContentJson("articleId");
+	}
 
 Testing
 =======

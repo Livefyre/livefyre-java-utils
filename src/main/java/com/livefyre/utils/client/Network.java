@@ -9,6 +9,7 @@ import net.oauth.jsontoken.JsonToken;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
+import com.livefyre.utils.core.LivefyreException;
 import com.livefyre.utils.core.LivefyreJwtUtil;
 import com.livefyre.utils.core.TokenException;
 import com.sun.jersey.api.client.Client;
@@ -50,9 +51,11 @@ public class Network {
      * @throws TokenException if there is a failure creating the token
      * @throws IllegalArgumentException if urlTemplate does not contain {id}
      * @throws NullPointerException if urlTemplate, this.name, or this.key are null
+     * @throws LivefyreException if there is an issue contacting Livefyre
+     * @see <a href="http://docs.livefyre.com/developers/user-auth/remote-profiles/#ping-for-pull">documentation</a>
      */
 
-    public boolean setUserSyncUrl(String urlTemplate) {
+    public Network setUserSyncUrl(String urlTemplate) {
         Preconditions.checkNotNull(urlTemplate);
         Preconditions.checkNotNull(this.networkName);
         Preconditions.checkNotNull(this.networkKey);
@@ -73,7 +76,10 @@ public class Network {
                 .queryParam("actor_token", token)
                 .queryParam("pull_profile_url", urlTemplate)
                 .post(ClientResponse.class);
-        return response.getStatus() == 204;
+        if (response.getStatus() != 204) {
+            throw new LivefyreException("Error contacting Livefyre. Status code: " +response.getStatus());
+        }
+        return this;
     }
     
     /**
@@ -84,14 +90,19 @@ public class Network {
      * @param userId user id for the user
      * @return true if Livefyre was successfully pinged. false otherwise
      * @throws NullPointerException if userId or networkName is null
+     * @throws LivefyreException if there is an issue contacting Livefyre
+     * @see <a href="http://docs.livefyre.com/developers/user-auth/remote-profiles/#ping-for-pull">documentation</a>
      */
-    public boolean syncUser(String userId) {
+    public Network syncUser(String userId) {
         Preconditions.checkNotNull(userId);
         Preconditions.checkNotNull(this.networkName);
         ClientResponse response = Client.create()
                 .resource(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
                 .post(ClientResponse.class);
-        return response.getStatus() == 200;
+        if (response.getStatus() != 200) {
+            throw new LivefyreException("Error contacting Livefyre. Status code: " +response.getStatus());
+        }
+        return this;
     }
     
     /**
@@ -140,6 +151,17 @@ public class Network {
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure decrypting token." +e);
         }
+    }
+
+    /**
+     * Returns an instance of a Livefyre site object.
+     * 
+     * @param siteId Livefyre-provided site id
+     * @param siteKey The Livefyre-provided key for this particular site.
+     * @return a Site object
+     */
+    public Site getSite(String siteId, String siteKey) {
+        return new Site(this.networkName, siteId, siteKey);
     }
     
     public String getName() {
