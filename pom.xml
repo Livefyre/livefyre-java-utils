@@ -13,12 +13,12 @@
 
 	<groupId>com.livefyre</groupId>
 	<artifactId>utils</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<organization>
 		<name>Livefyre</name>
-		<url>http://www.livefyre.com</url>
+		<url>http://livefyre.com</url>
 	</organization>
 
 	<scm>

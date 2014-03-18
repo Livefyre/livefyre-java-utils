@@ -96,8 +96,17 @@ public class Network {
     public Network syncUser(String userId) {
         Preconditions.checkNotNull(userId);
         Preconditions.checkNotNull(this.networkName);
+        String token;
+        try {
+            token = LivefyreJwtUtil.getJwtUserAuthToken(this.networkName, this.networkKey, DEFAULT_USER, DEFAULT_USER, 86400);
+        } catch (InvalidKeyException e) {
+            throw new TokenException("Failure creating token." +e);
+        } catch (SignatureException e) {
+            throw new TokenException("Failure creating token." +e);
+        }
         ClientResponse response = Client.create()
                 .resource(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
+                .queryParam("lftoken", token)
                 .post(ClientResponse.class);
         if (response.getStatus() != 200) {
             throw new LivefyreException("Error contacting Livefyre. Status code: " +response.getStatus());

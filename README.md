@@ -3,7 +3,7 @@
 Requirements
 ============
 
-Java 1.5 and later.
+Works with Java 1.5 and later.
 
 Installation
 ============
