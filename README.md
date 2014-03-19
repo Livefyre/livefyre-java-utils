@@ -1,6 +1,6 @@
 # Livefyre Java Utility Classes
 
-Livefyre's official library for common server-side tasks necessary for getting Livefyre apps (comments, reviews, etc.) working on your website
+Livefyre's official library for common server-side tasks necessary for getting Livefyre apps (comments, reviews, etc.) working on your website.
 
 Requirements
 ============
