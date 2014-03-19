@@ -1,4 +1,7 @@
-=== 1.0.1 2014-03-18
+=== 1.0.2 2014-03-18
+
+* Method name change from getCollectionToken to buildCollectionToken
+
 * Fixed Network.syncUser - added the necessary lftoken needed to validate the request. 
 
 * Initial commit.
