@@ -21,11 +21,11 @@ public class SiteTest {
         try {
             network.getSite("", null);
             fail("siteKey cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
             network.getSite(null, "");
             fail("siteId cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         Site site = network.getSite("", "");
         assertNotNull(site);
     }
@@ -33,15 +33,29 @@ public class SiteTest {
     @Test
     public void testSiteCollectionToken() {
         Site site = Livefyre.getNetwork("", "").getSite(SITE_ID, SITE_KEY);
-        String token = site.buildCollectionToken("test", "testId", "testUrl", "testTags");
+        
+        try {
+            site.buildCollectionMetaToken("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345", "", "", "");
+            fail("titles longer than 255 char are not allowed");
+        } catch (IllegalArgumentException e) {}
+        try {
+            site.buildCollectionMetaToken("", "", "tet.com", "");
+            fail("url must start with valid url scheme (http:// or https://)");
+        } catch (IllegalArgumentException e) {}
+        try {
+            site.buildCollectionMetaToken("", "", "tet.com/", "");
+            fail("url must be a valid domain");
+        } catch (IllegalArgumentException e) {}
+        
+        String token = site.buildCollectionMetaToken("test", "testId", "https://test.com", "testTags");
         assertNotNull(token);
         try {
-            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("url").getAsString(), "testUrl");
+            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("url").getAsString(), "https://test.com");
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
         
-        token = site.buildCollectionToken("test", "testId", "testUrl", "testTags", StreamType.REVIEWS);
+        token = site.buildCollectionMetaToken("test", "testId", "http://www.test.com", "testTags", StreamType.REVIEWS);
         assertNotNull(token);
         try {
             assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("type").getAsString(), "reviews");
@@ -52,43 +66,46 @@ public class SiteTest {
     
     @Test
     public void testNullChecks() {
-        Site site = new Site();
+        Site site = new Site("", "", "");
+        site.setNetworkName(null);
+        site.setSiteId(null);
+        site.setSiteKey(null);
         try {
-            site.buildCollectionToken(null, null, null, null, null);
+            site.buildCollectionMetaToken(null, null, null, null, null);
             fail("title cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
-            site.buildCollectionToken("", null, null, null, null);
+            site.buildCollectionMetaToken("", null, null, null, null);
             fail("articleId cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
-            site.buildCollectionToken("", "", null, null, null);
+            site.buildCollectionMetaToken("", "", null, null, null);
             fail("url cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
-            site.buildCollectionToken("", "", "", null, null);
+            site.buildCollectionMetaToken("", "", "http://test.com", null, null);
             fail("tags cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
-            site.buildCollectionToken("", "", "", "", null);
+            site.buildCollectionMetaToken("", "", "http://test.com", "", null);
             fail("stream cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
-            site.buildCollectionToken("", "", "", "", StreamType.NONE);
+            site.buildCollectionMetaToken("", "", "https://test.com", "", StreamType.NONE);
             fail("siteKey cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
             site.getCollectionContent(null);
             fail("displayName cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         try {
             site.getCollectionContent("");
             fail("siteId cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
         site.setSiteId("");
         try {
             site.getCollectionContent("");
             fail("networkName cannot be null");
-        } catch(NullPointerException ex) {}
+        } catch(NullPointerException e) {}
     }
 }

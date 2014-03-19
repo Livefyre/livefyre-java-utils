@@ -1,4 +1,6 @@
-=== 1.0.2 2014-03-18
+=== 1.0.3 2014-03-19
+
+* Adding additional checks, changing some method names, updating readme
 
 * Method name change from getCollectionToken to buildCollectionToken
 

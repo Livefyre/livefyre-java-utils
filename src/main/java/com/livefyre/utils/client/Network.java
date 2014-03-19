@@ -1,5 +1,8 @@
 package com.livefyre.utils.client;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
@@ -7,7 +10,8 @@ import java.util.Calendar;
 
 import net.oauth.jsontoken.JsonToken;
 
-import com.google.common.base.Preconditions;
+import org.apache.commons.lang.StringUtils;
+
 import com.google.gson.JsonObject;
 import com.livefyre.utils.core.LivefyreException;
 import com.livefyre.utils.core.LivefyreJwtUtil;
@@ -17,11 +21,10 @@ import com.sun.jersey.api.client.ClientResponse;
 
 public class Network {
     private static final String DEFAULT_USER = "system";
+    private static final String ID = "{id}";
     
     private String networkName = null;
     private String networkKey = null;
-    
-    public Network() {}
     
     /**
      * Creates a new Network class with name and key.
@@ -31,19 +34,17 @@ public class Network {
      * @throws NullPointerException if networkName or networkKey is null
      */
     public Network(String networkName, String networkKey) {
-        Preconditions.checkNotNull(networkName);
-        Preconditions.checkNotNull(networkKey);
-        this.networkName = networkName;
-        this.networkKey = networkKey;
+        this.networkName = checkNotNull(networkName);
+        this.networkKey = checkNotNull(networkKey);
     }
     
     /**
      * Set the URL that Livefyre will use to fetch user profile info from your user management
-     * system. Be sure to set url_template with a working endpoint (see Remote Profiles) before
+     * system. Be sure to set urlTemplate with a working endpoint (see Remote Profiles) before
      * making calls to updateRemoteUser().
-     * The registered “url_template” must contain the string "{id}" which will be replaced with
+     * The registered “urlTemplate” must contain the string "{id}" which will be replaced with
      * the ID of the user that’s being updated.
-     * ex. url_template = “http://example.com/users/get_remote_profile?id={id}”
+     * ex. urlTemplate = “http://example.com/users/get_remote_profile?id={id}”
      * 
      * @param urlTemplate template that Livefyre will use to fetch user profile info. must not be
      *            null
@@ -56,12 +57,9 @@ public class Network {
      */
 
     public Network setUserSyncUrl(String urlTemplate) {
-        Preconditions.checkNotNull(urlTemplate);
-        Preconditions.checkNotNull(this.networkName);
-        Preconditions.checkNotNull(this.networkKey);
-        if (!urlTemplate.contains("{id}")) {
-            throw new IllegalArgumentException("urlTemplate does not contain {id}.");
-        }
+        checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
+        checkNotNull(this.networkName);
+        checkNotNull(this.networkKey);
         
         String token;
         try {
@@ -94,8 +92,9 @@ public class Network {
      * @see <a href="http://docs.livefyre.com/developers/user-auth/remote-profiles/#ping-for-pull">documentation</a>
      */
     public Network syncUser(String userId) {
-        Preconditions.checkNotNull(userId);
-        Preconditions.checkNotNull(this.networkName);
+        checkNotNull(userId);
+        checkNotNull(this.networkName);
+        
         String token;
         try {
             token = LivefyreJwtUtil.getJwtUserAuthToken(this.networkName, this.networkKey, DEFAULT_USER, DEFAULT_USER, 86400);
@@ -118,19 +117,21 @@ public class Network {
      * Creates a Livefyre user token. It is recommended that this is called after the user
      * is authenticated.
      * 
-     * @param userId user id for the user
+     * @param userId user id for the user. must be alphanumeric
      * @param displayName display name for the user
      * @param expires seconds until this token is to expire
      * @return String containing the user token
      * @throws NullPointerException if userId, displayName, expires, networkName, or networkKey is null
+     * @throws IllegalArgumentException if userId is not alphanumeric
      * @throws TokenException if there is an issue creating the jwt
      */
-    public String getUserAuthToken(String userId, String displayName, Double expires) {
-        Preconditions.checkNotNull(userId);
-        Preconditions.checkNotNull(displayName);
-        Preconditions.checkNotNull(expires);
-        Preconditions.checkNotNull(this.networkName);
-        Preconditions.checkNotNull(this.networkKey);
+    public String buildUserAuthToken(String userId, String displayName, Double expires) {
+        checkArgument(StringUtils.isAlphanumeric(checkNotNull(userId)), "userId is not alphanumeric.");
+        checkNotNull(displayName);
+        checkNotNull(expires);
+        checkNotNull(this.networkName);
+        checkNotNull(this.networkKey);
+        
         try {
             return LivefyreJwtUtil.getJwtUserAuthToken(this.networkName, this.networkKey, userId, displayName, expires);
         } catch (InvalidKeyException e) {
@@ -148,8 +149,9 @@ public class Network {
      * @throws TokenException if there is an issue decrypting the token
      */
     public boolean validateLivefyreToken(String lfToken) {
-        Preconditions.checkNotNull(lfToken);
-        Preconditions.checkNotNull(this.networkKey);
+        checkNotNull(lfToken);
+        checkNotNull(this.networkKey);
+        
         try {
             JsonToken json = LivefyreJwtUtil.decodeJwt(this.networkKey, lfToken);
             JsonObject jsonObj = json.getPayloadAsJsonObject();
@@ -173,21 +175,20 @@ public class Network {
         return new Site(this.networkName, siteId, siteKey);
     }
     
+    /* Getters/Setters */
     public String getName() {
         return networkName;
     }
 
-    public Network setNetworkName(String name) {
+    protected void setNetworkName(String name) {
         this.networkName = name;
-        return this;
     }
 
-    public String getKey() {
+    public String getNetworkKey() {
         return networkKey;
     }
 
-    public Network setKey(String key) {
-        this.networkKey = key;
-        return this;
+    protected void setNetworkKey(String networkKey) {
+        this.networkKey = networkKey;
     }
 }

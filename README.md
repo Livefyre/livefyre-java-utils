@@ -25,48 +25,37 @@ Creating tokens:
 
 **User auth token:**
 ```java
-public String example() {
-	return Livefyre.getNetwork("networkName", "networkKey").getUserAuthToken("userId", "displayName", "timeTillExpire");
-}
+Livefyre.getNetwork(networkName, networkKey).buildUserAuthToken(userId, displayName, timeTillExpire);
 ```
 
 **Collection meta token:**
 ```java
-public String example() {
-	Network network = Livefyre.getNetwork("networkName", "networkKey");
-	return network.getSite("siteId", "siteKey").getCollectionMetaToken("title", "articleId", "url", "tags");
-}
+Network network = Livefyre.getNetwork(networkName, networkKey);
+network.getSite(siteId, siteKey).buildCollectionMetaToken(title, articleId, url, tags);
 ```
 
 **You can also use the LivefyreJwtUtil class to create and decode tokens.*
 
 To validate a Livefyre token:
 ```java
-public boolean example() {
-	return Livefyre.getNetwork("networkName", "networkKey").validateLivefyreToken("lfToken");
-}
+Livefyre.getNetwork(networkName, networkKey).validateLivefyreToken(lfToken);
 ```
-
 
 To send Livefyre a user sync url and then have Livefyre pull user data from that url:
 
 ```java
-public void example() {
-	Network network = Livefyre.getNetwork("networkName", "networkKey");
-    network.setUserSyncUrl("http://thisisa.test.url/{id}/");
-    network.syncUser("system");
-}
+Network network = Livefyre.getNetwork(networkName, networkKey);
+network.setUserSyncUrl(http://thisisa.test.url/{id}/);
+network.syncUser(system);
 ```
         
 To retrieve content collection data as a string and json object from Livefyre (note that both are in JSON, but the latter is encapsulated in a JsonObject):
 
 ```java
-public void example() {
-    Site site = Livefyre.getNetwork("networkName", "networkKey").getSite("siteId", "siteSecret");
-    String content = site.getCollectionContent("articleId");
+Site site = Livefyre.getNetwork(networkName, networkKey).getSite(siteId, siteSecret);
+String content = site.getCollectionContent(articleId);
 
-    JsonObject jsonObject = site.getCollectionContentJson("articleId");
-}
+JsonObject jsonObject = site.getCollectionContentJson(articleId);
 ```
 
 Testing
