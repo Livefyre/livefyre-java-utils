@@ -42,8 +42,8 @@ public class Site {
         this.siteKey = siteKey;
     }
     
-    public String getCollectionMetaToken(String title, String articleId, String url, String tags) {
-        return getCollectionMetaToken(title, articleId, url, tags, StreamType.NONE);
+    public String buildCollectionToken(String title, String articleId, String url, String tags) {
+        return buildCollectionToken(title, articleId, url, tags, StreamType.NONE);
     }
     
     /**
@@ -58,7 +58,7 @@ public class Site {
      * @throws NullPointerException if title, articleId, url, tags, stream, or siteKey is null
      * @throws TokenException if there is an issue creating the token
      */
-    public String getCollectionMetaToken(String title, String articleId, String url, String tags, StreamType stream) {
+    public String buildCollectionToken(String title, String articleId, String url, String tags, StreamType stream) {
         Preconditions.checkNotNull(title);
         Preconditions.checkNotNull(articleId);
         Preconditions.checkNotNull(url);
