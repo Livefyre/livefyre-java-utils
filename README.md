@@ -1,6 +1,6 @@
 # Livefyre Java Utility Classes
 
-This is Livefyre's official utility for Java users.  These classes provide a simple way to create the tokens necessary for interacting with the Livefyre API, and they also provide some methods to assist with accessing some common endpoints.
+Livefyre's official library for common server-side tasks necessary for getting Livefyre apps (comments, reviews, etc.) working on your website
 
 Requirements
 ============
