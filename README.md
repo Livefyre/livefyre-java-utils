@@ -1,16 +1,11 @@
 # Livefyre Java Utility Classes
+[![GitHub version](https://badge.fury.io/gh/livefyre%2Flivefyre-java-utils.png)](http://badge.fury.io/gh/livefyre%2Flivefyre-java-utils)
 
 Livefyre's official library for common server-side tasks necessary for getting Livefyre apps (comments, reviews, etc.) working on your website.
 
-Requirements
-============
-
 Works with Java 1.5 and later.
 
-Installation
-============
-
-### Maven users
+## Installation
 
 Add this dependency to your project's POM:
 
@@ -20,11 +15,14 @@ Add this dependency to your project's POM:
       <version>1.0.3</version>
     </dependency>
 
-Usage
-=====
+## Usage
 
 Creating tokens:
 
+**Livefyre token:**
+```Java
+Network network = Livefyre.getNetwork("networkName", "networkKey").buildUserAuthToken()
+```
 **User auth token:**
 ```Java
 Livefyre.getNetwork("networkName", "networkKey").buildUserAuthToken("userId", "displayName", double timeTillExpire);
@@ -35,8 +33,6 @@ Livefyre.getNetwork("networkName", "networkKey").buildUserAuthToken("userId", "d
 Network network = Livefyre.getNetwork("networkName", "networkKey");
 network.getSite("siteId", "siteKey").buildCollectionMetaToken("title", "articleId", "url", "tags");
 ```
-
-**You can also use the LivefyreJwtUtil class to create and decode tokens.*
 
 To validate a Livefyre token:
 ```Java
@@ -60,12 +56,20 @@ content = site.getCollectionContent("articleId");
 JsonObject jsonObject = site.getCollectionContentJson("articleId");
 ```
 
-Testing
-=======
+## Testing
 
 You must have Maven installed. To run the tests, simply run `mvn test`. You can run particular tests by passing `-D test=Class#method` -- for example, `-D test=NetworkTest#testNetworkCreation`.
 
-License
-=======
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+Note: any feature update on any of Livefyre's libraries will need to be reflected on all libraries. We will try and accommodate when we find a request useful, but please be aware of the time it may take.
+
+## License
 
 MIT

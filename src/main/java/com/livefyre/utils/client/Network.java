@@ -20,6 +20,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class Network {
+    private static final double DEFAULT_EXPIRES = 86400.0;
     private static final String DEFAULT_USER = "system";
     private static final String ID = "{id}";
     
@@ -61,17 +62,9 @@ public class Network {
         checkNotNull(this.networkName);
         checkNotNull(this.networkKey);
         
-        String token;
-        try {
-            token = LivefyreJwtUtil.getJwtUserAuthToken(this.networkName, this.networkKey, DEFAULT_USER, DEFAULT_USER, 86400);
-        } catch (InvalidKeyException e) {
-            throw new TokenException("Failure creating token." +e);
-        } catch (SignatureException e) {
-            throw new TokenException("Failure creating token." +e);
-        }
         ClientResponse response = Client.create()
                 .resource(String.format("http://%s/", this.networkName))
-                .queryParam("actor_token", token)
+                .queryParam("actor_token", buildUserAuthToken())
                 .queryParam("pull_profile_url", urlTemplate)
                 .post(ClientResponse.class);
         if (response.getStatus() != 204) {
@@ -95,22 +88,22 @@ public class Network {
         checkNotNull(userId);
         checkNotNull(this.networkName);
         
-        String token;
-        try {
-            token = LivefyreJwtUtil.getJwtUserAuthToken(this.networkName, this.networkKey, DEFAULT_USER, DEFAULT_USER, 86400);
-        } catch (InvalidKeyException e) {
-            throw new TokenException("Failure creating token." +e);
-        } catch (SignatureException e) {
-            throw new TokenException("Failure creating token." +e);
-        }
         ClientResponse response = Client.create()
                 .resource(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
-                .queryParam("lftoken", token)
+                .queryParam("lftoken", buildUserAuthToken())
                 .post(ClientResponse.class);
         if (response.getStatus() != 200) {
             throw new LivefyreException("Error contacting Livefyre. Status code: " +response.getStatus());
         }
         return this;
+    }
+    
+    /**
+     * Creates a Livefyre token. It is needed for interacting with a lot of Livefyre API endpoints.
+     * @return Livefyre token
+     */
+    public String buildUserAuthToken() {
+        return buildUserAuthToken(DEFAULT_USER, DEFAULT_USER, DEFAULT_EXPIRES);
     }
     
     /**
