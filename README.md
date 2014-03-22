@@ -20,21 +20,26 @@ Add this dependency to your project's POM:
 Creating tokens:
 
 **Livefyre token:**
+
 ```Java
-Network network = Livefyre.getNetwork("networkName", "networkKey").buildUserAuthToken()
+Network network = Livefyre.getNetwork("networkName", "networkKey").buildLfToken()
 ```
+
 **User auth token:**
+
 ```Java
 Livefyre.getNetwork("networkName", "networkKey").buildUserAuthToken("userId", "displayName", double timeTillExpire);
 ```
 
 **Collection meta token:**
+
 ```Java
 Network network = Livefyre.getNetwork("networkName", "networkKey");
 network.getSite("siteId", "siteKey").buildCollectionMetaToken("title", "articleId", "url", "tags");
 ```
 
 To validate a Livefyre token:
+
 ```Java
 Livefyre.getNetwork("networkName", "networkKey").validateLivefyreToken("lfToken");
 ```

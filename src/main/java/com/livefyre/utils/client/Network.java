@@ -64,7 +64,7 @@ public class Network {
         
         ClientResponse response = Client.create()
                 .resource(String.format("http://%s/", this.networkName))
-                .queryParam("actor_token", buildUserAuthToken())
+                .queryParam("actor_token", buildLfToken())
                 .queryParam("pull_profile_url", urlTemplate)
                 .post(ClientResponse.class);
         if (response.getStatus() != 204) {
@@ -90,7 +90,7 @@ public class Network {
         
         ClientResponse response = Client.create()
                 .resource(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
-                .queryParam("lftoken", buildUserAuthToken())
+                .queryParam("lftoken", buildLfToken())
                 .post(ClientResponse.class);
         if (response.getStatus() != 200) {
             throw new LivefyreException("Error contacting Livefyre. Status code: " +response.getStatus());
@@ -102,7 +102,7 @@ public class Network {
      * Creates a Livefyre token. It is needed for interacting with a lot of Livefyre API endpoints.
      * @return Livefyre token
      */
-    public String buildUserAuthToken() {
+    public String buildLfToken() {
         return buildUserAuthToken(DEFAULT_USER, DEFAULT_USER, DEFAULT_EXPIRES);
     }
     
