@@ -67,7 +67,7 @@ You must have Maven installed. To run the tests, simply run `mvn test`. You can 
 
 ## Documentation
 
-Located [here](answers.livefyre.com/libraries).
+Located [here](http://answers.livefyre.com/libraries).
 
 ## Contributing
 
