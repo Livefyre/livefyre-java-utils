@@ -49,14 +49,13 @@ public class Network {
      * 
      * @param urlTemplate template that Livefyre will use to fetch user profile info. must not be
      *            null
-     * @returns this Network class
+     * @return this Network class
      * @throws TokenException if there is a failure creating the token
      * @throws IllegalArgumentException if urlTemplate does not contain {id}
      * @throws NullPointerException if urlTemplate, this.name, or this.key are null
      * @throws LivefyreException if there is an issue contacting Livefyre
      * @see <a href="http://docs.livefyre.com/developers/user-auth/remote-profiles/#ping-for-pull">documentation</a>
      */
-
     public Network setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         checkNotNull(this.networkName);

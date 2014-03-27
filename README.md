@@ -65,6 +65,10 @@ JsonObject jsonObject = site.getCollectionContentJson("articleId");
 
 You must have Maven installed. To run the tests, simply run `mvn test`. You can run particular tests by passing `-D test=Class#method` -- for example, `-D test=NetworkTest#testNetworkCreation`.
 
+## Documentation
+
+Located [here](http://livefyre.github.io/livefyre-java-utils/).
+
 ## Contributing
 
 1. Fork it
