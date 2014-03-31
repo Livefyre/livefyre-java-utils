@@ -22,13 +22,14 @@ Creating tokens:
 **Livefyre token:**
 
 ```Java
-Network network = Livefyre.getNetwork("networkName", "networkKey").buildLfToken()
+Livefyre.getNetwork("networkName", "networkKey").buildLfToken()
 ```
 
 **User auth token:**
 
 ```Java
-Livefyre.getNetwork("networkName", "networkKey").buildUserAuthToken("userId", "displayName", double timeTillExpire);
+Network network = Livefyre.getNetwork("networkName", "networkKey");
+network.buildUserAuthToken("userId", "displayName", double timeTillExpire);
 ```
 
 **Collection meta token:**
