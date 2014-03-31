@@ -52,7 +52,7 @@ Network network = Livefyre.getNetwork("networkName", "networkKey");
 network.setUserSyncUrl("url");
 network.syncUser("userId");
 ```
-        
+
 To retrieve content collection data as a and json object from Livefyre (note that both are in JSON, but the latter is encapsulated in a JsonObject):
 
 ```Java
