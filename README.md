@@ -53,12 +53,13 @@ network.setUserSyncUrl("url");
 network.syncUser("userId");
 ```
 
-To retrieve content collection data as a and json object from Livefyre (note that both are in JSON, but the latter is encapsulated in a JsonObject):
+To retrieve content collection data:
 
 ```Java
 Site site = Livefyre.getNetwork("networkName", "networkKey").getSite("siteId", "siteSecret");
 content = site.getCollectionContent("articleId");
 
+// The following method does the same as previous, but provides the data as a JsonObject.
 JsonObject jsonObject = site.getCollectionContentJson("articleId");
 ```
 
