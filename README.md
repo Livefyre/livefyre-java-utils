@@ -22,42 +22,51 @@ Creating tokens:
 **Livefyre token:**
 
 ```Java
-Livefyre.getNetwork("networkName", "networkKey").buildLfToken()
+Livefyre.getNetwork("networkName", "networkKey").buildLfToken();
 ```
 
 **User auth token:**
 
 ```Java
 Network network = Livefyre.getNetwork("networkName", "networkKey");
-network.buildUserAuthToken("userId", "displayName", double timeTillExpire);
+
+network.buildUserAuthToken("userId", "displayName", expires);
 ```
 
 **Collection meta token:**
+The 'stream' argument is optional.
 
 ```Java
 Network network = Livefyre.getNetwork("networkName", "networkKey");
-network.getSite("siteId", "siteKey").buildCollectionMetaToken("title", "articleId", "url", "tags");
+Site site = network.getSite("siteId", "siteKey");
+
+site.buildCollectionMetaToken("title", "articleId", "url", "tags", StreamEnum);
 ```
 
 To validate a Livefyre token:
 
 ```Java
-Livefyre.getNetwork("networkName", "networkKey").validateLivefyreToken("lfToken");
+Network network = Livefyre.getNetwork("networkName", "networkKey");
+
+network.validateLivefyreToken("lfToken");
 ```
 
 To send Livefyre a user sync url and then have Livefyre pull user data from that url:
 
 ```Java
 Network network = Livefyre.getNetwork("networkName", "networkKey");
-network.setUserSyncUrl("url");
+
+network.setUserSyncUrl("url{id}");
 network.syncUser("userId");
 ```
 
 To retrieve content collection data:
 
 ```Java
-Site site = Livefyre.getNetwork("networkName", "networkKey").getSite("siteId", "siteSecret");
-content = site.getCollectionContent("articleId");
+Network network = Livefyre.getNetwork("networkName", "networkKey");
+Site site = network.getSite("siteId", "siteSecret");
+
+site.getCollectionContent("articleId");
 
 // The following method does the same as previous, but provides the data as a JsonObject.
 JsonObject jsonObject = site.getCollectionContentJson("articleId");
