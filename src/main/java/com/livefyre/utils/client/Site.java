@@ -69,10 +69,10 @@ public class Site {
         checkNotNull(this.networkName);
         
         ClientResponse response = Client.create()
-                .resource(String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init",
-                        this.networkName, this.siteId, Base64.encodeBase64URLSafeString(articleId.getBytes())))
-                .accept(MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
+            .resource(String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init",
+                this.networkName, this.siteId, Base64.encodeBase64URLSafeString(articleId.getBytes())))
+            .accept(MediaType.APPLICATION_JSON)
+            .get(ClientResponse.class);
         if (response.getStatus() != 200) {
             throw new LivefyreException("Error contacting Livefyre. Status code: " +response.getStatus());
         }

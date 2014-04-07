@@ -37,10 +37,10 @@ public class Network {
         checkNotNull(this.networkKey);
         
         ClientResponse response = Client.create()
-                .resource(String.format("http://%s/", this.networkName))
-                .queryParam("actor_token", buildLivefyreToken())
-                .queryParam("pull_profile_url", urlTemplate)
-                .post(ClientResponse.class);
+            .resource(String.format("http://%s/", this.networkName))
+            .queryParam("actor_token", buildLivefyreToken())
+            .queryParam("pull_profile_url", urlTemplate)
+            .post(ClientResponse.class);
         return response.getStatus() == 204;
     }
     
@@ -49,9 +49,9 @@ public class Network {
         checkNotNull(this.networkName);
         
         ClientResponse response = Client.create()
-                .resource(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
-                .queryParam("lftoken", buildLivefyreToken())
-                .post(ClientResponse.class);
+            .resource(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
+            .queryParam("lftoken", buildLivefyreToken())
+            .post(ClientResponse.class);
         return response.getStatus() == 200;
     }
     
@@ -83,9 +83,9 @@ public class Network {
             JsonToken json = LivefyreJwtUtil.decodeJwt(this.networkKey, lfToken);
             JsonObject jsonObj = json.getPayloadAsJsonObject();
             return jsonObj.get("domain").getAsString().compareTo(this.networkName) == 0
-                    && jsonObj.get("user_id").getAsString().compareTo("system") == 0
-                    && jsonObj.get("expires").getAsBigInteger().compareTo(
-                            BigInteger.valueOf(Calendar.getInstance().getTimeInMillis()/1000L)) >= 0;
+                && jsonObj.get("user_id").getAsString().compareTo("system") == 0
+                && jsonObj.get("expires").getAsBigInteger().compareTo(
+                        BigInteger.valueOf(Calendar.getInstance().getTimeInMillis()/1000L)) >= 0;
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure decrypting token." +e);
         }
