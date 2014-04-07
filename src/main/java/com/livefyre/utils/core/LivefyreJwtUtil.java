@@ -1,6 +1,8 @@
 package com.livefyre.utils.core;
 
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Calendar;
 import java.util.List;
@@ -15,6 +17,9 @@ import net.oauth.jsontoken.crypto.SignatureAlgorithm;
 import net.oauth.jsontoken.crypto.Verifier;
 import net.oauth.jsontoken.discovery.VerifierProvider;
 import net.oauth.jsontoken.discovery.VerifierProviders;
+
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
@@ -36,16 +41,21 @@ public class LivefyreJwtUtil {
     }
 
     public static String getJwtCollectionMetaToken(String siteSecret, String title, String tags, String url,
-            String articleId, StreamType stream) throws InvalidKeyException, SignatureException {
+            String articleId, String stream) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
         HmacSHA256Signer signer = new HmacSHA256Signer(null, null, siteSecret.getBytes());
         JsonToken mToken = new JsonToken(signer);
         JsonObject tokenJSON = mToken.getPayloadAsJsonObject();
-        tokenJSON.addProperty("title", title);
+        
         tokenJSON.addProperty("url", url);
         tokenJSON.addProperty("tags", tags);
+        tokenJSON.addProperty("title", title);
+        
+        String checksum = Hex.encodeHexString(MessageDigest.getInstance("MD5").digest(tokenJSON.toString().getBytes()));
+
+        tokenJSON.addProperty("checksum", checksum);
         tokenJSON.addProperty("articleId", articleId);
-        if (stream != StreamType.NONE) {
-            tokenJSON.addProperty("type", stream.toString());
+        if (!StringUtils.isEmpty(stream)) {
+            tokenJSON.addProperty("type", stream);
         }
         return mToken.serializeAndSign();
     }

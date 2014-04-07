@@ -1,4 +1,7 @@
-=== 1.0.3 2014-03-19
+=== 1.1.0 2014-04-07
+
+* Removed chaining from api calls. Changed output to boolean instead. Added getCollectionId method call.
+* Added checksum to collection meta token. Added another method to allow tags to be optional. Removed StreamType enum
 
 * Adding additional checks, changing some method names, updating readme
 

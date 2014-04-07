@@ -12,64 +12,68 @@ Add this dependency to your project's POM:
     <dependency>
       <groupId>com.livefyre</groupId>
       <artifactId>utils</artifactId>
-      <version>1.0.3</version>
+      <version>1.1.0</version>
     </dependency>
 
 ## Usage
 
-Creating tokens:
-
-**Livefyre token:**
-
-```Java
-Livefyre.getNetwork("networkName", "networkKey").buildLfToken();
-```
-
-**User auth token:**
+Instantiating a network object:
 
 ```Java
 Network network = Livefyre.getNetwork("networkName", "networkKey");
+```
 
+Building a Livefyre token:
+
+```Java
+network.buildLivefyreToken();
+```
+
+Building a user auth token:
+
+```Java
 network.buildUserAuthToken("userId", "displayName", expires);
-```
-
-**Collection meta token:**
-The 'stream' argument is optional.
-
-```Java
-Network network = Livefyre.getNetwork("networkName", "networkKey");
-Site site = network.getSite("siteId", "siteKey");
-
-site.buildCollectionMetaToken("title", "articleId", "url", "tags", StreamEnum);
 ```
 
 To validate a Livefyre token:
 
 ```Java
-Network network = Livefyre.getNetwork("networkName", "networkKey");
-
 network.validateLivefyreToken("lfToken");
 ```
 
 To send Livefyre a user sync url and then have Livefyre pull user data from that url:
 
 ```Java
-Network network = Livefyre.getNetwork("networkName", "networkKey");
-
-network.setUserSyncUrl("url{id}");
+network.setUserSyncUrl("urlTemplate");
 network.syncUser("userId");
+```
+
+Instantiating a site object:
+
+```Java
+Site site = network.getSite("siteId", "siteKey");
+```
+
+Building a collection meta token:
+*The "tags" and "stream" argument is optional.*
+
+```Java
+site.buildCollectionMetaToken("title", "articleId", "url", "tags", "stream");
 ```
 
 To retrieve content collection data:
 
 ```Java
-Network network = Livefyre.getNetwork("networkName", "networkKey");
-Site site = network.getSite("siteId", "siteSecret");
-
 site.getCollectionContent("articleId");
 
 // The following method does the same as previous, but provides the data as a JsonObject.
 JsonObject jsonObject = site.getCollectionContentJson("articleId");
+```
+
+To get a content collection's id:
+
+```Java
+site.getCollectionId("articleId");
 ```
 
 ## Testing

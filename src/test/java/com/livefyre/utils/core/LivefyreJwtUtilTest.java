@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 
 import net.oauth.jsontoken.JsonToken;
@@ -12,8 +13,6 @@ import net.oauth.jsontoken.JsonToken;
 import org.junit.Test;
 
 import com.google.gson.JsonObject;
-import com.livefyre.utils.core.LivefyreJwtUtil;
-import com.livefyre.utils.core.StreamType;
 
 public class LivefyreJwtUtilTest {
     private static final String TEST_SECRET = "testkeytest";
@@ -44,11 +43,13 @@ public class LivefyreJwtUtilTest {
         String token = null;
         JsonToken json = null;
         try {
-            token = LivefyreJwtUtil.getJwtCollectionMetaToken(TEST_SECRET, "title", "tags", "url", "id", StreamType.REVIEWS);
+            token = LivefyreJwtUtil.getJwtCollectionMetaToken(TEST_SECRET, "title", "tags", "url", "id", "reviews");
             json = LivefyreJwtUtil.decodeJwt(TEST_SECRET, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't be an issue encoding/decoding");
         } catch (SignatureException e) {
+            fail("shouldn't be an issue encoding/decoding");
+        } catch (NoSuchAlgorithmException e) {
             fail("shouldn't be an issue encoding/decoding");
         }
         assertNotNull(token);

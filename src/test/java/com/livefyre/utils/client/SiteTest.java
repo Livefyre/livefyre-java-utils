@@ -9,7 +9,6 @@ import java.security.InvalidKeyException;
 import org.junit.Test;
 
 import com.livefyre.utils.core.LivefyreJwtUtil;
-import com.livefyre.utils.core.StreamType;
 
 public class SiteTest {
     private static final String SITE_ID = "1";
@@ -47,15 +46,15 @@ public class SiteTest {
             fail("url must be a valid domain");
         } catch (IllegalArgumentException e) {}
         
-        String token = site.buildCollectionMetaToken("test", "testId", "https://test.com", "testTags");
+        String token = site.buildCollectionMetaToken("title", "testId", "https://www.url.com", "tags");
         assertNotNull(token);
         try {
-            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("url").getAsString(), "https://test.com");
+            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("url").getAsString(), "https://www.url.com");
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
         
-        token = site.buildCollectionMetaToken("test", "testId", "http://www.test.com", "testTags", StreamType.REVIEWS);
+        token = site.buildCollectionMetaToken("test", "testId", "http://www.test.com", "testTags", "reviews");
         assertNotNull(token);
         try {
             assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("type").getAsString(), "reviews");
@@ -83,15 +82,7 @@ public class SiteTest {
             fail("url cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "http://test.com", null, null);
-            fail("tags cannot be null");
-        } catch(NullPointerException e) {}
-        try {
-            site.buildCollectionMetaToken("", "", "http://test.com", "", null);
-            fail("stream cannot be null");
-        } catch(NullPointerException e) {}
-        try {
-            site.buildCollectionMetaToken("", "", "https://test.com", "", StreamType.NONE);
+            site.buildCollectionMetaToken("", "", "https://test.com", "", null);
             fail("siteKey cannot be null");
         } catch(NullPointerException e) {}
         try {
