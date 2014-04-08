@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.google.gson.JsonObject;
 
 public class LivefyreJwtUtilTest {
+    private static final String CHECKSUM = "323f0074333c0c8c01951c0b3bf5f794";
     private static final String TEST_SECRET = "testkeytest";
 
     @Test
@@ -49,9 +50,8 @@ public class LivefyreJwtUtilTest {
             fail("shouldn't be an issue encoding/decoding");
         } catch (SignatureException e) {
             fail("shouldn't be an issue encoding/decoding");
-        } catch (NoSuchAlgorithmException e) {
-            fail("shouldn't be an issue encoding/decoding");
         }
+        
         assertNotNull(token);
         assertNotNull(json);
         JsonObject jsonObj = json.getPayloadAsJsonObject();
@@ -60,5 +60,18 @@ public class LivefyreJwtUtilTest {
         assertEquals("tags", jsonObj.get("tags").getAsString());
         assertEquals("id", jsonObj.get("articleId").getAsString());
         assertEquals("reviews", jsonObj.get("type").getAsString());
+    }
+    
+    @Test
+    public void testChecksum() {
+        String checksum = null;
+        try {
+            checksum = LivefyreJwtUtil.getChecksum("title", "url", "tags");
+        } catch (NoSuchAlgorithmException e) {
+            fail("shouldn't fail to create the checksum");
+        }
+        
+        assertNotNull(checksum);
+        assertEquals(CHECKSUM, checksum);
     }
 }

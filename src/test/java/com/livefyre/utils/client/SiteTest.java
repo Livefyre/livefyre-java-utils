@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.livefyre.utils.core.LivefyreJwtUtil;
 
 public class SiteTest {
+    private static final String CHECKSUM = "6e2e4faf7b95f896260fe695eafb34ba";
     private static final String SITE_ID = "1";
     private static final String SITE_KEY = "testkeytest";
     
@@ -34,19 +35,19 @@ public class SiteTest {
         Site site = Livefyre.getNetwork("", "").getSite(SITE_ID, SITE_KEY);
         
         try {
-            site.buildCollectionMetaToken("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", "");
+            site.buildCollectionMetaToken("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", "", null);
             fail("titles longer than 255 char are not allowed");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "tet.com", "");
+            site.buildCollectionMetaToken("", "", "tet.com", "" , "");
             fail("url must start with valid url scheme (http:// or https://)");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "tet.com/", "");
+            site.buildCollectionMetaToken("", "", "tet.com/", "", "");
             fail("url must be a valid domain");
         } catch (IllegalArgumentException e) {}
         
-        String token = site.buildCollectionMetaToken("title", "testId", "https://www.url.com", "tags");
+        String token = site.buildCollectionMetaToken("title", "testId", "https://www.url.com", "tags", "reviews");
         assertNotNull(token);
         try {
             assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("url").getAsString(), "https://www.url.com");
@@ -61,6 +62,24 @@ public class SiteTest {
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
+    }
+    
+    @Test
+    public void testSiteChecksum() {
+        Site site = Livefyre.getNetwork("", "").getSite(SITE_ID, SITE_KEY);
+        
+        try {
+            site.buildChecksum("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "");
+            fail("titles longer than 255 char are not allowed");
+        } catch (IllegalArgumentException e) {}
+        try {
+            site.buildChecksum("", "tet.com", "");
+            fail("url must start with valid url scheme (http:// or https://)");
+        } catch (IllegalArgumentException e) {}
+        
+        String checksum = site.buildChecksum("title", "https://www.url.com", "tags");
+        assertNotNull(checksum);
+        assertEquals(CHECKSUM, checksum);
     }
     
     @Test

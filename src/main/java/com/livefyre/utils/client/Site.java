@@ -34,28 +34,33 @@ public class Site {
         this.siteKey = checkNotNull(siteKey);
     }
     
-    public String buildCollectionMetaToken(String title, String articleId, String url) {
-        return buildCollectionMetaToken(title, articleId, url, "", null);
-    }
-    
-    public String buildCollectionMetaToken(String title, String articleId, String url, String tags) {
-        return buildCollectionMetaToken(title, articleId, url, tags, null);
-    }
-    
     public String buildCollectionMetaToken(String title, String articleId, String url, String tags, String stream) {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkNotNull(articleId);
         checkArgument(isValidFullUrl(checkNotNull(url)), "url is not a valid domain. see http://www.ietf.org/rfc/rfc3490.txt.");
         checkNotNull(this.siteKey);
         
+        String t = tags == null ? "" : tags;
+        
         try {
-            return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, tags, url, articleId, stream);
+            return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, stream);
         } catch (InvalidKeyException e) {
             throw new TokenException(TOKEN_FAILURE_MSG +e);
         } catch (SignatureException e) {
             throw new TokenException(TOKEN_FAILURE_MSG +e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new TokenException(TOKEN_FAILURE_MSG +e);
+        }
+    }
+    
+    public String buildChecksum(String title, String url, String tags) {
+        checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
+        checkArgument(isValidFullUrl(checkNotNull(url)), "url is not a valid domain. see http://www.ietf.org/rfc/rfc3490.txt.");
+
+        String t = tags == null ? "" : tags;
+        
+        try {
+            return LivefyreJwtUtil.getChecksum(title, url, t);
+        } catch (NoSuchAlgorithmException e) { 
+            throw new LivefyreException("Failure creating checksum." +e);
         }
     }
 

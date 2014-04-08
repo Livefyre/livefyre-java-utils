@@ -41,7 +41,7 @@ public class LivefyreJwtUtil {
     }
 
     public static String getJwtCollectionMetaToken(String siteSecret, String title, String tags, String url,
-            String articleId, String stream) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+            String articleId, String stream) throws InvalidKeyException, SignatureException {
         HmacSHA256Signer signer = new HmacSHA256Signer(null, null, siteSecret.getBytes());
         JsonToken mToken = new JsonToken(signer);
         JsonObject tokenJSON = mToken.getPayloadAsJsonObject();
@@ -49,15 +49,22 @@ public class LivefyreJwtUtil {
         tokenJSON.addProperty("url", url);
         tokenJSON.addProperty("tags", tags);
         tokenJSON.addProperty("title", title);
-        
-        String checksum = Hex.encodeHexString(MessageDigest.getInstance("MD5").digest(tokenJSON.toString().getBytes()));
-
-        tokenJSON.addProperty("checksum", checksum);
         tokenJSON.addProperty("articleId", articleId);
         if (!StringUtils.isEmpty(stream)) {
             tokenJSON.addProperty("type", stream);
         }
+        
         return mToken.serializeAndSign();
+    }
+    
+    public static String getChecksum(String title, String url, String tags) throws NoSuchAlgorithmException {
+        JsonObject tokenJSON = new JsonObject();
+        
+        tokenJSON.addProperty("url", url);
+        tokenJSON.addProperty("tags", tags);
+        tokenJSON.addProperty("title", title);
+        
+        return Hex.encodeHexString(MessageDigest.getInstance("MD5").digest(tokenJSON.toString().getBytes()));
     }
 
     public static JsonToken decodeJwt(String secret, String jwt) throws InvalidKeyException {

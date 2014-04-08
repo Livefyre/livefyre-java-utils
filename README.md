@@ -55,10 +55,17 @@ Site site = network.getSite("siteId", "siteKey");
 ```
 
 Building a collection meta token:
-*The "tags" and "stream" argument is optional.*
+*The "tags" and "stream" arguments are optional.*
 
 ```Java
 site.buildCollectionMetaToken("title", "articleId", "url", "tags", "stream");
+```
+
+Building a checksum:
+*The "tags" argument is optional.*
+
+```Java
+site.buildChecksum("title", "url", "tags");
 ```
 
 To retrieve content collection data:
