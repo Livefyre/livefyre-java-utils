@@ -1,4 +1,6 @@
-=== 1.1.1 2014-04-08
+=== 1.1.2 2014-04-10
+
+* Fixing url validation to be more relaxed. Adding more url tests.
 
 * Put buildChecksum into its own method. Removed 'helper methods' for buildCollectionToken.
 
