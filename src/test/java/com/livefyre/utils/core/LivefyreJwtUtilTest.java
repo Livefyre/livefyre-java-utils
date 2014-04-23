@@ -24,7 +24,7 @@ public class LivefyreJwtUtilTest {
         JsonToken json = null;
         try {
             token = LivefyreJwtUtil.getJwtUserAuthToken("test.fyre.com", TEST_SECRET, "some", "user", 86400);
-            json = LivefyreJwtUtil.decodeJwt("KguZvm1Qo8LB8h6qDBDk7uj+vpM=", "eyJhbGciOiJIUzI1NiJ9.eyJkb21haW4iOiJ1bml2aXNpb24taW50LTAuZnlyZS5jbyIsInVzZXJfaWQiOiI1MjIxNDczNyIsImRpc3BsYXlfbmFtZSI6InRlc3RpbmdiYWRldiIsImV4cGlyZXMiOjI3OTY2Mzk4MTJ9.iCltKgQcuiVWiMXmKlsEYCrb1hK0TwgB37zH8uClu94");
+            json = LivefyreJwtUtil.decodeJwt(TEST_SECRET, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't be an issue encoding/decoding");
         } catch (SignatureException e) {
