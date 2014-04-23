@@ -3,10 +3,13 @@ package com.livefyre.utils.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
+
+import net.oauth.jsontoken.JsonToken;
 
 import org.junit.Test;
 
@@ -48,22 +51,34 @@ public class SiteTest {
             site.buildCollectionMetaToken("", "", "tet.com/", "", "");
             fail("url must be a valid domain");
         } catch (IllegalArgumentException e) {}
-        
-        String token = site.buildCollectionMetaToken("title", "testId", "http://www.google.com", "tags", "reviews");
-        assertNotNull(token);
         try {
-            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("url").getAsString(), "http://www.google.com");
+            site.buildCollectionMetaToken("", "", "http://www.test.com", "", "abc");
+            fail("type must be of a known type");
+        } catch (IllegalArgumentException e) {}
+        
+        String token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "reviews");
+        assertNotNull(token);
+        JsonToken decodedToken = null;
+        try {
+            decodedToken = LivefyreJwtUtil.decodeJwt(SITE_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
         
-        token = site.buildCollectionMetaToken("test", "testId", "http://www.test.com", "testTags", "reviews");
+        assertEquals(decodedToken.getParamAsPrimitive("url").getAsString(), "http://www.livefyre.com");
+        assertEquals(decodedToken.getParamAsPrimitive("type").getAsString(), "reviews");
+        assertNull(decodedToken.getParamAsPrimitive("stream_type"));
+        
+        token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "liveblog");
         assertNotNull(token);
         try {
-            assertEquals(LivefyreJwtUtil.decodeJwt(SITE_KEY, token).getParamAsPrimitive("type").getAsString(), "reviews");
+            decodedToken = LivefyreJwtUtil.decodeJwt(SITE_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
+        
+        assertEquals(decodedToken.getParamAsPrimitive("stream_type").getAsString(), "liveblog");
+        assertNull(decodedToken.getParamAsPrimitive("type"));
     }
     
     @Test

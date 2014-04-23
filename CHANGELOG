@@ -1,4 +1,6 @@
-=== 1.1.2 2014-04-10
+=== 1.1.3 2014-04-23
+
+* Renaming stream to type and adding checks to make sure that type is of a recognized type. Adding legacy stream_type support.
 
 * Fixing url validation to be more relaxed. Adding more url tests.
 

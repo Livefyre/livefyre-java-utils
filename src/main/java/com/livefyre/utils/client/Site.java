@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.livefyre.utils.core.LivefyreException;
@@ -23,6 +24,8 @@ import com.sun.jersey.api.client.ClientResponse;
 
 public class Site {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
+    private static final ImmutableList<String> TYPE = ImmutableList.of("reviews", "sidenotes", "");
+    private static final ImmutableList<String> STREAM_TYPE = ImmutableList.of("liveblog", "livechat", "livecomments");
 
     private String networkName = null;
     private String siteId = null;
@@ -34,17 +37,22 @@ public class Site {
         this.siteKey = checkNotNull(siteKey);
     }
 
-    public String buildCollectionMetaToken(String title, String articleId, String url, String tags, String stream) {
+    public String buildCollectionMetaToken(String title, String articleId, String url, String tags, String type) {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkNotNull(articleId);
-        checkArgument(isValidFullUrl(checkNotNull(url)),
-                "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
+        checkArgument(isValidFullUrl(checkNotNull(url)), "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
         checkNotNull(this.siteKey);
 
         String t = tags == null ? "" : tags;
-
+        
         try {
-            return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, stream);
+            if (STREAM_TYPE.contains(type)) {
+                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, null, type);
+            } else if (TYPE.contains(type)) {
+                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, type, null);
+            } else {
+                throw new IllegalArgumentException("type is not a recognized type. should be liveblog, livechat, livecomments, reviews, sidenotes, or an empty String.");
+            }
         } catch (InvalidKeyException e) {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
         } catch (SignatureException e) {
@@ -55,7 +63,7 @@ public class Site {
     public String buildChecksum(String title, String url, String tags) {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkArgument(isValidFullUrl(checkNotNull(url)),
-                "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
+            "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
 
         String t = tags == null ? "" : tags;
 
@@ -76,11 +84,11 @@ public class Site {
         checkNotNull(this.networkName);
 
         ClientResponse response = Client
-                .create()
-                .resource(
-                        String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.networkName, this.siteId,
-                                Base64.encodeBase64URLSafeString(articleId.getBytes())))
-                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+            .create()
+            .resource(
+                String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.networkName, this.siteId,
+                    Base64.encodeBase64URLSafeString(articleId.getBytes())))
+            .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         if (response.getStatus() != 200) {
             throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
         }
