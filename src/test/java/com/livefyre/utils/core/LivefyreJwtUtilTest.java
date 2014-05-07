@@ -44,7 +44,7 @@ public class LivefyreJwtUtilTest {
         String token = null;
         JsonToken json = null;
         try {
-            token = LivefyreJwtUtil.getJwtCollectionMetaToken(TEST_SECRET, "title", "tags", "url", "id", "reviews", "");
+            token = LivefyreJwtUtil.getJwtCollectionMetaToken(TEST_SECRET, "title", "tags", "url", "id", "reviews");
             json = LivefyreJwtUtil.decodeJwt(TEST_SECRET, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't be an issue encoding/decoding");

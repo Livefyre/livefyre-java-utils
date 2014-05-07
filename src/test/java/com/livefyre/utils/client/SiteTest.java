@@ -3,7 +3,6 @@ package com.livefyre.utils.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -67,7 +66,6 @@ public class SiteTest {
         
         assertEquals(decodedToken.getParamAsPrimitive("url").getAsString(), "http://www.livefyre.com");
         assertEquals(decodedToken.getParamAsPrimitive("type").getAsString(), "reviews");
-        assertNull(decodedToken.getParamAsPrimitive("stream_type"));
         
         token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "liveblog");
         assertNotNull(token);
@@ -77,8 +75,7 @@ public class SiteTest {
             fail("shouldn't fail");
         }
         
-        assertEquals(decodedToken.getParamAsPrimitive("stream_type").getAsString(), "liveblog");
-        assertNull(decodedToken.getParamAsPrimitive("type"));
+        assertEquals(decodedToken.getParamAsPrimitive("type").getAsString(), "liveblog");
     }
     
     @Test

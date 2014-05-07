@@ -1,15 +1,17 @@
 === 1.1.3 2014-04-23
 
-* Renaming stream to type and adding checks to make sure that type is of a recognized type. Adding legacy stream_type support.
+* Removed stream_type and added additional acceptable types.
 
-* Fixing url validation to be more relaxed. Adding more url tests.
+* Renamed stream to type and added checks to make sure that type is of a recognized type. Added legacy stream_type support.
+
+* Fixed url validation to be more relaxed. Added more url tests.
 
 * Put buildChecksum into its own method. Removed 'helper methods' for buildCollectionToken.
 
 * Removed chaining from api calls. Changed output to boolean instead. Added getCollectionId method call.
-* Added checksum to collection meta token. Added another method to allow tags to be optional. Removed StreamType enum
+* Added checksum to collection meta token. Added another method to allow tags to be optional. Removed StreamType enum.
 
-* Adding additional checks, changing some method names, updating readme
+* Added additional checks, changed some method names, updated readme
 
 * Method name change from getCollectionToken to buildCollectionToken
 

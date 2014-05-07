@@ -24,8 +24,15 @@ import com.sun.jersey.api.client.ClientResponse;
 
 public class Site {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
-    private static final ImmutableList<String> TYPE = ImmutableList.of("reviews", "sidenotes", "");
-    private static final ImmutableList<String> STREAM_TYPE = ImmutableList.of("liveblog", "livechat", "livecomments");
+    private static final ImmutableList<String> TYPE = ImmutableList.of(
+            "reviews",
+            "sidenotes",
+            "ratings",
+            "counting",
+            "liveblog",
+            "livechat",
+            "livecomments",
+            "");
 
     private String networkName = null;
     private String siteId = null;
@@ -46,10 +53,8 @@ public class Site {
         String t = tags == null ? "" : tags;
         
         try {
-            if (STREAM_TYPE.contains(type)) {
-                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, null, type);
-            } else if (TYPE.contains(type)) {
-                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, type, null);
+            if (TYPE.contains(type)) {
+                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, type);
             } else {
                 throw new IllegalArgumentException("type is not a recognized type. should be liveblog, livechat, livecomments, reviews, sidenotes, or an empty String.");
             }

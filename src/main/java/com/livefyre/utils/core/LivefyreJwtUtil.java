@@ -41,7 +41,7 @@ public class LivefyreJwtUtil {
     }
 
     public static String getJwtCollectionMetaToken(String siteSecret, String title, String tags, String url,
-            String articleId, String type, String streamType) throws InvalidKeyException, SignatureException {
+            String articleId, String type) throws InvalidKeyException, SignatureException {
         HmacSHA256Signer signer = new HmacSHA256Signer(null, null, siteSecret.getBytes());
         JsonToken mToken = new JsonToken(signer);
         JsonObject tokenJSON = mToken.getPayloadAsJsonObject();
@@ -50,9 +50,6 @@ public class LivefyreJwtUtil {
         tokenJSON.addProperty("tags", tags);
         tokenJSON.addProperty("title", title);
         tokenJSON.addProperty("articleId", articleId);
-        if (!StringUtils.isEmpty(streamType)) {
-            tokenJSON.addProperty("stream_type", streamType);
-        }
         if (!StringUtils.isEmpty(type)) {
             tokenJSON.addProperty("type", type);
         }
