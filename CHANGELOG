@@ -1,20 +1,46 @@
 === 1.1.4 2014-05-07
 
-* Removed stream_type and added additional acceptable types.
+* Removed stream_type.
+* Added additional acceptable types.
 
-* Renamed stream to type and added checks to make sure that type is of a recognized type. Added legacy stream_type support.
+=== 1.1.3 2014-04-23
 
-* Fixed url validation to be more relaxed. Added more url tests.
+* Renamed stream to type. 
+* Added checks to make sure that type is of a recognized type.
+* Added legacy stream_type support.
 
-* Put buildChecksum into its own method. Removed 'helper methods' for buildCollectionToken.
+=== 1.1.2 2014-04-10
 
-* Removed chaining from api calls. Changed output to boolean instead. Added getCollectionId method call.
-* Added checksum to collection meta token. Added another method to allow tags to be optional. Removed StreamType enum.
+* Fixed url validation. They were too strict.
+* Added more url tests.
 
-* Added additional checks, changed some method names, updated readme
+=== 1.1.1 2014-04-08
 
-* Method name change from getCollectionToken to buildCollectionToken
+* Put buildChecksum into its own method.
+* Removed 'helper methods' for buildCollectionToken.
+
+=== 1.1.0 2014-04-07
+
+* Removed chaining from api calls.
+* Changed output to boolean instead.
+* Added getCollectionId method call.
+* Added checksum to collection meta token.
+* Added another overloader method for buildCollectionToken.
+* Removed StreamType enum.
+
+=== 1.0.3 2014-03-19
+
+* Added additional checks.
+* Updated some method names.
+
+=== 1.0.2 2014-03-18
+
+* Method name change from getCollectionToken to buildCollectionToken.
+
+=== 1.0.1 2014-03-18
 
 * Fixed Network.syncUser - added the necessary lftoken needed to validate the request. 
+
+=== 1.0.0 2014-03-12
 
 * Initial commit.
