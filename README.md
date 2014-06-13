@@ -12,7 +12,7 @@ Add this dependency to your project's POM:
     <dependency>
       <groupId>com.livefyre</groupId>
       <artifactId>utils</artifactId>
-      <version>1.1.4</version>
+      <version>1.2.0</version>
     </dependency>
 
 ## Usage
