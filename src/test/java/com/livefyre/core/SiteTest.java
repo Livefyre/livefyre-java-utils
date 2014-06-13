@@ -1,4 +1,4 @@
-package com.livefyre.utils.client;
+package com.livefyre.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,7 +12,8 @@ import net.oauth.jsontoken.JsonToken;
 
 import org.junit.Test;
 
-import com.livefyre.utils.core.LivefyreJwtUtil;
+import com.livefyre.Livefyre;
+import com.livefyre.utils.LivefyreJwtUtil;
 
 public class SiteTest {
     private static final String CHECKSUM = "6e2e4faf7b95f896260fe695eafb34ba";
@@ -112,10 +113,8 @@ public class SiteTest {
     
     @Test
     public void testNullChecks() {
-        Site site = new Site("", "", "");
-        site.setNetworkName(null);
-        site.setSiteId(null);
-        site.setSiteKey(null);
+        Site site = new Site(new Network("", ""), "", SITE_KEY);
+        site.getNetwork().setNetworkName(null);
         try {
             site.buildCollectionMetaToken(null, null, null, null, null);
             fail("title cannot be null");
@@ -129,21 +128,8 @@ public class SiteTest {
             fail("url cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "https://test.com", "", null);
-            fail("siteKey cannot be null");
-        } catch(NullPointerException e) {}
-        try {
             site.getCollectionContent(null);
             fail("displayName cannot be null");
-        } catch(NullPointerException e) {}
-        try {
-            site.getCollectionContent("");
-            fail("siteId cannot be null");
-        } catch(NullPointerException e) {}
-        site.setSiteId("");
-        try {
-            site.getCollectionContent("");
-            fail("networkName cannot be null");
         } catch(NullPointerException e) {}
     }
 }

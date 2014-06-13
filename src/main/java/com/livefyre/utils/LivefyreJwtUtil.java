@@ -1,4 +1,4 @@
-package com.livefyre.utils.core;
+package com.livefyre.utils;
 
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;

@@ -1,4 +1,4 @@
-package com.livefyre.utils.client;
+package com.livefyre.core;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -7,14 +7,19 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.Calendar;
+import java.util.List;
 
 import net.oauth.jsontoken.JsonToken;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.JsonObject;
-import com.livefyre.utils.core.LivefyreJwtUtil;
-import com.livefyre.utils.core.TokenException;
+import com.livefyre.api.client.PersonalizedStreamsClientImpl;
+import com.livefyre.api.dto.CollectionTopicDto;
+import com.livefyre.api.dto.Subscription;
+import com.livefyre.api.dto.Topic;
+import com.livefyre.exceptions.TokenException;
+import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
@@ -33,8 +38,6 @@ public class Network {
     
     public boolean setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
-        checkNotNull(this.networkName);
-        checkNotNull(this.networkKey);
         
         ClientResponse response = Client.create()
             .resource(String.format("http://%s/", this.networkName))
@@ -46,10 +49,10 @@ public class Network {
     
     public boolean syncUser(String userId) {
         checkNotNull(userId);
-        checkNotNull(this.networkName);
         
+        String url = String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId);
         ClientResponse response = Client.create()
-            .resource(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
+            .resource(url)
             .queryParam("lftoken", buildLivefyreToken())
             .post(ClientResponse.class);
         return response.getStatus() == 200;
@@ -63,8 +66,6 @@ public class Network {
         checkArgument(StringUtils.isAlphanumeric(checkNotNull(userId)), "userId is not alphanumeric.");
         checkNotNull(displayName);
         checkNotNull(expires);
-        checkNotNull(this.networkName);
-        checkNotNull(this.networkKey);
         
         try {
             return LivefyreJwtUtil.getJwtUserAuthToken(this.networkName, this.networkKey, userId, displayName, expires);
@@ -77,7 +78,6 @@ public class Network {
     
     public boolean validateLivefyreToken(String lfToken) {
         checkNotNull(lfToken);
-        checkNotNull(this.networkKey);
         
         try {
             JsonToken json = LivefyreJwtUtil.decodeJwt(this.networkKey, lfToken);
@@ -90,25 +90,75 @@ public class Network {
             throw new TokenException("Failure decrypting token." +e);
         }
     }
-
+    
     public Site getSite(String siteId, String siteKey) {
-        return new Site(this.networkName, siteId, siteKey);
+        return new Site(this, siteId, siteKey);
+    }
+    
+    /* Topic API */
+    public Topic getTopic(String topicId) {
+        return PersonalizedStreamsClientImpl.getNetworkTopic(this, topicId);
+    }
+    
+    public boolean addOrUpdateTopic(Topic topic) {
+        return PersonalizedStreamsClientImpl.postNetworkTopic(this, topic);
+    }
+    
+    public boolean deleteTopic(Topic topic) {
+        return PersonalizedStreamsClientImpl.deleteNetworkTopic(this, topic);
+    }
+    
+    /* Multiple Topic API */
+    public List<Topic> getTopics(Integer limit, Integer offset) {
+        return PersonalizedStreamsClientImpl.getNetworkTopics(this, limit, offset);
+    }
+    
+    public CollectionTopicDto postTopics(List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.postNetworkTopics(this, topics);
+    }
+    
+    public CollectionTopicDto deleteTopics(List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.deleteNetworkTopics(this, topics);
+    }
+    
+    /* Subscription API */
+    public List<Subscription> getSubscriptions(String user) {
+        return PersonalizedStreamsClientImpl.getSubscriptions(this, user);
+    }
+    
+    public CollectionTopicDto postSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.postSubscriptions(this, user, topics);
+    }
+    
+    public CollectionTopicDto putSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.putSubscriptions(this, user, topics);
+    }
+
+    public CollectionTopicDto deleteSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.deleteSubscriptions(this, user, topics);
+    }
+    
+    /* Subscriber API */
+    public List<String> getSubscribers(Topic topic) {
+        return PersonalizedStreamsClientImpl.getSubscribers(this, topic);
+    }
+    
+    public CollectionTopicDto postSubscribers(Topic topic, List<String> users) {
+        return PersonalizedStreamsClientImpl.postSubscribers(this, topic, users);
+    }
+    
+    public CollectionTopicDto putSubscribers(Topic topic, List<String> users) {
+        return PersonalizedStreamsClientImpl.putSubscribers(this, topic, users);
+    }
+
+    public CollectionTopicDto deleteSubscribers(Topic topic, List<String> users) {
+        return PersonalizedStreamsClientImpl.deleteSubscribers(this, topic, users);
     }
     
     /* Getters/Setters */
-    public String getName() {
-        return networkName;
-    }
-
-    protected void setNetworkName(String name) {
-        this.networkName = name;
-    }
-
-    public String getNetworkKey() {
-        return networkKey;
-    }
-
-    protected void setNetworkKey(String networkKey) {
-        this.networkKey = networkKey;
+    public String getName() { return networkName; }
+    protected void setNetworkName(String name) { this.networkName = name; }
+    public String getNetworkKey() { return networkKey; }
+    protected void setNetworkKey(String networkKey) { this.networkKey = networkKey;
     }
 }

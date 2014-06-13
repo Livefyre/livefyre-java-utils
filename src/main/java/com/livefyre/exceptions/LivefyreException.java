@@ -1,4 +1,4 @@
-package com.livefyre.utils.core;
+package com.livefyre.exceptions;
 
 public class LivefyreException extends RuntimeException {
     private static final long serialVersionUID = -4370654756303707640L;

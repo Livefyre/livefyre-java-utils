@@ -1,10 +1,13 @@
-package com.livefyre.utils.client;
+package com.livefyre.core;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import com.livefyre.Livefyre;
+import com.livefyre.core.Network;
 
 public class NetworkTest {
     private static final String NETWORK = "test.fyre.com";
