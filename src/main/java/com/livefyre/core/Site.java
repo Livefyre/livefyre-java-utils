@@ -10,9 +10,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.codec.binary.Base64;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
@@ -23,8 +23,6 @@ import com.livefyre.api.dto.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
 
 public class Site {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
@@ -90,16 +88,11 @@ public class Site {
     public String getCollectionContent(String articleId) {
         checkNotNull(articleId);
 
-        ClientResponse response = Client
-            .create()
-            .resource(
-                String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.network.getName(), this.siteId,
-                    Base64.encodeBase64URLSafeString(articleId.getBytes())))
-            .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        if (response.getStatus() != 200) {
-            throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
-        }
-        return response.getEntity(String.class);
+        String url = String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.network.getName(), this.siteId,
+              Base64.encodeBase64URLSafeString(articleId.getBytes()));
+        
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        return client.target(url).request().get(String.class);
     }
 
     public String getCollectionId(String articleId) {

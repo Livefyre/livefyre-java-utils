@@ -6,9 +6,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 
 import com.google.common.collect.Lists;
 import com.livefyre.api.client.filter.LftokenAuthFilter;
@@ -20,7 +27,7 @@ import com.livefyre.core.Site;
 
 public class PersonalizedStreamsClientImpl {
 
-    private static final String BASE_URL = "https://%1$s/api/v4/%1$s";
+    private static final String BASE_URL = "http://%1$s/api/v4/%1$s";
     private static final String SITE_PATH_ADD = BASE_URL+"/site/%2$s/";
     
     /* Topic API */
@@ -67,8 +74,6 @@ public class PersonalizedStreamsClientImpl {
     /* Multiple Topic API */
     public static List<Topic> getNetworkTopics(Network network, Integer limit, Integer offset) {
         checkNotNull(network);
-        checkNotNull(limit);
-        checkNotNull(offset);
         return client(network).getTopics(limit, offset);
     }
     
@@ -91,8 +96,6 @@ public class PersonalizedStreamsClientImpl {
     
     public static List<Topic> getSiteTopics(Site site, Integer limit, Integer offset) {
         checkNotNull(site);
-        checkNotNull(limit);
-        checkNotNull(offset);
         return client(site).getTopics(limit, offset);
     }
     
@@ -214,21 +217,30 @@ public class PersonalizedStreamsClientImpl {
         return subscriptions;
     }
     
-    private static PersonalizedStreamsClient client(Network network) {
+    protected static PersonalizedStreamsClient client(Network network) {
         return client(network, null);
     }
     
-    private static PersonalizedStreamsClient client(Site site) {
+    protected static PersonalizedStreamsClient client(Site site) {
         return client(site.getNetwork(), site);
     }
     
+    //TODO: lots of crud just to set the timeout.
+    @SuppressWarnings("deprecation")
     private static PersonalizedStreamsClient client(Network network, Site site) {
-        ResteasyClient client = new ResteasyClientBuilder().build();
+        ClientConnectionManager cm = new ThreadSafeClientConnManager();
+        HttpClient httpClient = new DefaultHttpClient(cm);
+        HttpParams params = httpClient.getParams();
+        HttpConnectionParams.setConnectionTimeout(params, 1000);
+        HttpConnectionParams.setSoTimeout(params, 5000);
+        ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+        
+        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         client.register(new LftokenAuthFilter(network));
         
         ResteasyWebTarget target = client.target(site == null ?
                 String.format(BASE_URL, network.getName()) : String.format(SITE_PATH_ADD, network.getName(), site.getId()));
-        
+
         PersonalizedStreamsClient psclient = target.proxy(PersonalizedStreamsClient.class);
         return psclient;
     }

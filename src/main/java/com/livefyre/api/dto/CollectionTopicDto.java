@@ -2,6 +2,7 @@ package com.livefyre.api.dto;
 
 import java.util.List;
 
+//TODO: split this dto out into separate objects.
 public class CollectionTopicDto {
     private List<String> topicIds;
     private int created;

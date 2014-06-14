@@ -8,6 +8,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -26,7 +27,6 @@ public interface PersonalizedStreamsClient {
     public static final String USER_SUBSCRIPTION_URL = "/user/{user}/subscriptions/";
     public static final String TOPIC_SUBSCRIPTION_URL = "/topic/{topicId}/subscribers/";
 
-    /* Network and Site level OK */
     @GET
     @Path(TOPIC_URL)
     @Produces(MediaType.APPLICATION_JSON)
@@ -49,7 +49,6 @@ public interface PersonalizedStreamsClient {
     @Produces(MediaType.APPLICATION_JSON)
     CollectionTopicDto deleteTopics(@FormParam("topicIds") List<String> topicIds);
 
-    /* Site->Collection level OK */
     @GET
     @Path(COLLECTION_TOPICS_URL)
     @Produces(MediaType.APPLICATION_JSON)
@@ -61,7 +60,7 @@ public interface PersonalizedStreamsClient {
     @Produces(MediaType.APPLICATION_JSON)
     CollectionTopicDto postCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("topics") List<Topic> topics);
     
-    @POST
+    @PUT
     @Path(COLLECTION_TOPICS_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -73,7 +72,6 @@ public interface PersonalizedStreamsClient {
     @Produces(MediaType.APPLICATION_JSON)
     CollectionTopicDto deleteCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("topicIds") List<String> topicIds);
     
-    /* Network level OK */
     @GET
     @Path(USER_SUBSCRIPTION_URL)
     @Produces(MediaType.APPLICATION_JSON)
@@ -85,7 +83,7 @@ public interface PersonalizedStreamsClient {
     @Produces(MediaType.APPLICATION_JSON)
     CollectionTopicDto postSubscriptions(@PathParam("user") String user, @FormParam("subscriptions") List<Subscription> subscriptions);
     
-    @POST
+    @PUT
     @Path(USER_SUBSCRIPTION_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -108,7 +106,7 @@ public interface PersonalizedStreamsClient {
     @Produces(MediaType.APPLICATION_JSON)
     CollectionTopicDto postSubscribers(@PathParam("topicId") String topicId, @FormParam("objectIds") List<String> users);
     
-    @POST
+    @PUT
     @Path(TOPIC_SUBSCRIPTION_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

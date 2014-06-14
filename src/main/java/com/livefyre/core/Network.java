@@ -3,15 +3,22 @@ package com.livefyre.core;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import net.oauth.jsontoken.JsonToken;
 
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import com.google.gson.JsonObject;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
@@ -20,8 +27,6 @@ import com.livefyre.api.dto.Subscription;
 import com.livefyre.api.dto.Topic;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
 
 public class Network {
     private static final double DEFAULT_EXPIRES = 86400.0;
@@ -39,11 +44,21 @@ public class Network {
     public boolean setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
-        ClientResponse response = Client.create()
-            .resource(String.format("http://%s/", this.networkName))
-            .queryParam("actor_token", buildLivefyreToken())
-            .queryParam("pull_profile_url", urlTemplate)
-            .post(ClientResponse.class);
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        ResteasyWebTarget target = client.target(String.format("http://%s/", this.networkName));
+        
+        // hack to get around resteasy complaining about brackets
+        try {
+            urlTemplate = URLEncoder.encode(urlTemplate, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
+        Response response = target
+                .queryParam("actor_token", buildLivefyreToken())
+                .queryParam("pull_profile_url", urlTemplate)
+                .request()
+                .post(null);
+        
         return response.getStatus() == 204;
     }
     
@@ -51,10 +66,12 @@ public class Network {
         checkNotNull(userId);
         
         String url = String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId);
-        ClientResponse response = Client.create()
-            .resource(url)
-            .queryParam("lftoken", buildLivefyreToken())
-            .post(ClientResponse.class);
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        Response response = client.target(url)
+                .queryParam("lftoken", buildLivefyreToken())
+                .request()
+                .post(null);
+        
         return response.getStatus() == 200;
     }
     
