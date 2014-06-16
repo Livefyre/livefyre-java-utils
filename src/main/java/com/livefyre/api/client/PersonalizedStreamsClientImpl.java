@@ -5,23 +5,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.proxy.WebResourceFactory;
 
 import com.google.common.collect.Lists;
 import com.livefyre.api.client.filter.LftokenAuthFilter;
 import com.livefyre.api.dto.CollectionTopicDto;
+import com.livefyre.api.dto.PostDto;
 import com.livefyre.api.dto.Subscription;
+import com.livefyre.api.dto.Subscription.Type;
 import com.livefyre.api.dto.Topic;
+import com.livefyre.api.dto.TopicsDto;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
 
@@ -40,14 +39,14 @@ public class PersonalizedStreamsClientImpl {
     public static boolean postNetworkTopic(Network network, Topic topic) {
         checkNotNull(network);
         checkNotNull(topic);
-        CollectionTopicDto dto = postNetworkTopics(network, Arrays.asList(topic));
+        TopicsDto dto = postNetworkTopics(network, Arrays.asList(topic));
         return dto.getCreated() == 1 || dto.getUpdated() == 1;
     }
     
     public static boolean deleteNetworkTopic(Network network, Topic topic) {
         checkNotNull(network);
         checkNotNull(topic);
-        CollectionTopicDto dto = deleteNetworkTopics(network, Arrays.asList(topic));
+        TopicsDto dto = deleteNetworkTopics(network, Arrays.asList(topic));
         return dto.getDeleted() == 1;
     }
     
@@ -60,14 +59,14 @@ public class PersonalizedStreamsClientImpl {
     public static boolean postSiteTopic(Site site, Topic topic) {
         checkNotNull(site);
         checkNotNull(topic);
-        CollectionTopicDto dto = postSiteTopics(site, Arrays.asList(topic));
+        TopicsDto dto = postSiteTopics(site, Arrays.asList(topic));
         return dto.getCreated() == 1 || dto.getUpdated() == 1;
     }
     
     public static boolean deleteSiteTopic(Site site, Topic topic) {
         checkNotNull(site);
         checkNotNull(topic);
-        CollectionTopicDto dto = deleteSiteTopics(site, Arrays.asList(topic));
+        TopicsDto dto = deleteSiteTopics(site, Arrays.asList(topic));
         return dto.getDeleted() == 1;
     }
     
@@ -77,7 +76,7 @@ public class PersonalizedStreamsClientImpl {
         return client(network).getTopics(limit, offset);
     }
     
-    public static CollectionTopicDto postNetworkTopics(Network network, List<Topic> topics) {
+    public static TopicsDto postNetworkTopics(Network network, List<Topic> topics) {
         checkNotNull(network);
         checkNotNull(topics);
         for (Topic topic : topics) {
@@ -88,10 +87,10 @@ public class PersonalizedStreamsClientImpl {
         return client(network).postTopics(topics);
     }
     
-    public static CollectionTopicDto deleteNetworkTopics(Network network, List<Topic> topics) {
+    public static TopicsDto deleteNetworkTopics(Network network, List<Topic> topics) {
         checkNotNull(network);
         checkNotNull(topics);
-        return client(network).deleteTopics(getTopicIds(topics));
+        return client(network).patchTopics(getTopicIds(topics));
     }
     
     public static List<Topic> getSiteTopics(Site site, Integer limit, Integer offset) {
@@ -99,7 +98,7 @@ public class PersonalizedStreamsClientImpl {
         return client(site).getTopics(limit, offset);
     }
     
-    public static CollectionTopicDto postSiteTopics(Site site, List<Topic> topics) {
+    public static TopicsDto postSiteTopics(Site site, List<Topic> topics) {
         checkNotNull(site);
         checkNotNull(topics);
         for (Topic topic : topics) {
@@ -110,10 +109,10 @@ public class PersonalizedStreamsClientImpl {
         return client(site).postTopics(topics);
     }
     
-    public static CollectionTopicDto deleteSiteTopics(Site site, List<Topic> topics) {
+    public static TopicsDto deleteSiteTopics(Site site, List<Topic> topics) {
         checkNotNull(site);
         checkNotNull(topics);
-        return client(site).deleteTopics(getTopicIds(topics));
+        return client(site).patchTopics(getTopicIds(topics));
     }
     
     /* Collection Topic API */
@@ -123,25 +122,25 @@ public class PersonalizedStreamsClientImpl {
         return client(site).getCollectionTopics(collectionId);
     }
     
-    public static CollectionTopicDto postCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static Integer postCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         checkNotNull(site);
         checkNotNull(collectionId);
         checkNotNull(topics);
-        return client(site).postCollectionTopics(collectionId, topics);
+        return client(site).postCollectionTopics(collectionId, getTopicIds(topics)).getAdded();
     }
     
-    public static CollectionTopicDto putCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static PostDto putCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         checkNotNull(site);
         checkNotNull(collectionId);
         checkNotNull(topics);
-        return client(site).putCollectionTopics(collectionId, topics);
+        return client(site).putCollectionTopics(collectionId, getTopicIds(topics));
     }
     
-    public static CollectionTopicDto deleteCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static Integer deleteCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         checkNotNull(site);
         checkNotNull(collectionId);
         checkNotNull(topics);
-        return client(site).deleteCollectionTopics(collectionId, getTopicIds(topics));
+        return client(site).patchCollectionTopics(collectionId, getTopicIds(topics)).getRemoved();
     }
     
     /* Subscription API */
@@ -151,72 +150,35 @@ public class PersonalizedStreamsClientImpl {
         return client(network).getSubscriptions(user);
     }
     
-    public static CollectionTopicDto postSubscriptions(Network network, String user, List<Topic> topics) {
+    public static Integer postSubscriptions(Network network, String user, List<Topic> topics) {
         checkNotNull(network);
         checkNotNull(user);
         checkNotNull(topics);
-        return client(network).postSubscriptions(user, getSubscriptions(topics));
+        return client(network).postSubscriptions(user, getSubscriptions(topics, user)).getAdded();
     }
     
-    public static CollectionTopicDto putSubscriptions(Network network, String user, List<Topic> topics) {
+    public static PostDto putSubscriptions(Network network, String user, List<Topic> topics) {
         checkNotNull(network);
         checkNotNull(user);
         checkNotNull(topics);
-        return client(network).putSubscriptions(user, getSubscriptions(topics));
+        return client(network).putSubscriptions(user, getSubscriptions(topics, user));
     }
 
-    public static CollectionTopicDto deleteSubscriptions(Network network, String user, List<Topic> topics) {
+    public static Integer deleteSubscriptions(Network network, String user, List<Topic> topics) {
         checkNotNull(network);
         checkNotNull(user);
         checkNotNull(topics);
-        return client(network).deleteSubscriptions(user, getSubscriptions(topics));
+        return client(network).patchSubscriptions(user, getSubscriptions(topics, user)).getRemoved();
     }
     
     /* Subscriber API */
-    public static List<String> getSubscribers(Network network, Topic topic) {
+    public static List<String> getSubscribers(Network network, Topic topic, Integer limit, Integer offset) {
         checkNotNull(network);
         checkNotNull(topic);
-        return client(network).getSubscribers(topic.getId());
-    }
-    
-    public static CollectionTopicDto postSubscribers(Network network, Topic topic, List<String> users) {
-        checkNotNull(network);
-        checkNotNull(topic);
-        checkNotNull(users);
-        return client(network).postSubscribers(topic.getId(), users);
-    }
-    
-    public static CollectionTopicDto putSubscribers(Network network, Topic topic, List<String> users) {
-        checkNotNull(network);
-        checkNotNull(topic);
-        checkNotNull(users);
-        return client(network).putSubscribers(topic.getId(), users);
-    }
-
-    public static CollectionTopicDto deleteSubscribers(Network network, Topic topic, List<String> users) {
-        checkNotNull(network);
-        checkNotNull(topic);
-        checkNotNull(users);
-        return client(network).deleteSubscribers(topic.getId(), users);
+        return client(network).getSubscribers(topic.getId(), limit, offset);
     }
     
     /* Helper methods */
-    private static List<String> getTopicIds(List<Topic> topics) {
-        List<String> ids = Lists.newArrayList();
-        for (Topic topic : topics) {
-            ids.add(topic.getId());
-        }
-        return ids;
-    }
-    
-    private static List<Subscription> getSubscriptions(List<Topic> topics) {
-        List<Subscription> subscriptions = Lists.newArrayList();
-        for (Topic topic : topics) {
-            subscriptions.add(new Subscription(topic.getId()));
-        }
-        return subscriptions;
-    }
-    
     protected static PersonalizedStreamsClient client(Network network) {
         return client(network, null);
     }
@@ -225,23 +187,31 @@ public class PersonalizedStreamsClientImpl {
         return client(site.getNetwork(), site);
     }
     
-    //TODO: lots of crud just to set the timeout.
-    @SuppressWarnings("deprecation")
     private static PersonalizedStreamsClient client(Network network, Site site) {
-        ClientConnectionManager cm = new ThreadSafeClientConnManager();
-        HttpClient httpClient = new DefaultHttpClient(cm);
-        HttpParams params = httpClient.getParams();
-        HttpConnectionParams.setConnectionTimeout(params, 1000);
-        HttpConnectionParams.setSoTimeout(params, 5000);
-        ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+        Client client = ClientBuilder.newClient();
+        client.property(ClientProperties.CONNECT_TIMEOUT, 1000);
+        client.property(ClientProperties.READ_TIMEOUT,    5000);
         
-        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
-        client.register(new LftokenAuthFilter(network));
+        WebTarget target = client.target(site == null ?
+              String.format(BASE_URL, network.getName()) : String.format(SITE_PATH_ADD, network.getName(), site.getId()));
+        target.register(new LftokenAuthFilter(network));
         
-        ResteasyWebTarget target = client.target(site == null ?
-                String.format(BASE_URL, network.getName()) : String.format(SITE_PATH_ADD, network.getName(), site.getId()));
+        return WebResourceFactory.newResource(PersonalizedStreamsClient.class, target);
+    }
 
-        PersonalizedStreamsClient psclient = target.proxy(PersonalizedStreamsClient.class);
-        return psclient;
+    private static List<String> getTopicIds(List<Topic> topics) {
+        List<String> ids = Lists.newArrayList();
+        for (Topic topic : topics) {
+            ids.add(topic.getId());
+        }
+        return ids;
+    }
+    
+    private static List<Subscription> getSubscriptions(List<Topic> topics, String user) {
+        List<Subscription> subscriptions = Lists.newArrayList();
+        for (Topic topic : topics) {
+            subscriptions.add(new Subscription(topic.getId(), user, Type.PERSONAL_STREAM));
+        }
+        return subscriptions;
     }
 }

@@ -3,28 +3,31 @@ package com.livefyre.core;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import net.oauth.jsontoken.JsonToken;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
-import com.livefyre.api.dto.CollectionTopicDto;
+import com.livefyre.api.dto.PostDto;
 import com.livefyre.api.dto.Subscription;
 import com.livefyre.api.dto.Topic;
+import com.livefyre.api.dto.TopicsDto;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 
@@ -44,20 +47,14 @@ public class Network {
     public boolean setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
-        ResteasyClient client = new ResteasyClientBuilder().build();
-        ResteasyWebTarget target = client.target(String.format("http://%s/", this.networkName));
+        Form form = new Form();
+        form.param("actor_token", buildLivefyreToken());
+        form.param("pull_profile_url", urlTemplate);
         
-        // hack to get around resteasy complaining about brackets
-        try {
-            urlTemplate = URLEncoder.encode(urlTemplate, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return false;
-        }
-        Response response = target
-                .queryParam("actor_token", buildLivefyreToken())
-                .queryParam("pull_profile_url", urlTemplate)
+        Response response = ClientBuilder.newClient()
+                .target(String.format("http://%s/", this.networkName))
                 .request()
-                .post(null);
+                .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         
         return response.getStatus() == 204;
     }
@@ -65,13 +62,12 @@ public class Network {
     public boolean syncUser(String userId) {
         checkNotNull(userId);
         
-        String url = String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId);
-        ResteasyClient client = new ResteasyClientBuilder().build();
-        Response response = client.target(url)
+        Response response = ClientBuilder.newClient()
+                .target(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
                 .queryParam("lftoken", buildLivefyreToken())
                 .request()
                 .post(null);
-        
+
         return response.getStatus() == 200;
     }
     
@@ -95,7 +91,7 @@ public class Network {
     
     public boolean validateLivefyreToken(String lfToken) {
         checkNotNull(lfToken);
-        
+
         try {
             JsonToken json = LivefyreJwtUtil.decodeJwt(this.networkKey, lfToken);
             JsonObject jsonObj = json.getPayloadAsJsonObject();
@@ -117,8 +113,13 @@ public class Network {
         return PersonalizedStreamsClientImpl.getNetworkTopic(this, topicId);
     }
     
-    public boolean addOrUpdateTopic(Topic topic) {
-        return PersonalizedStreamsClientImpl.postNetworkTopic(this, topic);
+    public Topic addOrUpdateTopic(String id, String label) {
+        Topic topic = new Topic(this, id, label);
+        if (PersonalizedStreamsClientImpl.postNetworkTopic(this, topic)) {
+            topic.update(Calendar.getInstance().getTime());
+            return topic;
+        }
+        return null;
     }
     
     public boolean deleteTopic(Topic topic) {
@@ -126,50 +127,63 @@ public class Network {
     }
     
     /* Multiple Topic API */
+    public List<Topic> getTopics() {
+        return PersonalizedStreamsClientImpl.getNetworkTopics(this, null, null);
+    }
+    
     public List<Topic> getTopics(Integer limit, Integer offset) {
         return PersonalizedStreamsClientImpl.getNetworkTopics(this, limit, offset);
     }
     
-    public CollectionTopicDto postTopics(List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.postNetworkTopics(this, topics);
+    public List<Topic> postTopics(Map<String, String> topics) {
+        List<Topic> list = Lists.newArrayList();
+        for (String key : topics.keySet()) {
+            list.add(new Topic(this, key, topics.get(key)));
+        }
+        
+        TopicsDto result = PersonalizedStreamsClientImpl.postNetworkTopics(this, list);
+        if (result.getCreated() > 0 || result.getUpdated() > 0) {
+            Date date = Calendar.getInstance().getTime();
+            for (Topic topic : list) {
+                topic.update(date);
+            }
+            return list;
+        }
+        return null;
     }
     
-    public CollectionTopicDto deleteTopics(List<Topic> topics) {
+    public TopicsDto deleteTopics(List<Topic> topics) {
         return PersonalizedStreamsClientImpl.deleteNetworkTopics(this, topics);
     }
     
     /* Subscription API */
     public List<Subscription> getSubscriptions(String user) {
-        return PersonalizedStreamsClientImpl.getSubscriptions(this, user);
+        return PersonalizedStreamsClientImpl.getSubscriptions(this, getUserUrn(user));
     }
     
-    public CollectionTopicDto postSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.postSubscriptions(this, user, topics);
-    }
-    
-    public CollectionTopicDto putSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.putSubscriptions(this, user, topics);
+    public Integer postSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.postSubscriptions(this, getUserUrn(user), topics);
     }
 
-    public CollectionTopicDto deleteSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.deleteSubscriptions(this, user, topics);
+    public PostDto putSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.putSubscriptions(this, getUserUrn(user), topics);
+    }
+
+    public Integer deleteSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.deleteSubscriptions(this, getUserUrn(user), topics);
     }
     
     /* Subscriber API */
     public List<String> getSubscribers(Topic topic) {
-        return PersonalizedStreamsClientImpl.getSubscribers(this, topic);
+        return PersonalizedStreamsClientImpl.getSubscribers(this, topic, null, null);
     }
     
-    public CollectionTopicDto postSubscribers(Topic topic, List<String> users) {
-        return PersonalizedStreamsClientImpl.postSubscribers(this, topic, users);
+    public List<String> getSubscribers(Topic topic, Integer limit, Integer offset) {
+        return PersonalizedStreamsClientImpl.getSubscribers(this, topic, limit, offset);
     }
     
-    public CollectionTopicDto putSubscribers(Topic topic, List<String> users) {
-        return PersonalizedStreamsClientImpl.putSubscribers(this, topic, users);
-    }
-
-    public CollectionTopicDto deleteSubscribers(Topic topic, List<String> users) {
-        return PersonalizedStreamsClientImpl.deleteSubscribers(this, topic, users);
+    private String getUserUrn(String user) {
+        return String.format("urn:livefyre:%s:user=%s", this.networkName, user);
     }
     
     /* Getters/Setters */

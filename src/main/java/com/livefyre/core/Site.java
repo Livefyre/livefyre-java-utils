@@ -8,18 +8,24 @@ import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.client.ClientBuilder;
 
 import org.apache.commons.codec.binary.Base64;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
 import com.livefyre.api.dto.CollectionTopicDto;
+import com.livefyre.api.dto.PostDto;
 import com.livefyre.api.dto.Topic;
+import com.livefyre.api.dto.TopicsDto;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
@@ -89,10 +95,14 @@ public class Site {
         checkNotNull(articleId);
 
         String url = String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.network.getName(), this.siteId,
-              Base64.encodeBase64URLSafeString(articleId.getBytes()));
+                Base64.encodeBase64URLSafeString(articleId.getBytes()));
+
+        String response = ClientBuilder.newClient()
+                .target(url)
+                .request()
+                .get(String.class);
         
-        ResteasyClient client = new ResteasyClientBuilder().build();
-        return client.target(url).request().get(String.class);
+        return response;
     }
 
     public String getCollectionId(String articleId) {
@@ -105,8 +115,13 @@ public class Site {
         return PersonalizedStreamsClientImpl.getSiteTopic(this, topicId);
     }
     
-    public boolean addOrUpdateTopic(Topic topic) {
-        return PersonalizedStreamsClientImpl.postSiteTopic(this, topic);
+    public Topic addOrUpdateTopic(String id, String label) {
+        Topic topic = new Topic(this, id, label);
+        if (PersonalizedStreamsClientImpl.postSiteTopic(this, topic)) {
+            topic.update(Calendar.getInstance().getTime());
+            return topic;
+        }
+        return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
@@ -114,16 +129,33 @@ public class Site {
     }
     
     /* Multiple Topic API */
+    public List<Topic> getTopics() {
+        return PersonalizedStreamsClientImpl.getSiteTopics(this, null, null);
+    }
+    
     public List<Topic> getTopics(Integer limit, Integer offset) {
         return PersonalizedStreamsClientImpl.getSiteTopics(this, limit, offset);
     }
     
-    public CollectionTopicDto postTopics(List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.postSiteTopics(this, topics);
+    public List<Topic> postTopics(Map<String, String> topics) {
+        List<Topic> list = Lists.newArrayList();
+        for (String key : topics.keySet()) {
+            list.add(new Topic(this, key, topics.get(key)));
+        }
+        
+        TopicsDto result = PersonalizedStreamsClientImpl.postSiteTopics(this, list);
+        if (result.getCreated() > 0 || result.getUpdated() > 0) {
+            Date date = Calendar.getInstance().getTime();
+            for (Topic topic : list) {
+                topic.update(date);
+            }
+            return list;
+        }
+        return null;
     }
     
-    public CollectionTopicDto deleteTopics(List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.deleteSiteTopics(this, topics);
+    public boolean deleteTopics(List<Topic> topics) {
+        return (PersonalizedStreamsClientImpl.deleteSiteTopics(this, topics).getDeleted() > 0);
     }
     
     /* Collection Topic API */
@@ -131,15 +163,15 @@ public class Site {
         return PersonalizedStreamsClientImpl.getCollectionTopics(this, collectionId);
     }
     
-    public CollectionTopicDto postCollectionTopics(String collectionId, List<Topic> topics) {
+    public Integer postCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.postCollectionTopics(this, collectionId, topics);
     }
     
-    public CollectionTopicDto putCollectionTopics(String collectionId, List<Topic> topics) {
+    public PostDto putCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.putCollectionTopics(this, collectionId, topics);
     }
     
-    public CollectionTopicDto deleteCollectionTopics(String collectionId, List<Topic> topics) {
+    public Integer deleteCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.deleteCollectionTopics(this, collectionId, topics);
     }
     
@@ -151,7 +183,7 @@ public class Site {
         }
         return true;
     }
-
+    
     /* Getters/Setters */
     public String getNetworkName() { return this.network.getName(); }
     public Network getNetwork() { return this.network; }

@@ -3,7 +3,6 @@ package com.livefyre.api.client;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -16,8 +15,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.livefyre.api.dto.CollectionTopicDto;
+import com.livefyre.api.dto.PostDto;
 import com.livefyre.api.dto.Subscription;
 import com.livefyre.api.dto.Topic;
+import com.livefyre.api.dto.TopicsDto;
 
 public interface PersonalizedStreamsClient {
     
@@ -35,19 +36,21 @@ public interface PersonalizedStreamsClient {
     @GET
     @Path(MULTIPLE_TOPIC_URL)
     @Produces(MediaType.APPLICATION_JSON)
-    List<Topic> getTopics(@QueryParam("limit") @DefaultValue("100") Integer limit, @QueryParam("offset") @DefaultValue("0") Integer offset);
+    List<Topic> getTopics(
+            @QueryParam("limit") @DefaultValue("100") Integer limit,
+            @QueryParam("offset") @DefaultValue("0") Integer offset);
     
     @POST
     @Path(MULTIPLE_TOPIC_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto postTopics(@FormParam("topics") List<Topic> topics);
+    TopicsDto postTopics(@FormParam("topics") List<Topic> topics);
     
-    @DELETE
+    @PATCH
     @Path(MULTIPLE_TOPIC_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto deleteTopics(@FormParam("topicIds") List<String> topicIds);
+    TopicsDto patchTopics(@FormParam("delete") List<String> topicIds);
 
     @GET
     @Path(COLLECTION_TOPICS_URL)
@@ -58,19 +61,19 @@ public interface PersonalizedStreamsClient {
     @Path(COLLECTION_TOPICS_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto postCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("topics") List<Topic> topics);
+    PostDto postCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("topicIds") List<String> topicIds);
     
     @PUT
     @Path(COLLECTION_TOPICS_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto putCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("topics") List<Topic> topics);
+    PostDto putCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("topicIds") List<String> topicIds);
     
-    @DELETE
+    @PATCH
     @Path(COLLECTION_TOPICS_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto deleteCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("topicIds") List<String> topicIds);
+    PostDto patchCollectionTopics(@PathParam("collectionId") String collectionId, @FormParam("delete") List<String> topicIds);
     
     @GET
     @Path(USER_SUBSCRIPTION_URL)
@@ -81,41 +84,24 @@ public interface PersonalizedStreamsClient {
     @Path(USER_SUBSCRIPTION_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto postSubscriptions(@PathParam("user") String user, @FormParam("subscriptions") List<Subscription> subscriptions);
+    PostDto postSubscriptions(@PathParam("user") String user, @FormParam("subscriptions") List<Subscription> subscriptions);
     
     @PUT
     @Path(USER_SUBSCRIPTION_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto putSubscriptions(@PathParam("user") String user, @FormParam("subscriptions") List<Subscription> subscriptions);
+    PostDto putSubscriptions(@PathParam("user") String user, @FormParam("subscriptions") List<Subscription> subscriptions);
     
-    @DELETE
+    @PATCH
     @Path(USER_SUBSCRIPTION_URL)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto deleteSubscriptions(@PathParam("user") String user, @FormParam("subscriptions") List<Subscription> subscriptions);
+    PostDto patchSubscriptions(@PathParam("user") String user, @FormParam("subscriptions") List<Subscription> subscriptions);
 
     @GET
     @Path(TOPIC_SUBSCRIPTION_URL)
     @Produces(MediaType.APPLICATION_JSON)
-    List<String> getSubscribers(@PathParam("topicId") String topicId);
-    
-    @POST
-    @Path(TOPIC_SUBSCRIPTION_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto postSubscribers(@PathParam("topicId") String topicId, @FormParam("objectIds") List<String> users);
-    
-    @PUT
-    @Path(TOPIC_SUBSCRIPTION_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto putSubscribers(@PathParam("topicId") String topicId, @FormParam("objectIds") List<String> users);
-    
-    @DELETE
-    @Path(TOPIC_SUBSCRIPTION_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto deleteSubscribers(@PathParam("topicId") String topicId, @FormParam("objectIds") List<String> users);
- 
+    List<String> getSubscribers(@PathParam("topicId") String topicId, 
+            @QueryParam("limit") @DefaultValue("100") Integer limit,
+            @QueryParam("offset") @DefaultValue("0") Integer offset);
 }
