@@ -62,7 +62,7 @@ public class NetworkTest {
         assertTrue(network.validateLivefyreToken(token));
     }
     
-//    @Test
+    @Test
     public void testNullChecks() {
         Network network = new Network("", "");
         network.setNetworkName(null);

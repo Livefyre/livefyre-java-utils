@@ -64,11 +64,4 @@ public class Topic {
     public void setModifiedAt(Date modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
-    
-    public void update(Date date) {
-        if (this.createdAt == null) {
-            this.createdAt = date;
-        }
-        this.modifiedAt = date;
-    }
 }

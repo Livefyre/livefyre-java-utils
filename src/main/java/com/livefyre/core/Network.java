@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -113,10 +112,9 @@ public class Network {
         return PersonalizedStreamsClientImpl.getNetworkTopic(this, topicId);
     }
     
-    public Topic addOrUpdateTopic(String id, String label) {
+    public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = new Topic(this, id, label);
         if (PersonalizedStreamsClientImpl.postNetworkTopic(this, topic)) {
-            topic.update(Calendar.getInstance().getTime());
             return topic;
         }
         return null;
@@ -135,7 +133,7 @@ public class Network {
         return PersonalizedStreamsClientImpl.getNetworkTopics(this, limit, offset);
     }
     
-    public List<Topic> postTopics(Map<String, String> topics) {
+    public List<Topic> createOrUpdateTopics(Map<String, String> topics) {
         List<Topic> list = Lists.newArrayList();
         for (String key : topics.keySet()) {
             list.add(new Topic(this, key, topics.get(key)));
@@ -143,10 +141,6 @@ public class Network {
         
         TopicsDto result = PersonalizedStreamsClientImpl.postNetworkTopics(this, list);
         if (result.getCreated() > 0 || result.getUpdated() > 0) {
-            Date date = Calendar.getInstance().getTime();
-            for (Topic topic : list) {
-                topic.update(date);
-            }
             return list;
         }
         return null;
@@ -161,11 +155,11 @@ public class Network {
         return PersonalizedStreamsClientImpl.getSubscriptions(this, getUserUrn(user));
     }
     
-    public Integer postSubscriptions(String user, List<Topic> topics) {
+    public Integer createSubscriptions(String user, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.postSubscriptions(this, getUserUrn(user), topics);
     }
 
-    public PostDto putSubscriptions(String user, List<Topic> topics) {
+    public PostDto updateSubscriptions(String user, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.putSubscriptions(this, getUserUrn(user), topics);
     }
 
@@ -182,7 +176,7 @@ public class Network {
         return PersonalizedStreamsClientImpl.getSubscribers(this, topic, limit, offset);
     }
     
-    private String getUserUrn(String user) {
+    public String getUserUrn(String user) {
         return String.format("urn:livefyre:%s:user=%s", this.networkName, user);
     }
     

@@ -1,10 +1,13 @@
 package com.livefyre.api.dto;
 
+import java.util.Date;
+
 public class Subscription {
     private String to;
     private String by;
     private Type type;
-
+    private Date createdAt;
+    
     public Subscription(String to, String by, Type type) {
         this.to = to;
         this.by = by;
@@ -33,6 +36,14 @@ public class Subscription {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public enum Type {

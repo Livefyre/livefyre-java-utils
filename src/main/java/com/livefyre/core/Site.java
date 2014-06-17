@@ -8,8 +8,6 @@ import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -115,10 +113,9 @@ public class Site {
         return PersonalizedStreamsClientImpl.getSiteTopic(this, topicId);
     }
     
-    public Topic addOrUpdateTopic(String id, String label) {
+    public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = new Topic(this, id, label);
         if (PersonalizedStreamsClientImpl.postSiteTopic(this, topic)) {
-            topic.update(Calendar.getInstance().getTime());
             return topic;
         }
         return topic;
@@ -137,7 +134,7 @@ public class Site {
         return PersonalizedStreamsClientImpl.getSiteTopics(this, limit, offset);
     }
     
-    public List<Topic> postTopics(Map<String, String> topics) {
+    public List<Topic> createOrUpdateTopics(Map<String, String> topics) {
         List<Topic> list = Lists.newArrayList();
         for (String key : topics.keySet()) {
             list.add(new Topic(this, key, topics.get(key)));
@@ -145,10 +142,6 @@ public class Site {
         
         TopicsDto result = PersonalizedStreamsClientImpl.postSiteTopics(this, list);
         if (result.getCreated() > 0 || result.getUpdated() > 0) {
-            Date date = Calendar.getInstance().getTime();
-            for (Topic topic : list) {
-                topic.update(date);
-            }
             return list;
         }
         return null;
@@ -163,11 +156,11 @@ public class Site {
         return PersonalizedStreamsClientImpl.getCollectionTopics(this, collectionId);
     }
     
-    public Integer postCollectionTopics(String collectionId, List<Topic> topics) {
+    public Integer createCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.postCollectionTopics(this, collectionId, topics);
     }
     
-    public PostDto putCollectionTopics(String collectionId, List<Topic> topics) {
+    public PostDto updateCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.putCollectionTopics(this, collectionId, topics);
     }
     
