@@ -1,14 +1,13 @@
 package com.livefyre.api.dto;
 
-import java.util.List;
 
 public class CollectionTopicDto {
-    private List<String> topicIds;
+    private CollectionTopicDataDto data;
 
-    public List<String> getTopicIds() {
-        return topicIds;
+    public CollectionTopicDataDto getData() {
+        return data;
     }
-    public void setTopicIds(List<String> topicIds) {
-        this.topicIds = topicIds;
+    public void setData(CollectionTopicDataDto data) {
+        this.data = data;
     }
 }

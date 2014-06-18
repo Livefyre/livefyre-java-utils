@@ -65,8 +65,8 @@ public class NetworkTest {
     @Test
     public void testNullChecks() {
         Network network = new Network("", "");
-        network.setNetworkName(null);
-        network.setNetworkKey(null);;
+        network.setName(null);
+        network.setKey(null);;
         /* param checks */
         try {
             network.setUserSyncUrl(null);
@@ -106,7 +106,7 @@ public class NetworkTest {
             fail("network name cannot be null");
         } catch(NullPointerException e) {}
         /* key checks */
-        network.setNetworkName("");
+        network.setName("");
         try {
             network.setUserSyncUrl("{id}");
             fail("network key cannot be null");

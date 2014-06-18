@@ -20,15 +20,13 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
-import com.livefyre.api.dto.CollectionTopicDto;
-import com.livefyre.api.dto.PostDto;
 import com.livefyre.api.dto.Topic;
-import com.livefyre.api.dto.TopicsDto;
+import com.livefyre.api.dto.TopicDataDto;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 
-public class Site {
+public class Site implements LfCore {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
     private static final ImmutableList<String> TYPE = ImmutableList.of(
         "reviews",
@@ -42,13 +40,13 @@ public class Site {
     );
 
     private Network network = null;
-    private String siteId = null;
-    private String siteKey = null;
+    private String id = null;
+    private String key = null;
 
-    public Site(Network network, String siteId, String siteKey) {
+    public Site(Network network, String id, String key) {
         this.network = checkNotNull(network);
-        this.siteId = checkNotNull(siteId);
-        this.siteKey = checkNotNull(siteKey);
+        this.id = checkNotNull(id);
+        this.key = checkNotNull(key);
     }
 
     public String buildCollectionMetaToken(String title, String articleId, String url, String tags, String type) {
@@ -60,7 +58,7 @@ public class Site {
         
         try {
             if (TYPE.contains(type) || type == null) {
-                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.siteKey, title, t, url, articleId, type);
+                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.key, title, t, url, articleId, type);
             } else {
                 throw new IllegalArgumentException("type is not a recognized type. should be liveblog, livechat, livecomments, reviews, sidenotes, or an empty String.");
             }
@@ -92,7 +90,7 @@ public class Site {
     public String getCollectionContent(String articleId) {
         checkNotNull(articleId);
 
-        String url = String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.network.getName(), this.siteId,
+        String url = String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.network.getName(), this.id,
                 Base64.encodeBase64URLSafeString(articleId.getBytes()));
 
         String response = ClientBuilder.newClient()
@@ -110,28 +108,28 @@ public class Site {
     
     /* Topic API */
     public Topic getTopic(String topicId) {
-        return PersonalizedStreamsClientImpl.getSiteTopic(this, topicId);
+        return PersonalizedStreamsClientImpl.getTopic(this, topicId);
     }
     
     public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = new Topic(this, id, label);
-        if (PersonalizedStreamsClientImpl.postSiteTopic(this, topic)) {
+        if (PersonalizedStreamsClientImpl.postTopic(this, topic)) {
             return topic;
         }
         return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClientImpl.deleteSiteTopic(this, topic);
+        return PersonalizedStreamsClientImpl.deleteTopic(this, topic);
     }
     
     /* Multiple Topic API */
     public List<Topic> getTopics() {
-        return PersonalizedStreamsClientImpl.getSiteTopics(this, null, null);
+        return PersonalizedStreamsClientImpl.getTopics(this, null, null);
     }
     
     public List<Topic> getTopics(Integer limit, Integer offset) {
-        return PersonalizedStreamsClientImpl.getSiteTopics(this, limit, offset);
+        return PersonalizedStreamsClientImpl.getTopics(this, limit, offset);
     }
     
     public List<Topic> createOrUpdateTopics(Map<String, String> topics) {
@@ -140,7 +138,7 @@ public class Site {
             list.add(new Topic(this, key, topics.get(key)));
         }
         
-        TopicsDto result = PersonalizedStreamsClientImpl.postSiteTopics(this, list);
+        TopicDataDto result = PersonalizedStreamsClientImpl.postTopics(this, list);
         if (result.getCreated() > 0 || result.getUpdated() > 0) {
             return list;
         }
@@ -148,24 +146,29 @@ public class Site {
     }
     
     public boolean deleteTopics(List<Topic> topics) {
-        return (PersonalizedStreamsClientImpl.deleteSiteTopics(this, topics).getDeleted() > 0);
+        return (PersonalizedStreamsClientImpl.deleteTopics(this, topics).getDeleted() > 0);
     }
     
     /* Collection Topic API */
-    public CollectionTopicDto getCollectionTopics(String collectionId) {
+    public List<String> getCollectionTopics(String collectionId) {
         return PersonalizedStreamsClientImpl.getCollectionTopics(this, collectionId);
     }
     
-    public Integer createCollectionTopics(String collectionId, List<Topic> topics) {
+    public Integer addCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.postCollectionTopics(this, collectionId, topics);
     }
     
-    public PostDto updateCollectionTopics(String collectionId, List<Topic> topics) {
+    public boolean updateCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.putCollectionTopics(this, collectionId, topics);
     }
     
-    public Integer deleteCollectionTopics(String collectionId, List<Topic> topics) {
+    public Integer removeCollectionTopics(String collectionId, List<Topic> topics) {
         return PersonalizedStreamsClientImpl.deleteCollectionTopics(this, collectionId, topics);
+    }
+    
+    /* Helper methods */
+    public String getUrn() {
+        return network.getUrn()+":site="+id;
     }
     
     protected boolean isValidFullUrl(String url) {
@@ -178,11 +181,12 @@ public class Site {
     }
     
     /* Getters/Setters */
-    public String getNetworkName() { return this.network.getName(); }
+    public String buildLivefyreToken() { return network.buildLivefyreToken(); }
+    public String getNetworkName() { return network.getName(); }
     public Network getNetwork() { return this.network; }
     protected void setNetwork(Network network) { this.network = network; }
-    public String getId() { return siteId; }
-    protected void setSiteId(String siteId) { this.siteId = siteId; }
-    public String getSiteKey() { return siteKey; }
-    protected void setSiteKey(String key) { this.siteKey = key; }
+    public String getId() { return id; }
+    protected void setId(String id) { this.id = id; }
+    public String getKey() { return key; }
+    protected void setKey(String key) { this.key = key; }
 }

@@ -1,11 +1,23 @@
 package com.livefyre.api.dto;
 
-
-public class TopicsDto {
+public class TopicDto {
+    private TopicDataDto data;
+    private int added;
     private int created;
     private int updated;
-    private int deleted;
-    
+
+    public TopicDataDto getData() {
+        return data;
+    }
+    public void setData(TopicDataDto data) {
+        this.data = data;
+    }
+    public int getAdded() {
+        return added;
+    }
+    public void setAdded(int added) {
+        this.added = added;
+    }
     public int getCreated() {
         return created;
     }
@@ -18,10 +30,5 @@ public class TopicsDto {
     public void setUpdated(int updated) {
         this.updated = updated;
     }
-    public int getDeleted() {
-        return deleted;
-    }
-    public void setDeleted(int deleted) {
-        this.deleted = deleted;
-    }
+    
 }

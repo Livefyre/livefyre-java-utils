@@ -2,11 +2,17 @@ package com.livefyre.api.dto;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Subscription {
     private String to;
     private String by;
     private Type type;
     private Date createdAt;
+    
+    public Subscription() { }
     
     public Subscription(String to, String by, Type type) {
         this.to = to;
@@ -46,24 +52,18 @@ public class Subscription {
         this.createdAt = createdAt;
     }
 
+    @XmlEnum(String.class)
     public enum Type {
-        PERSONAL_STREAM("personalStream", 1);
+        personalStream(1);
         
-        private String name;
         private int type;
         
-        private Type(String name, int type) {
-            this.name = name;
+        private Type(int type) {
             this.type = type;
         }
         
         public int getType() {
             return this.type;
-        }
-        
-        @Override
-        public String toString() {
-            return this.name;
         }
     }
 }

@@ -1,9 +1,11 @@
 package com.livefyre.api.client;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -11,13 +13,10 @@ import com.livefyre.Livefyre;
 import com.livefyre.api.dto.Subscription;
 import com.livefyre.api.dto.Subscription.Type;
 import com.livefyre.api.dto.Topic;
+import com.livefyre.api.dto.TopicDataDto;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
 
-
-/*
- * TODO: Add asserts - correct logic.
- */
 public class PersonalizedStreamsClientImplTest {
     private static final String NETWORK_NAME = "<NETWORK-NAME>";
     private static final String NETWORK_KEY = "<NETWORK-KEY>";
@@ -61,76 +60,122 @@ public class PersonalizedStreamsClientImplTest {
     }
     
     @Test
-    @Ignore
     public void testNetworkTopicApi() {
-        PersonalizedStreamsClientImpl.getNetworkTopic(network, topic.getId());
-        PersonalizedStreamsClientImpl.postNetworkTopic(network, topic);
-        PersonalizedStreamsClientImpl.getNetworkTopic(network, topic.getId());
+        assertTrue(PersonalizedStreamsClientImpl.postTopic(network, topic));
+        Topic t = PersonalizedStreamsClientImpl.getTopic(network, topic.getId());
+        assertNotNull(t);
         
-        PersonalizedStreamsClientImpl.deleteNetworkTopic(network, topic);
-        PersonalizedStreamsClientImpl.getNetworkTopic(network, topic.getId());
+        assertTrue(PersonalizedStreamsClientImpl.deleteTopic(network, t));
+        
+//      PersonalizedStreamsClientImpl.getTopic(site, t.getId());
+        List<Topic> ts = PersonalizedStreamsClientImpl.getTopics(network, null, null);
+        assertTrue(ts.isEmpty());
     }
     
     @Test
-    @Ignore
     public void testMultipleNetworkTopicApi() {
-        PersonalizedStreamsClientImpl.postNetworkTopics(network, topics);
-        PersonalizedStreamsClientImpl.getNetworkTopics(network, 3, 0);
-        PersonalizedStreamsClientImpl.deleteNetworkTopics(network, topics);
-        PersonalizedStreamsClientImpl.getNetworkTopics(network, null, null);
+        TopicDataDto dto = PersonalizedStreamsClientImpl.postTopics(network, topics);
+        assertTrue(dto.getCreated() == topics.size());
+        
+        List<Topic> ts = PersonalizedStreamsClientImpl.getTopics(network, 3, 0);
+        assertTrue(ts.size() == 3);
+        
+        dto = PersonalizedStreamsClientImpl.deleteTopics(network, topics);
+        assertTrue(dto.getDeleted() == topics.size());
+        
+        ts = PersonalizedStreamsClientImpl.getTopics(network, null, null);
+        assertTrue(ts.isEmpty());
     }
     
     @Test
-    @Ignore
     public void testSiteTopicApi() {
-        PersonalizedStreamsClientImpl.postSiteTopic(site, topic1);
-        PersonalizedStreamsClientImpl.getSiteTopic(site, topic1.getId());
+        assertTrue(PersonalizedStreamsClientImpl.postTopic(site, topic4));
         
-        PersonalizedStreamsClientImpl.deleteSiteTopic(site, topic1);
-        PersonalizedStreamsClientImpl.getSiteTopic(site, topic1.getId());
+        Topic t = PersonalizedStreamsClientImpl.getTopic(site, topic4.getId());
+        assertNotNull(t);
+        
+        assertTrue(PersonalizedStreamsClientImpl.deleteTopic(site, t));
+        
+//        PersonalizedStreamsClientImpl.getTopic(site, t.getId());
+        List<Topic> ts = PersonalizedStreamsClientImpl.getTopics(network, null, null);
+        assertTrue(ts.isEmpty());
     }
     
     @Test
-    @Ignore
     public void testMultipleSiteTopicApi() {
-        PersonalizedStreamsClientImpl.postSiteTopics(site, topics);
-        PersonalizedStreamsClientImpl.getSiteTopics(site, 3, 0);
-        PersonalizedStreamsClientImpl.deleteSiteTopics(site, topics);
-        PersonalizedStreamsClientImpl.getSiteTopics(site, null, null);
+        TopicDataDto dto = PersonalizedStreamsClientImpl.postTopics(site, topics2);
+        assertTrue(dto.getCreated() == topics2.size());
+        
+        List<Topic> ts = PersonalizedStreamsClientImpl.getTopics(site, 2, 0);
+        assertTrue(ts.size() == 2);
+        
+        dto = PersonalizedStreamsClientImpl.deleteTopics(site, topics2);
+        assertTrue(dto.getDeleted() == topics2.size());
+        
+        ts = PersonalizedStreamsClientImpl.getTopics(site, null, null);
+        assertTrue(ts.isEmpty());
     }
     
     @Test
-    @Ignore
-    public void testCollectionTopicApi() {
-        PersonalizedStreamsClientImpl.postNetworkTopics(network, topics);
+    public void testCollectionTopicApi_network() {
+        PersonalizedStreamsClientImpl.postTopics(network, topics);
         
-        PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
-        PersonalizedStreamsClientImpl.postCollectionTopics(site, COLLECTION_ID, topics);
-        PersonalizedStreamsClientImpl.putCollectionTopics(site, COLLECTION_ID, topics1);
-        PersonalizedStreamsClientImpl.deleteCollectionTopics(site, COLLECTION_ID, topics);
+        List<String> topicIds = PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
+        assertTrue(topicIds.isEmpty());
         
-        PersonalizedStreamsClientImpl.deleteNetworkTopics(network, topics);
+        int added = PersonalizedStreamsClientImpl.postCollectionTopics(site, COLLECTION_ID, topics);
+        assertTrue(added == 7);
+        
+        topicIds = PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
+        assertTrue(topicIds.size() == 7);
 
-        PersonalizedStreamsClientImpl.postSiteTopics(site, topics);
+        assertTrue(PersonalizedStreamsClientImpl.putCollectionTopics(site, COLLECTION_ID, topics1));
+        
+        topicIds = PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
+        assertTrue(topicIds.size() == 3);
+        
+        int deleted = PersonalizedStreamsClientImpl.deleteCollectionTopics(site, COLLECTION_ID, topics);
+        assertTrue(deleted == 3);
+        
+        topicIds = PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
+        assertTrue(topicIds.isEmpty());
+        
+        PersonalizedStreamsClientImpl.deleteTopics(network, topics);
+        topicIds = PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
+    }
+
+    @Test
+    public void testCollectionTopicApi_site() {
+        PersonalizedStreamsClientImpl.postTopics(site, topics2);
+        
         PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
         PersonalizedStreamsClientImpl.postCollectionTopics(site, COLLECTION_ID, topics2);
         PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
-        
-        PersonalizedStreamsClientImpl.putCollectionTopics(site, COLLECTION_ID, topics1);
-        PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
-
-        List<Topic> topics3 = Lists.newArrayList(topic2);
-        PersonalizedStreamsClientImpl.deleteCollectionTopics(site, COLLECTION_ID, topics3);
+//        
+//        PersonalizedStreamsClientImpl.putCollectionTopics(site, COLLECTION_ID, topics1); // this would clear all topics for the given collection to the ones provided...
+//        PersonalizedStreamsClientImpl.getCollectionTopics(site, COLLECTION_ID);
+//
+        PersonalizedStreamsClientImpl.deleteCollectionTopics(site, COLLECTION_ID, topics2);
+        PersonalizedStreamsClientImpl.deleteTopics(site, topics2);
     }
     
+    // TODO make a super mix up test
+    
     @Test
-    @Ignore
     public void testSubscriberApi() {
-        String user1 = "user-1";
-        String user2 = "user-2";
+        String user1 = network.getUserUrn("539f362185889e79f5000000"); //TODO get a different user.
         
-        Subscription subscription = new Subscription(topic1.getId(), user1, Type.PERSONAL_STREAM);
-        
-        PersonalizedStreamsClientImpl.getSubscriptions(network, user1);
+        Subscription subscription = new Subscription(topic1.getId(), user1, Type.personalStream);
+
+        PersonalizedStreamsClientImpl.postTopics(network, topics);
+        PersonalizedStreamsClientImpl.deleteTopics(network, topics);
+        List<Subscription> su = PersonalizedStreamsClientImpl.getSubscriptions(network, user1);
+        int subs = PersonalizedStreamsClientImpl.postSubscriptions(network, user1, topics);
+//        boolean s = PersonalizedStreamsClientImpl.putSubscriptions(network, user1, topics1);
+        int del = PersonalizedStreamsClientImpl.deleteSubscriptions(network, user1, Lists.newArrayList(topics));
+        List<Subscription> sub = PersonalizedStreamsClientImpl.getSubscriptions(network, user1);
+        sub.size();
+
+        PersonalizedStreamsClientImpl.deleteTopics(network, topics);
     }
 }

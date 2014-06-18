@@ -23,24 +23,23 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
-import com.livefyre.api.dto.PostDto;
 import com.livefyre.api.dto.Subscription;
 import com.livefyre.api.dto.Topic;
-import com.livefyre.api.dto.TopicsDto;
+import com.livefyre.api.dto.TopicDataDto;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 
-public class Network {
-    private static final double DEFAULT_EXPIRES = 86400.0;
+public class Network implements LfCore {
+    public static final double DEFAULT_EXPIRES = 86400.0;
     private static final String DEFAULT_USER = "system";
     private static final String ID = "{id}";
     
-    private String networkName = null;
-    private String networkKey = null;
+    private String name = null;
+    private String key = null;
     
-    public Network(String networkName, String networkKey) {
-        this.networkName = checkNotNull(networkName);
-        this.networkKey = checkNotNull(networkKey);
+    public Network(String name, String key) {
+        this.name = checkNotNull(name);
+        this.key = checkNotNull(key);
     }
     
     public boolean setUserSyncUrl(String urlTemplate) {
@@ -51,7 +50,7 @@ public class Network {
         form.param("pull_profile_url", urlTemplate);
         
         Response response = ClientBuilder.newClient()
-                .target(String.format("http://%s/", this.networkName))
+                .target(String.format("http://%s/", this.name))
                 .request()
                 .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         
@@ -62,7 +61,7 @@ public class Network {
         checkNotNull(userId);
         
         Response response = ClientBuilder.newClient()
-                .target(String.format("http://%s/api/v3_0/user/%s/refresh", this.networkName, userId))
+                .target(String.format("http://%s/api/v3_0/user/%s/refresh", this.name, userId))
                 .queryParam("lftoken", buildLivefyreToken())
                 .request()
                 .post(null);
@@ -80,7 +79,7 @@ public class Network {
         checkNotNull(expires);
         
         try {
-            return LivefyreJwtUtil.getJwtUserAuthToken(this.networkName, this.networkKey, userId, displayName, expires);
+            return LivefyreJwtUtil.getJwtUserAuthToken(this.name, this.key, userId, displayName, expires);
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure creating token." +e);
         } catch (SignatureException e) {
@@ -92,9 +91,9 @@ public class Network {
         checkNotNull(lfToken);
 
         try {
-            JsonToken json = LivefyreJwtUtil.decodeJwt(this.networkKey, lfToken);
+            JsonToken json = LivefyreJwtUtil.decodeJwt(this.key, lfToken);
             JsonObject jsonObj = json.getPayloadAsJsonObject();
-            return jsonObj.get("domain").getAsString().compareTo(this.networkName) == 0
+            return jsonObj.get("domain").getAsString().compareTo(this.name) == 0
                 && jsonObj.get("user_id").getAsString().compareTo("system") == 0
                 && jsonObj.get("expires").getAsBigInteger().compareTo(
                         BigInteger.valueOf(Calendar.getInstance().getTimeInMillis()/1000L)) >= 0;
@@ -109,81 +108,86 @@ public class Network {
     
     /* Topic API */
     public Topic getTopic(String topicId) {
-        return PersonalizedStreamsClientImpl.getNetworkTopic(this, topicId);
+        return PersonalizedStreamsClientImpl.getTopic(this, topicId);
     }
     
     public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = new Topic(this, id, label);
-        if (PersonalizedStreamsClientImpl.postNetworkTopic(this, topic)) {
+        if (PersonalizedStreamsClientImpl.postTopic(this, topic)) {
             return topic;
         }
         return null;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClientImpl.deleteNetworkTopic(this, topic);
+        return PersonalizedStreamsClientImpl.deleteTopic(this, topic);
     }
     
     /* Multiple Topic API */
     public List<Topic> getTopics() {
-        return PersonalizedStreamsClientImpl.getNetworkTopics(this, null, null);
+        return PersonalizedStreamsClientImpl.getTopics(this, null, null);
     }
     
     public List<Topic> getTopics(Integer limit, Integer offset) {
-        return PersonalizedStreamsClientImpl.getNetworkTopics(this, limit, offset);
+        return PersonalizedStreamsClientImpl.getTopics(this, limit, offset);
     }
     
-    public List<Topic> createOrUpdateTopics(Map<String, String> topics) {
+    public List<Topic> createOrUpdateTopics(Map<String, String> topicMap) {
         List<Topic> list = Lists.newArrayList();
-        for (String key : topics.keySet()) {
-            list.add(new Topic(this, key, topics.get(key)));
+        for (String key : topicMap.keySet()) {
+            list.add(new Topic(this, key, topicMap.get(key)));
         }
         
-        TopicsDto result = PersonalizedStreamsClientImpl.postNetworkTopics(this, list);
+        TopicDataDto result = PersonalizedStreamsClientImpl.postTopics(this, list);
         if (result.getCreated() > 0 || result.getUpdated() > 0) {
             return list;
         }
         return null;
     }
     
-    public TopicsDto deleteTopics(List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.deleteNetworkTopics(this, topics);
+    public Integer deleteTopics(List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.deleteTopics(this, topics).getDeleted();
     }
     
     /* Subscription API */
     public List<Subscription> getSubscriptions(String user) {
-        return PersonalizedStreamsClientImpl.getSubscriptions(this, getUserUrn(user));
+        return PersonalizedStreamsClientImpl.getSubscriptions(this, user);
     }
     
-    public Integer createSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.postSubscriptions(this, getUserUrn(user), topics);
+    public Integer addSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.postSubscriptions(this, user, topics);
     }
 
-    public PostDto updateSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.putSubscriptions(this, getUserUrn(user), topics);
+    public boolean updateSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.putSubscriptions(this, user, topics);
     }
 
-    public Integer deleteSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.deleteSubscriptions(this, getUserUrn(user), topics);
+    public Integer removeSubscriptions(String user, List<Topic> topics) {
+        return PersonalizedStreamsClientImpl.deleteSubscriptions(this, user, topics);
     }
     
     /* Subscriber API */
-    public List<String> getSubscribers(Topic topic) {
+    public List<Subscription> getSubscribers(Topic topic) {
         return PersonalizedStreamsClientImpl.getSubscribers(this, topic, null, null);
     }
     
-    public List<String> getSubscribers(Topic topic, Integer limit, Integer offset) {
+    public List<Subscription> getSubscribers(Topic topic, Integer limit, Integer offset) {
         return PersonalizedStreamsClientImpl.getSubscribers(this, topic, limit, offset);
     }
     
+    /* Helper methods */
+    public String getUrn() {
+        return "urn:livefyre:"+name;
+    }
     public String getUserUrn(String user) {
-        return String.format("urn:livefyre:%s:user=%s", this.networkName, user);
+        return getUrn()+":user="+user;
     }
     
     /* Getters/Setters */
-    public String getName() { return networkName; }
-    protected void setNetworkName(String name) { this.networkName = name; }
-    public String getNetworkKey() { return networkKey; }
-    protected void setNetworkKey(String networkKey) { this.networkKey = networkKey;
+    public String getNetworkName() { return getName(); } // used for the interface
+    public String getName() { return name; }
+    protected void setName(String name) { this.name = name; }
+    public String getKey() { return key; }
+    protected void setKey(String key) { this.key = key;
     }
 }
