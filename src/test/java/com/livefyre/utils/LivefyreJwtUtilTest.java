@@ -1,4 +1,4 @@
-package com.livefyre.utils.core;
+package com.livefyre.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,6 +13,7 @@ import net.oauth.jsontoken.JsonToken;
 import org.junit.Test;
 
 import com.google.gson.JsonObject;
+import com.livefyre.utils.LivefyreJwtUtil;
 
 public class LivefyreJwtUtilTest {
     private static final String CHECKSUM = "323f0074333c0c8c01951c0b3bf5f794";

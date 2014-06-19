@@ -1,14 +1,28 @@
-package com.livefyre.utils.client;
+package com.livefyre.core;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import com.livefyre.Livefyre;
+
 public class NetworkTest {
-    private static final String NETWORK = "test.fyre.com";
-    private static final String NETWORK_KEY = "testkeytest";
+    private static final String NETWORK_NAME = "<NETWORK-NAME>";
+    private static final String NETWORK_KEY = "<NETWORK-KEY>";
+    private static final String USER_SYNC_URL = "<USER-SYNC-URL>";
+    private static final String USER = "<USER>";
+    
+    @Test
+    @Ignore
+    public void testSetUserSync() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        
+        assertTrue(network.setUserSyncUrl(USER_SYNC_URL));
+        assertTrue(network.syncUser(USER));
+    }
     
     @Test
     public void testNetworkCreation() {
@@ -26,7 +40,7 @@ public class NetworkTest {
     
     @Test
     public void testNetworkSetUserSyncId() {
-        Network network = Livefyre.getNetwork(NETWORK, NETWORK_KEY);
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         try {
             network.setUserSyncUrl("http://thisisa.test.url/");
             fail("network must contain {id}");
@@ -35,7 +49,7 @@ public class NetworkTest {
     
     @Test
     public void testNetworkUserToken() {
-        Network network = Livefyre.getNetwork(NETWORK, NETWORK_KEY);
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
         try {
             network.buildUserAuthToken("fjaowie.123", "", 1.0);
@@ -51,8 +65,8 @@ public class NetworkTest {
     @Test
     public void testNullChecks() {
         Network network = new Network("", "");
-        network.setNetworkName(null);
-        network.setNetworkKey(null);;
+        network.setName(null);
+        network.setKey(null);;
         /* param checks */
         try {
             network.setUserSyncUrl(null);
@@ -92,7 +106,7 @@ public class NetworkTest {
             fail("network name cannot be null");
         } catch(NullPointerException e) {}
         /* key checks */
-        network.setNetworkName("");
+        network.setName("");
         try {
             network.setUserSyncUrl("{id}");
             fail("network key cannot be null");

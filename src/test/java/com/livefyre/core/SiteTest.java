@@ -1,4 +1,4 @@
-package com.livefyre.utils.client;
+package com.livefyre.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -10,33 +10,63 @@ import java.security.InvalidKeyException;
 
 import net.oauth.jsontoken.JsonToken;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import com.livefyre.utils.core.LivefyreJwtUtil;
+import com.google.gson.JsonObject;
+import com.livefyre.Livefyre;
+import com.livefyre.utils.LivefyreJwtUtil;
 
 public class SiteTest {
     private static final String CHECKSUM = "6e2e4faf7b95f896260fe695eafb34ba";
-    private static final String SITE_ID = "1";
-    private static final String SITE_KEY = "testkeytest";
+    private static final String NETWORK_NAME = "<NETWORK-NAME>";
+    private static final String NETWORK_KEY = "<NETWORK-KEY>";
+    private static final String SITE_ID = "<SITE-ID>";
+    private static final String SITE_KEY = "<SITE-KEY>";
+    private static final String ARTICLE_ID = "<ARTICLE-ID>";
+
+    @Test
+    @Ignore
+    public void testGetCollectionInfo() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        Site site = network.getSite(SITE_ID, SITE_KEY);
+        String collectionContent = site.getCollectionContent(ARTICLE_ID);
+        
+        assertNotNull(collectionContent);
+        
+        JsonObject collectionJson = site.getCollectionContentJson(ARTICLE_ID);
+        
+        assertNotNull(collectionJson);
+    }
+    
+    @Test
+    @Ignore
+    public void testGetCollectionId() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        Site site = network.getSite(SITE_ID, SITE_KEY);
+        String id = site.getCollectionId(ARTICLE_ID);
+        
+        assertNotNull(id);
+    }
     
     @Test
     public void testSiteCreation() {
-        Network network = Livefyre.getNetwork("", "");
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         try {
-            network.getSite("", null);
+            network.getSite(SITE_ID, null);
             fail("siteKey cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.getSite(null, "");
+            network.getSite(null, SITE_KEY);
             fail("siteId cannot be null");
         } catch(NullPointerException e) {}
-        Site site = network.getSite("", "");
+        Site site = network.getSite(SITE_ID, SITE_KEY);
         assertNotNull(site);
     }
     
     @Test
     public void testSiteCollectionToken() {
-        Site site = Livefyre.getNetwork("", "").getSite(SITE_ID, SITE_KEY);
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         try {
             site.buildCollectionMetaToken("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", "", null);
@@ -80,7 +110,7 @@ public class SiteTest {
     
     @Test
     public void testSiteChecksum() {
-        Site site = Livefyre.getNetwork("", "").getSite(SITE_ID, SITE_KEY);
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         try {
             site.buildChecksum("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "");
@@ -98,7 +128,7 @@ public class SiteTest {
     
     @Test
     public void testSiteUrlChecker() {
-        Site site = Livefyre.getNetwork("", "").getSite(SITE_ID, SITE_KEY);
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         assertFalse(site.isValidFullUrl("test.com"));
         
@@ -112,10 +142,7 @@ public class SiteTest {
     
     @Test
     public void testNullChecks() {
-        Site site = new Site("", "", "");
-        site.setNetworkName(null);
-        site.setSiteId(null);
-        site.setSiteKey(null);
+        Site site = new Site(new Network(NETWORK_NAME, NETWORK_KEY), SITE_ID, SITE_KEY);
         try {
             site.buildCollectionMetaToken(null, null, null, null, null);
             fail("title cannot be null");
@@ -129,21 +156,8 @@ public class SiteTest {
             fail("url cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "https://test.com", "", null);
-            fail("siteKey cannot be null");
-        } catch(NullPointerException e) {}
-        try {
             site.getCollectionContent(null);
             fail("displayName cannot be null");
-        } catch(NullPointerException e) {}
-        try {
-            site.getCollectionContent("");
-            fail("siteId cannot be null");
-        } catch(NullPointerException e) {}
-        site.setSiteId("");
-        try {
-            site.getCollectionContent("");
-            fail("networkName cannot be null");
         } catch(NullPointerException e) {}
     }
 }

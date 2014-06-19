@@ -1,5 +1,6 @@
-package com.livefyre.utils.client;
+package com.livefyre;
 
+import com.livefyre.core.Network;
 
 public class Livefyre {
 
