@@ -9,6 +9,7 @@ import javax.ws.rs.client.WebTarget;
 
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 
@@ -16,11 +17,12 @@ import com.google.common.collect.Lists;
 import com.livefyre.api.client.filter.LftokenAuthFilter;
 import com.livefyre.api.dto.CollectionTopicDataDto;
 import com.livefyre.api.dto.CollectionTopicDto;
-import com.livefyre.api.dto.Subscription;
-import com.livefyre.api.dto.Subscription.Type;
 import com.livefyre.api.dto.SubscriptionDataDto;
-import com.livefyre.api.dto.Topic;
 import com.livefyre.api.dto.TopicDataDto;
+import com.livefyre.api.entity.Subscription;
+import com.livefyre.api.entity.Topic;
+import com.livefyre.api.entity.Subscription.Type;
+import com.livefyre.api.forms.PatchSubscriptionForm;
 import com.livefyre.api.forms.PatchTopicsForm;
 import com.livefyre.api.forms.SubscriptionsForm;
 import com.livefyre.api.forms.TopicIdsForm;
@@ -35,7 +37,7 @@ public class PersonalizedStreamsClientImpl {
     
     /* Topic API */
     public static Topic getTopic(LfCore core, String topicId) {
-        return client(core).getTopic(topicId).getData().getTopic();
+        return client(core).getTopic(Topic.generateUrn(core, topicId)).getData().getTopic();
     }
     
     public static boolean postTopic(LfCore core, Topic topic) {
@@ -114,7 +116,7 @@ public class PersonalizedStreamsClientImpl {
     public static Integer deleteSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
         return client(network, user)
-                .patchSubscriptions(userUrn, new SubscriptionsForm(getSubscriptions(topics, userUrn)), null)
+                .patchSubscriptions(userUrn, new PatchSubscriptionForm(getSubscriptions(topics, userUrn)), null)
                 .getData().getRemoved();
     }
     
@@ -133,8 +135,8 @@ public class PersonalizedStreamsClientImpl {
         config.connectorProvider(new HttpUrlConnectorProvider().useSetMethodWorkaround());
         
         Client client = ClientBuilder.newClient(config);
-//        client.property(ClientProperties.CONNECT_TIMEOUT, 1000);
-//        client.property(ClientProperties.READ_TIMEOUT,    10000);
+        client.property(ClientProperties.CONNECT_TIMEOUT, 1000);
+        client.property(ClientProperties.READ_TIMEOUT,    10000);
         
         WebTarget target = client.target(String.format(BASE_URL, core.getNetworkName()));
         target.register(new LftokenAuthFilter(core, user));

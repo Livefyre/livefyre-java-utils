@@ -5,7 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.FormParam;
 
-import com.livefyre.api.dto.Subscription;
+import com.livefyre.api.entity.Subscription;
 
 public class SubscriptionsForm {
     @FormParam("subscriptions")

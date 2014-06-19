@@ -1,4 +1,4 @@
-package com.livefyre.api.dto;
+package com.livefyre.api.entity;
 
 import java.util.Date;
 
@@ -10,7 +10,7 @@ public class Subscription {
     private String to;
     private String by;
     private Type type;
-    private Date createdAt;
+    private Integer createdAt;
     
     public Subscription() { }
     
@@ -23,33 +23,29 @@ public class Subscription {
     public String getTo() {
         return to;
     }
-
     public void setTo(String to) {
         this.to = to;
     }
-    
     public String getBy() {
         return by;
     }
-
     public void setBy(String by) {
         this.by = by;
     }
-
     public Type getType() {
         return type;
     }
-
     public void setType(Type type) {
         this.type = type;
     }
-
-    public Date getCreatedAt() {
+    public Integer getCreatedAt() {
         return createdAt;
     }
-
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Integer createdAt) {
         this.createdAt = createdAt;
+    }
+    public Date getCreatedAtDate() {
+        return new Date(createdAt.longValue()*1000);
     }
 
     @XmlEnum(String.class)

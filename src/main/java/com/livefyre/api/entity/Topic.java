@@ -1,4 +1,4 @@
-package com.livefyre.api.dto;
+package com.livefyre.api.entity;
 
 import java.util.Date;
 
@@ -20,11 +20,11 @@ public class Topic {
     public Topic() {}
     
     public Topic(LfCore core, String id, String label) {
-        this.id = Topic.generateUrn(id, core);
+        this.id = Topic.generateUrn(core, id);
         this.label = label;
     }
     
-    private static String generateUrn(String id, LfCore core) {
+    public static String generateUrn(LfCore core, String id) {
         return core.getUrn() + TOPIC_IDEN + id;
     }
     

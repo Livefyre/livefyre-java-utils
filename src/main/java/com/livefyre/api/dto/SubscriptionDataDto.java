@@ -3,6 +3,7 @@ package com.livefyre.api.dto;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.livefyre.api.entity.Subscription;
 
 public class SubscriptionDataDto {
     private List<Subscription> subscriptions = Lists.newArrayList();

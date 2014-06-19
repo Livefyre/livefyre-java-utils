@@ -5,7 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.FormParam;
 
-import com.livefyre.api.dto.Topic;
+import com.livefyre.api.entity.Topic;
 
 public class TopicsForm {
     @FormParam("topics")

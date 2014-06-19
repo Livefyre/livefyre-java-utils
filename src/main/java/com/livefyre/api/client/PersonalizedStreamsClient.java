@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import com.livefyre.api.dto.CollectionTopicDto;
 import com.livefyre.api.dto.SubscriptionDto;
 import com.livefyre.api.dto.TopicDto;
+import com.livefyre.api.forms.PatchSubscriptionForm;
 import com.livefyre.api.forms.PatchTopicsForm;
 import com.livefyre.api.forms.SubscriptionsForm;
 import com.livefyre.api.forms.TopicIdsForm;
@@ -123,7 +124,7 @@ public interface PersonalizedStreamsClient {
     @Produces(MediaType.APPLICATION_JSON)
     SubscriptionDto patchSubscriptions(
             @PathParam("userUrn") @NotNull String user,
-            SubscriptionsForm subscriptions,
+            PatchSubscriptionForm patchSubscriptionForm,
             @QueryParam("_method") @DefaultValue(PATCH_OVERRIDE) String method);
 
     @GET

@@ -23,9 +23,8 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
-import com.livefyre.api.dto.Subscription;
-import com.livefyre.api.dto.Topic;
-import com.livefyre.api.dto.TopicDataDto;
+import com.livefyre.api.entity.Subscription;
+import com.livefyre.api.entity.Topic;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 
@@ -113,10 +112,8 @@ public class Network implements LfCore {
     
     public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = new Topic(this, id, label);
-        if (PersonalizedStreamsClientImpl.postTopic(this, topic)) {
-            return topic;
-        }
-        return null;
+        PersonalizedStreamsClientImpl.postTopic(this, topic);
+        return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
@@ -138,11 +135,8 @@ public class Network implements LfCore {
             list.add(new Topic(this, key, topicMap.get(key)));
         }
         
-        TopicDataDto result = PersonalizedStreamsClientImpl.postTopics(this, list);
-        if (result.getCreated() > 0 || result.getUpdated() > 0) {
-            return list;
-        }
-        return null;
+        PersonalizedStreamsClientImpl.postTopics(this, list);
+        return list;
     }
     
     public Integer deleteTopics(List<Topic> topics) {
