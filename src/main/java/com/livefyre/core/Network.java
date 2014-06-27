@@ -3,12 +3,11 @@ package com.livefyre.core;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.math.BigInteger;
 import java.security.InvalidKeyException;
-import java.security.SignatureException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -16,12 +15,11 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import net.oauth.jsontoken.JsonToken;
-
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
 import com.livefyre.api.entity.Subscription;
 import com.livefyre.api.entity.Topic;
@@ -77,11 +75,16 @@ public class Network implements LfCore {
         checkNotNull(displayName);
         checkNotNull(expires);
         
+        Map<String, Object> data = ImmutableMap.<String, Object>of(
+            "domain", this.name,
+            "user_id", userId,
+            "display_name", displayName,
+            "expires", getExpiryInSeconds(expires)
+        );
+        
         try {
-            return LivefyreJwtUtil.getJwtUserAuthToken(this.name, this.key, userId, displayName, expires);
+            return LivefyreJwtUtil.encodeLivefyreJwt(this.key, data);
         } catch (InvalidKeyException e) {
-            throw new TokenException("Failure creating token." +e);
-        } catch (SignatureException e) {
             throw new TokenException("Failure creating token." +e);
         }
     }
@@ -90,12 +93,10 @@ public class Network implements LfCore {
         checkNotNull(lfToken);
 
         try {
-            JsonToken json = LivefyreJwtUtil.decodeJwt(this.key, lfToken);
-            JsonObject jsonObj = json.getPayloadAsJsonObject();
-            return jsonObj.get("domain").getAsString().compareTo(this.name) == 0
-                && jsonObj.get("user_id").getAsString().compareTo("system") == 0
-                && jsonObj.get("expires").getAsBigInteger().compareTo(
-                        BigInteger.valueOf(Calendar.getInstance().getTimeInMillis()/1000L)) >= 0;
+            JSONObject json = LivefyreJwtUtil.decodeLivefyreJwt(this.key, lfToken);
+            return json.getString("domain").compareTo(this.name) == 0
+                && json.getString("user_id").compareTo("system") == 0
+                && json.getInt("expires") >= Calendar.getInstance().getTimeInMillis()/1000L;
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure decrypting token." +e);
         }
@@ -183,5 +184,11 @@ public class Network implements LfCore {
     protected void setName(String name) { this.name = name; }
     public String getKey() { return key; }
     protected void setKey(String key) { this.key = key;
+    }
+
+    private long getExpiryInSeconds(double secTillExpire) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.add(Calendar.SECOND, (int) secTillExpire);
+        return cal.getTimeInMillis() / 1000L;
     }
 }

@@ -20,8 +20,8 @@ import com.livefyre.api.dto.CollectionTopicDto;
 import com.livefyre.api.dto.SubscriptionDataDto;
 import com.livefyre.api.dto.TopicDataDto;
 import com.livefyre.api.entity.Subscription;
-import com.livefyre.api.entity.Topic;
 import com.livefyre.api.entity.Subscription.Type;
+import com.livefyre.api.entity.Topic;
 import com.livefyre.api.forms.PatchSubscriptionForm;
 import com.livefyre.api.forms.PatchTopicsForm;
 import com.livefyre.api.forms.SubscriptionsForm;
@@ -33,7 +33,7 @@ import com.livefyre.core.Site;
 
 public class PersonalizedStreamsClientImpl {
 
-    private static final String BASE_URL = "http://quill.%1$s/api/v4";
+    private static final String BASE_URL = "https://quill.%1$s/api/v4";
     
     /* Topic API */
     public static Topic getTopic(LfCore core, String topicId) {

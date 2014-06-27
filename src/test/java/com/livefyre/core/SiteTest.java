@@ -7,18 +7,18 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
+import java.util.Map;
 
-import net.oauth.jsontoken.JsonToken;
-
+import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.gson.JsonObject;
+import com.google.common.collect.Maps;
 import com.livefyre.Livefyre;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class SiteTest {
-    private static final String CHECKSUM = "6e2e4faf7b95f896260fe695eafb34ba";
+    private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
     private static final String NETWORK_NAME = "<NETWORK-NAME>";
     private static final String NETWORK_KEY = "<NETWORK-KEY>";
     private static final String SITE_ID = "<SITE-ID>";
@@ -34,7 +34,7 @@ public class SiteTest {
         
         assertNotNull(collectionContent);
         
-        JsonObject collectionJson = site.getCollectionContentJson(ARTICLE_ID);
+        JSONObject collectionJson = site.getCollectionContentJson(ARTICLE_ID);
         
         assertNotNull(collectionJson);
     }
@@ -87,25 +87,33 @@ public class SiteTest {
         
         String token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "reviews");
         assertNotNull(token);
-        JsonToken decodedToken = null;
+        
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("tags", "tags");
+        map.put("type", "reviews");
+        String token2 = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", map);
+        
+        assertEquals(token, token2);
+        
+        JSONObject decodedToken = null;
         try {
-            decodedToken = LivefyreJwtUtil.decodeJwt(SITE_KEY, token);
+            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
         
-        assertEquals(decodedToken.getParamAsPrimitive("url").getAsString(), "http://www.livefyre.com");
-        assertEquals(decodedToken.getParamAsPrimitive("type").getAsString(), "reviews");
+        assertEquals(decodedToken.getString("url"), "http://www.livefyre.com");
+        assertEquals(decodedToken.getString("type"), "reviews");
         
         token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "liveblog");
         assertNotNull(token);
         try {
-            decodedToken = LivefyreJwtUtil.decodeJwt(SITE_KEY, token);
+            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
         
-        assertEquals(decodedToken.getParamAsPrimitive("type").getAsString(), "liveblog");
+        assertEquals(decodedToken.getString("type"), "liveblog");
     }
     
     @Test

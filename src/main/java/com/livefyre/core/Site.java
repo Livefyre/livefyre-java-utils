@@ -6,36 +6,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.client.ClientBuilder;
+import javax.xml.bind.DatatypeConverter;
 
-import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.common.collect.Maps;
 import com.livefyre.api.client.PersonalizedStreamsClientImpl;
 import com.livefyre.api.entity.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
+import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class Site implements LfCore {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
     private static final ImmutableList<String> TYPE = ImmutableList.of(
-        "reviews",
-        "sidenotes",
-        "ratings",
-        "counting",
-        "liveblog",
-        "livechat",
-        "livecomments",
-        ""
+        "reviews", "sidenotes", "ratings", "counting",
+        "liveblog", "livechat", "livecomments", ""
     );
 
     private Network network = null;
@@ -47,23 +43,31 @@ public class Site implements LfCore {
         this.id = checkNotNull(id);
         this.key = checkNotNull(key);
     }
-
+    
+    /* Kept for backwards compatibility/usability */
     public String buildCollectionMetaToken(String title, String articleId, String url, String tags, String type) {
+        return buildCollectionMetaToken(title, articleId, url, 
+                ImmutableMap.<String, Object>of("tags", tags == null ? "" : tags, "type", type == null ? "" : type));
+    }
+    
+    /* Need a lot more info */
+    public String buildCollectionMetaToken(String title, String articleId, String url, Map<String, Object> extras) {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkNotNull(articleId);
         checkArgument(isValidFullUrl(checkNotNull(url)), "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
 
-        String t = tags == null ? "" : tags;
+        if (extras.containsKey("type") && !TYPE.contains(extras.get("type"))) {
+            throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " +TYPE.toString());
+        }
+        
+        Map<String, Object> data = Maps.newHashMap(extras);
+        data.put("url", url);
+        data.put("title", title);
+        data.put("articleId", articleId);
         
         try {
-            if (TYPE.contains(type) || type == null) {
-                return LivefyreJwtUtil.getJwtCollectionMetaToken(this.key, title, t, url, articleId, type);
-            } else {
-                throw new IllegalArgumentException("type is not a recognized type. should be liveblog, livechat, livecomments, reviews, sidenotes, or an empty String.");
-            }
+            return LivefyreJwtUtil.encodeLivefyreJwt(this.key, data);
         } catch (InvalidKeyException e) {
-            throw new TokenException(TOKEN_FAILURE_MSG + e);
-        } catch (SignatureException e) {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
         }
     }
@@ -76,14 +80,19 @@ public class Site implements LfCore {
         String t = tags == null ? "" : tags;
 
         try {
-            return LivefyreJwtUtil.getChecksum(title, url, t);
+            JSONObject json = new JSONObject();
+            json.put("url", url);
+            json.put("tags", t);
+            json.put("title", title);
+            byte[] digest = MessageDigest.getInstance("MD5").digest(json.toString().getBytes());
+            return DatatypeConverter.printHexBinary(digest).toLowerCase();
         } catch (NoSuchAlgorithmException e) {
             throw new LivefyreException("Failure creating checksum." + e);
         }
     }
 
-    public JsonObject getCollectionContentJson(String articleId) {
-        return (JsonObject) new JsonParser().parse(getCollectionContent(articleId));
+    public JSONObject getCollectionContentJson(String articleId) {
+        return new JSONObject(articleId);
     }
 
     public String getCollectionContent(String articleId) {
@@ -101,8 +110,8 @@ public class Site implements LfCore {
     }
 
     public String getCollectionId(String articleId) {
-        JsonObject collection = getCollectionContentJson(articleId);
-        return collection.get("collectionSettings").getAsJsonObject().get("collectionId").getAsString();
+        JSONObject collection = getCollectionContentJson(articleId);
+        return collection.getJSONObject("collectionSettings").getString("collectionId");
     }
     
     /* Topic API */
