@@ -50,7 +50,12 @@ public class Site implements LfCore {
                 ImmutableMap.<String, Object>of("tags", tags == null ? "" : tags, "type", type == null ? "" : type));
     }
     
-    /* Need a lot more info */
+    /**
+     * This method allows a variety of parameters/options to be passed in as a map.  Some examples are 'tags', 'type', 'extensions',
+     * 'tags', etc.  Please refer to http://answers.livefyre.com/developers/getting-started/tokens/collectionmeta/ for more info.
+     * 
+     * @param extras map of additional params to be included into the collection meta token.
+     */
     public String buildCollectionMetaToken(String title, String articleId, String url, Map<String, Object> extras) {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkNotNull(articleId);
