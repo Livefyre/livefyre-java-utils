@@ -2,11 +2,10 @@ package com.livefyre.api.entity;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.json.JSONObject;
 
 import com.livefyre.core.LfCore;
 
-@XmlRootElement()
 public class Topic {
     private static final String TOPIC_IDEN = ":topic=";
     private String id;
@@ -24,11 +23,22 @@ public class Topic {
         this.label = label;
     }
     
+    public Topic(String id, String label, int createdAt, int modifiedAt) {
+        this.id = id;
+        this.label = label;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+    }
+    
     public static String generateUrn(LfCore core, String id) {
         return core.getUrn() + TOPIC_IDEN + id;
     }
+
+    public static Topic fromJson(JSONObject json) {
+        return new Topic(json.getString("id"), json.getString("label"), json.getInt("createdAt"), json.getInt("modifiedAt"));
+    }
     
-    public String getTruncatedId() {
+    public String truncatedId() {
         return id.substring(id.indexOf(TOPIC_IDEN) + TOPIC_IDEN.length());
     }
     public Date getCreatedAtDate() {

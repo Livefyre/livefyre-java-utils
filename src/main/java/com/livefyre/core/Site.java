@@ -11,8 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.xml.bind.DatatypeConverter;
+import javax.ws.rs.core.MediaType;
 
 import org.json.JSONObject;
 
@@ -20,12 +19,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.livefyre.api.client.PersonalizedStreamsClientImpl;
+import com.livefyre.api.client.PersonalizedStreamsClient;
 import com.livefyre.api.entity.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.utils.LivefyreJwtUtil;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 
 public class Site implements LfCore {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
@@ -71,7 +72,7 @@ public class Site implements LfCore {
         data.put("articleId", articleId);
         
         try {
-            return LivefyreJwtUtil.encodeLivefyreJwt(this.key, data);
+            return LivefyreJwtUtil.encodeLivefyreJwt(key, data);
         } catch (InvalidKeyException e) {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
         }
@@ -89,8 +90,9 @@ public class Site implements LfCore {
             json.put("url", url);
             json.put("tags", t);
             json.put("title", title);
+            
             byte[] digest = MessageDigest.getInstance("MD5").digest(json.toString().getBytes());
-            return DatatypeConverter.printHexBinary(digest).toLowerCase();
+            return printHexBinary(digest);
         } catch (NoSuchAlgorithmException e) {
             throw new LivefyreException("Failure creating checksum." + e);
         }
@@ -103,15 +105,17 @@ public class Site implements LfCore {
     public String getCollectionContent(String articleId) {
         checkNotNull(articleId);
 
-        String url = String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", this.network.getName(), this.id,
+        String url = String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", network.getName(), id,
                 Base64.encodeBase64URLSafeString(articleId.getBytes()));
 
-        String response = ClientBuilder.newClient()
-                .target(url)
-                .request()
-                .get(String.class);
-        
-        return response;
+        ClientResponse response = Client.create()
+            .resource(url)
+            .accept(MediaType.APPLICATION_JSON)
+            .get(ClientResponse.class);
+        if (response.getStatus() != 200) {
+            throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
+        }
+        return response.getEntity(String.class);
     }
 
     public String getCollectionId(String articleId) {
@@ -121,57 +125,74 @@ public class Site implements LfCore {
     
     /* Topic API */
     public Topic getTopic(String topicId) {
-        return PersonalizedStreamsClientImpl.getTopic(this, topicId);
+        return PersonalizedStreamsClient.getTopic(this, topicId);
     }
     
     public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = new Topic(this, id, label);
-        PersonalizedStreamsClientImpl.postTopic(this, topic);
+        PersonalizedStreamsClient.postTopic(this, topic);
         return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClientImpl.deleteTopic(this, topic);
+        return PersonalizedStreamsClient.deleteTopic(this, topic);
     }
     
     /* Multiple Topic API */
     public List<Topic> getTopics() {
-        return PersonalizedStreamsClientImpl.getTopics(this, null, null);
+        return PersonalizedStreamsClient.getTopics(this, null, null);
     }
     
     public List<Topic> getTopics(Integer limit, Integer offset) {
-        return PersonalizedStreamsClientImpl.getTopics(this, limit, offset);
+        return PersonalizedStreamsClient.getTopics(this, limit, offset);
     }
     
     public List<Topic> createOrUpdateTopics(Map<String, String> topics) {
         List<Topic> list = Lists.newArrayList();
-        for (String key : topics.keySet()) {
-            list.add(new Topic(this, key, topics.get(key)));
+        for (String k : topics.keySet()) {
+            list.add(new Topic(this, k, topics.get(k)));
         }
         
-        PersonalizedStreamsClientImpl.postTopics(this, list);
+        PersonalizedStreamsClient.postTopics(this, list);
         return list;
     }
     
-    public boolean deleteTopics(List<Topic> topics) {
-        return (PersonalizedStreamsClientImpl.deleteTopics(this, topics).getDeleted() > 0);
+    public int deleteTopics(List<Topic> topics) {
+        return PersonalizedStreamsClient.deleteTopics(this, topics);
     }
     
     /* Collection Topic API */
     public List<String> getCollectionTopics(String collectionId) {
-        return PersonalizedStreamsClientImpl.getCollectionTopics(this, collectionId);
+        return PersonalizedStreamsClient.getCollectionTopics(this, collectionId);
     }
     
     public Integer addCollectionTopics(String collectionId, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.postCollectionTopics(this, collectionId, topics);
+        return PersonalizedStreamsClient.postCollectionTopics(this, collectionId, topics);
     }
     
     public boolean updateCollectionTopics(String collectionId, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.putCollectionTopics(this, collectionId, topics);
+        return PersonalizedStreamsClient.putCollectionTopics(this, collectionId, topics).isChanged();
     }
     
     public Integer removeCollectionTopics(String collectionId, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.deleteCollectionTopics(this, collectionId, topics);
+        return PersonalizedStreamsClient.deleteCollectionTopics(this, collectionId, topics);
+    }
+    
+    /* Stream API */
+    public String getTopicStream(Topic topic) {
+        return getTopicStream(topic, null, null, null);
+    }
+
+    public JSONObject getTopicStreamJson(Topic topic) {
+        return getTopicStreamJson(topic, null, null, null);
+    }
+    
+    public JSONObject getTopicStreamJson(Topic topic, Integer limit, Integer until, Integer since) {
+        return new JSONObject(getTopicStream(topic, limit, until, since));
+    }
+    
+    public String getTopicStream(Topic topic, Integer limit, Integer until, Integer since) {
+        return PersonalizedStreamsClient.getTopicStream(this, topic, limit, until, since);
     }
     
     /* Helper methods */
@@ -186,6 +207,17 @@ public class Site implements LfCore {
             return false;
         }
         return true;
+    }
+    
+    private static final char[] hexCode = "0123456789abcdef".toCharArray();
+    
+    private String printHexBinary(byte[] data) {
+        StringBuilder r = new StringBuilder(data.length * 2);
+        for (byte b : data) {
+            r.append(hexCode[(b >> 4) & 0xF]);
+            r.append(hexCode[(b & 0xF)]);
+        }
+        return r.toString();
     }
     
     /* Getters/Setters */

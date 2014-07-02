@@ -9,22 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.livefyre.api.client.PersonalizedStreamsClientImpl;
+import com.livefyre.api.client.PersonalizedStreamsClient;
 import com.livefyre.api.entity.Subscription;
 import com.livefyre.api.entity.Topic;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 
 public class Network implements LfCore {
     public static final double DEFAULT_EXPIRES = 86400.0;
@@ -42,27 +38,22 @@ public class Network implements LfCore {
     public boolean setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
-        Form form = new Form();
-        form.param("actor_token", buildLivefyreToken());
-        form.param("pull_profile_url", urlTemplate);
-        
-        Response response = ClientBuilder.newClient()
-                .target(String.format("http://%s/", this.name))
-                .request()
-                .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-        
+        ClientResponse response = Client.create()
+            .resource(String.format("http://%s/", name))
+            .queryParam("actor_token", buildLivefyreToken())
+            .queryParam("pull_profile_url", urlTemplate)
+            .post(ClientResponse.class);
         return response.getStatus() == 204;
     }
     
     public boolean syncUser(String userId) {
         checkNotNull(userId);
         
-        Response response = ClientBuilder.newClient()
-                .target(String.format("http://%s/api/v3_0/user/%s/refresh", this.name, userId))
-                .queryParam("lftoken", buildLivefyreToken())
-                .request()
-                .post(null);
-
+        String url = String.format("http://%s/api/v3_0/user/%s/refresh", name, userId);
+        ClientResponse response = Client.create()
+            .resource(url)
+            .queryParam("lftoken", buildLivefyreToken())
+            .post(ClientResponse.class);
         return response.getStatus() == 200;
     }
     
@@ -76,14 +67,14 @@ public class Network implements LfCore {
         checkNotNull(expires);
         
         Map<String, Object> data = ImmutableMap.<String, Object>of(
-            "domain", this.name,
+            "domain", name,
             "user_id", userId,
             "display_name", displayName,
             "expires", getExpiryInSeconds(expires)
         );
         
         try {
-            return LivefyreJwtUtil.encodeLivefyreJwt(this.key, data);
+            return LivefyreJwtUtil.encodeLivefyreJwt(key, data);
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure creating token." +e);
         }
@@ -93,8 +84,8 @@ public class Network implements LfCore {
         checkNotNull(lfToken);
 
         try {
-            JSONObject json = LivefyreJwtUtil.decodeLivefyreJwt(this.key, lfToken);
-            return json.getString("domain").compareTo(this.name) == 0
+            JSONObject json = LivefyreJwtUtil.decodeLivefyreJwt(key, lfToken);
+            return json.getString("domain").compareTo(name) == 0
                 && json.getString("user_id").compareTo("system") == 0
                 && json.getInt("expires") >= Calendar.getInstance().getTimeInMillis()/1000L;
         } catch (InvalidKeyException e) {
@@ -108,66 +99,99 @@ public class Network implements LfCore {
     
     /* Topic API */
     public Topic getTopic(String topicId) {
-        return PersonalizedStreamsClientImpl.getTopic(this, topicId);
+        return PersonalizedStreamsClient.getTopic(this, topicId);
     }
     
     public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = new Topic(this, id, label);
-        PersonalizedStreamsClientImpl.postTopic(this, topic);
+        PersonalizedStreamsClient.postTopic(this, topic);
         return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClientImpl.deleteTopic(this, topic);
+        return PersonalizedStreamsClient.deleteTopic(this, topic);
     }
     
     /* Multiple Topic API */
     public List<Topic> getTopics() {
-        return PersonalizedStreamsClientImpl.getTopics(this, null, null);
+        return PersonalizedStreamsClient.getTopics(this, null, null);
     }
     
     public List<Topic> getTopics(Integer limit, Integer offset) {
-        return PersonalizedStreamsClientImpl.getTopics(this, limit, offset);
+        return PersonalizedStreamsClient.getTopics(this, limit, offset);
     }
     
     public List<Topic> createOrUpdateTopics(Map<String, String> topicMap) {
         List<Topic> list = Lists.newArrayList();
-        for (String key : topicMap.keySet()) {
-            list.add(new Topic(this, key, topicMap.get(key)));
+        for (String k : topicMap.keySet()) {
+            list.add(new Topic(this, k, topicMap.get(k)));
         }
         
-        PersonalizedStreamsClientImpl.postTopics(this, list);
+        PersonalizedStreamsClient.postTopics(this, list);
         return list;
     }
     
-    public Integer deleteTopics(List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.deleteTopics(this, topics).getDeleted();
+    public int deleteTopics(List<Topic> topics) {
+        return PersonalizedStreamsClient.deleteTopics(this, topics);
     }
     
     /* Subscription API */
     public List<Subscription> getSubscriptions(String user) {
-        return PersonalizedStreamsClientImpl.getSubscriptions(this, user);
+        return PersonalizedStreamsClient.getSubscriptions(this, user);
     }
     
     public Integer addSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.postSubscriptions(this, user, topics);
+        return PersonalizedStreamsClient.postSubscriptions(this, user, topics);
     }
 
     public boolean updateSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.putSubscriptions(this, user, topics);
+        return PersonalizedStreamsClient.putSubscriptions(this, user, topics).isChanged();
     }
 
     public Integer removeSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClientImpl.deleteSubscriptions(this, user, topics);
+        return PersonalizedStreamsClient.deleteSubscriptions(this, user, topics);
     }
     
     /* Subscriber API */
     public List<Subscription> getSubscribers(Topic topic) {
-        return PersonalizedStreamsClientImpl.getSubscribers(this, topic, null, null);
+        return PersonalizedStreamsClient.getSubscribers(this, topic, null, null);
     }
     
     public List<Subscription> getSubscribers(Topic topic, Integer limit, Integer offset) {
-        return PersonalizedStreamsClientImpl.getSubscribers(this, topic, limit, offset);
+        return PersonalizedStreamsClient.getSubscribers(this, topic, limit, offset);
+    }
+    
+    /* Stream API */
+    public String getPersonalStream(String user) {
+        return getPersonalStream(user, null, null, null);
+    }
+    
+    public JSONObject getPersonalStreamJson(String user) {
+        return getPersonalStreamJson(user, null, null, null);
+    }
+    
+    public JSONObject getPersonalStreamJson(String user, Integer limit, Integer until, Integer since) {
+        return new JSONObject(getPersonalStream(user, limit, until, since));
+    }
+ 
+    public String getPersonalStream(String user, Integer limit, Integer until, Integer since) {
+        return PersonalizedStreamsClient.getPersonalStream(this, user, limit, until, since);
+    }
+    
+    public String getTopicStream(Topic topic) {
+        return getTopicStream(topic, null, null, null);
+    }
+
+    public JSONObject getTopicStreamJson(Topic topic) {
+        return getTopicStreamJson(topic, null, null, null);
+    }
+    
+    public JSONObject getTopicStreamJson(Topic topic, Integer limit, Integer until, Integer since) {
+        return new JSONObject(getTopicStream(topic, limit, until, since));
+    }
+    
+    public String getTopicStream(Topic topic, Integer limit, Integer until, Integer since) {
+        return PersonalizedStreamsClient.getTopicStream(this, topic, limit, until, since);
     }
     
     /* Helper methods */

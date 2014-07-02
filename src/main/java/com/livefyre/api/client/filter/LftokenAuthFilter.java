@@ -1,14 +1,13 @@
 package com.livefyre.api.client.filter;
 
-import java.io.IOException;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.filter.ClientFilter;
 
-public class LftokenAuthFilter implements ClientRequestFilter {
+public class LftokenAuthFilter extends ClientFilter {
     private final LfCore core;
     private final String user;
     
@@ -17,7 +16,8 @@ public class LftokenAuthFilter implements ClientRequestFilter {
         this.user = user;
     }
     
-    public void filter(ClientRequestContext requestContext) throws IOException {
+    @Override
+    public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
         String token = null;
         
         if (this.user != null) {
@@ -29,6 +29,8 @@ public class LftokenAuthFilter implements ClientRequestFilter {
             }
         }
         
-        requestContext.getHeaders().add("Authorization", "lftoken " + (token == null ? core.buildLivefyreToken() : token));
+        cr.getHeaders().add("Authorization", "lftoken " + (token == null ? core.buildLivefyreToken() : token));
+        
+        return getNext().handle(cr);
     }
 }

@@ -1,137 +1,353 @@
 package com.livefyre.api.client;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.ws.rs.core.MediaType;
 
-import com.livefyre.api.dto.CollectionTopicDto;
-import com.livefyre.api.dto.SubscriptionDto;
-import com.livefyre.api.dto.TopicDto;
-import com.livefyre.api.forms.PatchSubscriptionForm;
-import com.livefyre.api.forms.PatchTopicsForm;
-import com.livefyre.api.forms.SubscriptionsForm;
-import com.livefyre.api.forms.TopicIdsForm;
-import com.livefyre.api.forms.TopicsForm;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public interface PersonalizedStreamsClient {
-    
-    public static final String TOPIC_URL = "/{topicUrn}/";
-    public static final String MULTIPLE_TOPIC_URL = "/{urn}:topics/";
-    public static final String COLLECTION_TOPICS_URL = "/{siteUrn}:collection={collectionId}:topics/";
-    public static final String USER_SUBSCRIPTION_URL = "/{userUrn}:subscriptions/";
-    public static final String TOPIC_SUBSCRIPTION_URL = "/{topicUrn}:subscribers/";
-    public static final String PATCH_OVERRIDE = "PATCH";
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.livefyre.api.client.filter.LftokenAuthFilter;
+import com.livefyre.api.dto.TopicPostDto;
+import com.livefyre.api.dto.TopicPutDto;
+import com.livefyre.api.entity.Subscription;
+import com.livefyre.api.entity.Subscription.Type;
+import com.livefyre.api.entity.Topic;
+import com.livefyre.core.LfCore;
+import com.livefyre.core.Network;
+import com.livefyre.core.Site;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
-    @GET
-    @Path(TOPIC_URL)
-    @Produces(MediaType.APPLICATION_JSON)
-    TopicDto getTopic(
-            @PathParam("topicUrn") @NotNull String topicUrn);
-    
-    @GET
-    @Path(MULTIPLE_TOPIC_URL)
-    @Produces(MediaType.APPLICATION_JSON)
-    TopicDto getTopics(
-            @PathParam("urn") @NotNull String urn,
-            @QueryParam("limit") @DefaultValue("100") Integer limit,
-            @QueryParam("offset") @DefaultValue("0") Integer offset);
-    
-    @POST
-    @Path(MULTIPLE_TOPIC_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    TopicDto postTopics(
-            @PathParam("urn") @NotNull String urn,
-            TopicsForm form);
-    
-    @POST
-    @Path(MULTIPLE_TOPIC_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    TopicDto patchTopics(
-            @PathParam("urn") @NotNull String urn,
-            PatchTopicsForm form,
-            @QueryParam("_method") @DefaultValue(PATCH_OVERRIDE) String method);
+public class PersonalizedStreamsClient {
 
-    @GET
-    @Path(COLLECTION_TOPICS_URL)
-    @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto getCollectionTopics(
-            @PathParam("siteUrn") @NotNull String siteUrn,
-            @PathParam("collectionId") @NotNull String collectionId);
+    private static final String BASE_URL = "http://quill.%s/api/v4";
+    private static final String STREAM_BASE_URL = "http://bootstrap.%s/api/v4";
     
-    @POST
-    @Path(COLLECTION_TOPICS_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto postCollectionTopics(
-            @PathParam("siteUrn") @NotNull String siteUrn,
-            @PathParam("collectionId") @NotNull String collectionId,
-            TopicIdsForm form);
+    private static final String TOPIC_PATH = "/%s/";
+    private static final String MULTIPLE_TOPIC_PATH = "/%s:topics/";
+    private static final String COLLECTION_TOPICS_PATH = "/%s:collection=%s:topics/";
+    private static final String USER_SUBSCRIPTION_PATH = "/%s:subscriptions/";
+    private static final String TOPIC_SUBSCRIPTION_PATH = "/%s:subscribers/";
+    private static final String TIMELINE_PATH = "/timeline/";
+    private static final String PATCH_METHOD = "PATCH";
     
-    @PUT
-    @Path(COLLECTION_TOPICS_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto putCollectionTopics(
-            @PathParam("siteUrn") @NotNull String siteUrn,
-            @PathParam("collectionId") @NotNull String collectionId,
-            TopicIdsForm form);
+    /* Topic API */
+    public static Topic getTopic(LfCore core, String topicId) {
+        String jsonResp = builder(core)
+                .path(String.format(TOPIC_PATH, Topic.generateUrn(core, topicId)))
+                .accept(MediaType.APPLICATION_JSON)
+                .get(String.class);
+        
+        try {
+            return Topic.fromJson(new JSONObject(jsonResp).getJSONObject("data").getJSONObject("topic"));
+        } catch (JSONException e) {}
+        
+        return null;
+    }
     
-    @POST
-    @Path(COLLECTION_TOPICS_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    CollectionTopicDto patchCollectionTopics(
-            @PathParam("siteUrn") @NotNull String siteUrn,
-            @PathParam("collectionId") @NotNull String collectionId,
-            PatchTopicsForm form,
-            @QueryParam("_method") @DefaultValue(PATCH_OVERRIDE) String method);
+    public static boolean postTopic(LfCore core, Topic topic) {
+        return postTopics(core, Arrays.asList(topic)).isChanged();
+    }
     
-    @GET
-    @Path(USER_SUBSCRIPTION_URL)
-    @Produces(MediaType.APPLICATION_JSON)
-    SubscriptionDto getSubscriptions(
-            @PathParam("userUrn") @NotNull String user);
+    public static boolean deleteTopic(LfCore core, Topic topic) {
+        return deleteTopics(core, Arrays.asList(topic)) == 1;
+    }
     
-    @POST
-    @Path(USER_SUBSCRIPTION_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    SubscriptionDto postSubscriptions(
-            @PathParam("userUrn") @NotNull String user,
-            SubscriptionsForm subscriptions);
+    /* Multiple Topic API */
+    public static List<Topic> getTopics(LfCore core, Integer limit, Integer offset) {
+        String jsonResp = builder(core)
+                .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
+                .queryParam("limit", limit == null ? "100" : limit.toString())
+                .queryParam("offset", offset == null ? "0" : offset.toString())
+                .accept(MediaType.APPLICATION_JSON)
+                .get(String.class);
+        
+        List<Topic> topics = Lists.newArrayList();
+        try {
+            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("topics");
+            for (int i = 0; i < data.length(); i++) {
+                topics.add(Topic.fromJson(data.getJSONObject(i)));
+            }
+        } catch (JSONException e) {}
+        
+        return topics;
+    }
     
-    @PUT
-    @Path(USER_SUBSCRIPTION_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    SubscriptionDto putSubscriptions(
-            @PathParam("userUrn") @NotNull String user,
-            SubscriptionsForm subscriptions);
+    public static TopicPostDto postTopics(LfCore core, List<Topic> topics) {
+        for (Topic topic : topics) {
+            if (topic.getLabel().length() > 128 || StringUtils.isEmpty(topic.getLabel())) {
+                throw new IllegalArgumentException("Topic label is of incorrect length or empty.");
+            }
+        }
+        
+        String form = new JSONObject(ImmutableMap.<String, Object>of("topics", topics)).toString();
+        String jsonResp = builder(core)
+                .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(String.class, form);
+        
+        TopicPostDto dto = new TopicPostDto();
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            dto.update(data);
+        } catch (JSONException e) {}
+        
+        return dto;
+    }
     
-    @POST
-    @Path(USER_SUBSCRIPTION_URL)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    SubscriptionDto patchSubscriptions(
-            @PathParam("userUrn") @NotNull String user,
-            PatchSubscriptionForm patchSubscriptionForm,
-            @QueryParam("_method") @DefaultValue(PATCH_OVERRIDE) String method);
+    public static int deleteTopics(LfCore core, List<Topic> topics) {
+        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
+        String jsonResp = builder(core)
+                .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
+                .queryParam("_method", PATCH_METHOD)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(String.class, form);
+        
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            return data.getInt("deleted");
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+    
+    /* Collection Topic API */
+    public static List<String> getCollectionTopics(Site site, String collectionId) {
+        String jsonResp = builder(site.getNetwork())
+                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+                .accept(MediaType.APPLICATION_JSON)
+                .get(String.class);
+        
+        List<String> topicIds = Lists.newArrayList();
+        try {
+            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("topicIds");
+            for (int i = 0; i < data.length(); i++) {
+                topicIds.add(data.getString(i));
+            }
+        } catch (JSONException e) {}
+        
+        return topicIds;
+    }
+    
+    public static int postCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+        String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
+        
+        String jsonResp = builder(site.getNetwork())
+                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(String.class, form);
+        
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            return data.getInt("added");
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+    
+    public static TopicPutDto putCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+        String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
+        
+        String jsonResp = builder(site.getNetwork())
+                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .put(String.class, form);
+        
+        TopicPutDto dto = new TopicPutDto();
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            dto.update(data);
+        } catch (JSONException e) {}
+        
+        return dto;
+    }
+    
+    public static int deleteCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
+        
+        String jsonResp = builder(site.getNetwork())
+                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+                .queryParam("_method", PATCH_METHOD)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(String.class, form);
+        
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            return data.getInt("removed");
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+    
+    /* Subscription API */
+    public static List<Subscription> getSubscriptions(Network network, String user) {
+        String jsonResp = builder(network)
+                .path(String.format(USER_SUBSCRIPTION_PATH, network.getUserUrn(user)))
+                .accept(MediaType.APPLICATION_JSON)
+                .get(String.class);
+        
+        List<Subscription> subscriptions = Lists.newArrayList();
+        try {
+            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("subscriptions");
+            for (int i = 0; i < data.length(); i++) {
+                subscriptions.add(Subscription.fromJson(data.getJSONObject(i)));
+            }
+        } catch (JSONException e) {}
+        
+        return subscriptions;
+    }
+    
+    public static int postSubscriptions(Network network, String user, List<Topic> topics) {
+        String userUrn = network.getUserUrn(user);
+        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", getSubscriptions(topics, userUrn))).toString();
 
-    @GET
-    @Path(TOPIC_SUBSCRIPTION_URL)
-    @Produces(MediaType.APPLICATION_JSON)
-    SubscriptionDto getSubscribers(
-            @PathParam("topicUrn") @NotNull String topicUrn, 
-            @QueryParam("limit") @DefaultValue("100") Integer limit,
-            @QueryParam("offset") @DefaultValue("0") Integer offset);
+        String jsonResp = builder(network, user)
+                .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(String.class, form);
+        
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            return data.getInt("added");
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+    
+    public static TopicPutDto putSubscriptions(Network network, String user, List<Topic> topics) {
+        String userUrn = network.getUserUrn(user);
+        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", getSubscriptions(topics, userUrn))).toString();
+
+        String jsonResp = builder(network, user)
+                .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .put(String.class, form);
+        
+        TopicPutDto dto = new TopicPutDto();
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            dto.update(data);
+        } catch (JSONException e) {}
+        
+        return dto;
+    }
+
+    public static int deleteSubscriptions(Network network, String user, List<Topic> topics) {
+        String userUrn = network.getUserUrn(user);
+        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getSubscriptions(topics, userUrn))).toString();
+
+        String jsonResp = builder(network, user)
+                .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
+                .queryParam("_method", PATCH_METHOD)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(String.class, form);
+        
+        try {
+            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+            return data.getInt("removed");
+        } catch (JSONException e) {
+            return 0;
+        }
+    }
+    
+    /* Subscriber API */
+    public static List<Subscription> getSubscribers(Network network, Topic topic, Integer limit, Integer offset) {
+        String jsonResp = builder(network)
+                .path(String.format(TOPIC_SUBSCRIPTION_PATH, topic.getId()))
+                .queryParam("limit", limit == null ? "100" : limit.toString())
+                .queryParam("offset", offset == null ? "0" : offset.toString())
+                .accept(MediaType.APPLICATION_JSON)
+                .get(String.class);
+        
+        List<Subscription> subscriptions = Lists.newArrayList();
+        try {
+            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("subscriptions");
+            for (int i = 0; i < data.length(); i++) {
+                subscriptions.add(Subscription.fromJson(data.getJSONObject(i)));
+            }
+        } catch (JSONException e) {}
+        
+        return subscriptions;
+    }
+    
+    /* Stream API */
+    public static String getPersonalStream(Network network, String user, Integer limit, Integer until, Integer since) {
+        return getStreamResource(network, limit, until, since)
+                .queryParam("resource", network.getUserUrn(user) + ":personalStream")
+                .accept(MediaType.APPLICATION_JSON).get(String.class);
+    }
+    
+    public static String getTopicStream(LfCore core, Topic topic, Integer limit, Integer until, Integer since) {
+        return getStreamResource(core, limit, until, since)
+                .queryParam("resource", topic.getId() + ":topicStream")
+                .accept(MediaType.APPLICATION_JSON).get(String.class);
+    }
+    
+    private static WebResource getStreamResource(LfCore core, Integer limit, Integer until, Integer since) {
+        WebResource r = streamBuilder(core)
+                .path(TIMELINE_PATH)
+                .queryParam("limit", limit == null ? "50" : limit.toString());
+        
+        if (until != null) {
+            r = r.queryParam("until", until.toString());
+        } else if (since != null) {
+            r = r.queryParam("since", since.toString());
+        }
+        
+        return r;
+    }
+    
+    /* Helper methods */
+    private static WebResource builder(LfCore core) {
+        return builder(core, null);
+    }
+    
+    private static WebResource builder(LfCore core, String user) {
+        return client(core, user).resource(String.format(BASE_URL, core.getNetworkName()));
+    }
+    
+    private static WebResource streamBuilder(LfCore core) {
+        return client(core, null).resource(String.format(STREAM_BASE_URL, core.getNetworkName()));
+    }
+
+    private static Client client(LfCore core, String user) {
+        Client c = Client.create();
+        c.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
+        c.getProperties().put(ClientConfig.PROPERTY_CONNECT_TIMEOUT, 1000);
+        c.getProperties().put(ClientConfig.PROPERTY_READ_TIMEOUT, 10000);
+        c.addFilter(new LftokenAuthFilter(core, user));
+        return c;
+    }
+    
+    private static List<String> getTopicIds(List<Topic> topics) {
+        List<String> ids = Lists.newArrayList();
+        for (Topic topic : topics) {
+            ids.add(topic.getId());
+        }
+        return ids;
+    }
+    
+    private static List<Subscription> getSubscriptions(List<Topic> topics, String user) {
+        List<Subscription> subscriptions = Lists.newArrayList();
+        for (Topic topic : topics) {
+            subscriptions.add(new Subscription(topic.getId(), user, Type.personalStream));
+        }
+        return subscriptions;
+    }
 }

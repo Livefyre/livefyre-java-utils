@@ -11,6 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONObject;
 
 import com.livefyre.repackaged.apache.commons.Base64;
+import com.livefyre.repackaged.apache.commons.StringUtils;
 
 public class LivefyreJwtUtil {
 
@@ -46,16 +47,17 @@ public class LivefyreJwtUtil {
         try {
             JSONObject header = new JSONObject();
             header.put("alg", "HS256");
+            header.put("typ", "JWT");
             
             final SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(), ALGORITHM);
             final Mac sha256_HMAC = Mac.getInstance(ALGORITHM);
             sha256_HMAC.init(secret_key);
 
-            String jwtHeader = Base64.encodeBase64URLSafeString(header.toString().getBytes());
-            String jwtClaims = Base64.encodeBase64URLSafeString(data.toString().getBytes());
-            String jwtBase = jwtHeader.trim()+"."+jwtClaims.trim();
+            String jwtHeader = Base64.encodeBase64URLSafeString(StringUtils.getBytesUtf8(header.toString()));
+            String jwtClaims = Base64.encodeBase64URLSafeString(StringUtils.getBytesUtf8(data.toString()));
+            String jwtBase = jwtHeader+"."+jwtClaims;
 
-            String jwtSignature = Base64.encodeBase64URLSafeString(sha256_HMAC.doFinal(jwtBase.getBytes()));
+            String jwtSignature = Base64.encodeBase64URLSafeString(sha256_HMAC.doFinal(StringUtils.getBytesUsAscii((jwtBase))));
             String jwtToken = jwtBase+"."+jwtSignature;
             
             return jwtToken;
