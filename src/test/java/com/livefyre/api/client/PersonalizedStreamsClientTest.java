@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -17,21 +18,14 @@ import com.livefyre.api.entity.Topic;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
 
+@Ignore
 public class PersonalizedStreamsClientTest {
-//    private static final String NETWORK_NAME = "<NETWORK-NAME>";
-//    private static final String NETWORK_KEY = "<NETWORK-KEY>";
-//    private static final String SITE_ID = "<SITE-ID>";
-//    private static final String SITE_KEY = "<SITE-KEY>";
-//    private static final String COLLECTION_ID = "<COLLECTION-ID>";
-//    private static final String USER = "<USER-ID>";
-    
-
-    private static final String NETWORK_NAME = "apitesting-qa-0.fyre.co";
-    private static final String NETWORK_KEY = "klo2rwBIyWp3X/yith5PvCL4irM=";
-    private static final String SITE_ID = "290664";
-    private static final String SITE_KEY = "/IneVBxyMwSvKa1i/okpYSR7Btk=";
-    private static final String COLLECTION_ID = "2487945";
-    private static final String USER = "apitester";
+    private static final String NETWORK_NAME = "<NETWORK-NAME>";
+    private static final String NETWORK_KEY = "<NETWORK-KEY>";
+    private static final String SITE_ID = "<SITE-ID>";
+    private static final String SITE_KEY = "<SITE-KEY>";
+    private static final String COLLECTION_ID = "<COLLECTION-ID>";
+    private static final String USER = "<USER-ID>";
     
     private Network network;
     private Site site;

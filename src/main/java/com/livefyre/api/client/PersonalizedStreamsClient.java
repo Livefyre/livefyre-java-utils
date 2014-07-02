@@ -28,8 +28,8 @@ import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
 public class PersonalizedStreamsClient {
 
-    private static final String BASE_URL = "http://quill.%s/api/v4";
-    private static final String STREAM_BASE_URL = "http://bootstrap.%s/api/v4";
+    private static final String BASE_URL = "https://quill.%s/api/v4";
+    private static final String STREAM_BASE_URL = "https://bootstrap.%s/api/v4";
     
     private static final String TOPIC_PATH = "/%s/";
     private static final String MULTIPLE_TOPIC_PATH = "/%s:topics/";
@@ -37,6 +37,7 @@ public class PersonalizedStreamsClient {
     private static final String USER_SUBSCRIPTION_PATH = "/%s:subscriptions/";
     private static final String TOPIC_SUBSCRIPTION_PATH = "/%s:subscribers/";
     private static final String TIMELINE_PATH = "/timeline/";
+    
     private static final String PATCH_METHOD = "PATCH";
     
     /* Topic API */
