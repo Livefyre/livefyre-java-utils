@@ -288,30 +288,19 @@ public class PersonalizedStreamsClient {
     }
     
     /* Stream API */
-    public static String getPersonalStream(Network network, String user, Integer limit, Integer until, Integer since) {
-        return getStreamResource(network, limit, until, since)
-                .queryParam("resource", network.getUserUrn(user) + ":personalStream")
-                .accept(MediaType.APPLICATION_JSON).get(String.class);
-    }
-    
-    public static String getTopicStream(LfCore core, Topic topic, Integer limit, Integer until, Integer since) {
-        return getStreamResource(core, limit, until, since)
-                .queryParam("resource", topic.getId() + ":topicStream")
-                .accept(MediaType.APPLICATION_JSON).get(String.class);
-    }
-    
-    private static WebResource getStreamResource(LfCore core, Integer limit, Integer until, Integer since) {
+    public static String getTimelineStream(LfCore core, String resource, Integer limit, String until, String since) {
         WebResource r = streamBuilder(core)
                 .path(TIMELINE_PATH)
-                .queryParam("limit", limit == null ? "50" : limit.toString());
+                .queryParam("limit", limit == null ? "50" : limit.toString())
+                .queryParam("resource", resource);
         
         if (until != null) {
-            r = r.queryParam("until", until.toString());
+            r = r.queryParam("until", until);
         } else if (since != null) {
-            r = r.queryParam("since", since.toString());
+            r = r.queryParam("since", since);
         }
         
-        return r;
+        return r.accept(MediaType.APPLICATION_JSON).get(String.class);
     }
     
     /* Helper methods */

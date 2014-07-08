@@ -11,9 +11,9 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.livefyre.config.LfTest;
 
-public class LivefyreJwtUtilTest {
-    private static final String TEST_SECRET = "testkeytest";
+public class LivefyreJwtUtilTest extends LfTest {
 
     @Test
     public void testJwtEncodeDecode() {
@@ -28,8 +28,8 @@ public class LivefyreJwtUtilTest {
         );
         
         try {
-            token = LivefyreJwtUtil.encodeLivefyreJwt(TEST_SECRET, data);
-            json = LivefyreJwtUtil.decodeLivefyreJwt(TEST_SECRET, token);
+            token = LivefyreJwtUtil.encodeLivefyreJwt(NETWORK_KEY, data);
+            json = LivefyreJwtUtil.decodeLivefyreJwt(NETWORK_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't be an issue encoding/decoding");
         }

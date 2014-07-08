@@ -9,12 +9,10 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.livefyre.Livefyre;
 import com.livefyre.api.entity.Topic;
+import com.livefyre.config.LfTest;
 
 @Ignore
-public class NetworkApiTest {
-     private static final String NETWORK_NAME = "<NETWORK-NAME>";
-     private static final String NETWORK_KEY = "<NETWORK-KEY>";
-
+public class NetworkApiTest extends LfTest {
     private Network network;
 
     @Before

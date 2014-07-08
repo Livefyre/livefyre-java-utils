@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.security.InvalidKeyException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -15,8 +16,10 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.livefyre.api.client.PersonalizedStreamsClient;
+import com.livefyre.api.entity.Chronos;
 import com.livefyre.api.entity.Subscription;
 import com.livefyre.api.entity.Topic;
+import com.livefyre.api.factory.ChronosFactory;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
@@ -161,37 +164,21 @@ public class Network implements LfCore {
         return PersonalizedStreamsClient.getSubscribers(this, topic, limit, offset);
     }
     
-    /* Stream API */
-    public String getPersonalStream(String user) {
-        return getPersonalStream(user, null, null, null);
+    /* Chronos */
+    public Chronos getTopicStreamChronos(Topic topic) {
+        return getTopicStreamChronos(topic, 50, Calendar.getInstance().getTime());
     }
     
-    public JSONObject getPersonalStreamJson(String user) {
-        return getPersonalStreamJson(user, null, null, null);
+    public Chronos getTopicStreamChronos(Topic topic, Integer limit, Date date) {
+        return ChronosFactory.getTopicStreamChronos(this, topic, limit, date);
     }
     
-    public JSONObject getPersonalStreamJson(String user, Integer limit, Integer until, Integer since) {
-        return new JSONObject(getPersonalStream(user, limit, until, since));
-    }
- 
-    public String getPersonalStream(String user, Integer limit, Integer until, Integer since) {
-        return PersonalizedStreamsClient.getPersonalStream(this, user, limit, until, since);
+    public Chronos getPersonalStreamChronos(String user) {
+        return getPersonalStreamChronos(user, 50, Calendar.getInstance().getTime());
     }
     
-    public String getTopicStream(Topic topic) {
-        return getTopicStream(topic, null, null, null);
-    }
-
-    public JSONObject getTopicStreamJson(Topic topic) {
-        return getTopicStreamJson(topic, null, null, null);
-    }
-    
-    public JSONObject getTopicStreamJson(Topic topic, Integer limit, Integer until, Integer since) {
-        return new JSONObject(getTopicStream(topic, limit, until, since));
-    }
-    
-    public String getTopicStream(Topic topic, Integer limit, Integer until, Integer since) {
-        return PersonalizedStreamsClient.getTopicStream(this, topic, limit, until, since);
+    public Chronos getPersonalStreamChronos(String user, Integer limit, Date date) {
+        return ChronosFactory.getPersonalStreamChronos(this, user, limit, date);
     }
     
     /* Helper methods */
@@ -202,17 +189,17 @@ public class Network implements LfCore {
         return getUrn()+":user="+user;
     }
     
+    private long getExpiryInSeconds(double secTillExpire) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.add(Calendar.SECOND, (int) secTillExpire);
+        return cal.getTimeInMillis() / 1000L;
+    }
+    
     /* Getters/Setters */
     public String getNetworkName() { return getName(); } // used for the interface
     public String getName() { return name; }
     protected void setName(String name) { this.name = name; }
     public String getKey() { return key; }
     protected void setKey(String key) { this.key = key;
-    }
-
-    private long getExpiryInSeconds(double secTillExpire) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.add(Calendar.SECOND, (int) secTillExpire);
-        return cal.getTimeInMillis() / 1000L;
     }
 }

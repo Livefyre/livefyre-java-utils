@@ -15,18 +15,12 @@ import com.livefyre.api.dto.TopicPostDto;
 import com.livefyre.api.dto.TopicPutDto;
 import com.livefyre.api.entity.Subscription;
 import com.livefyre.api.entity.Topic;
+import com.livefyre.config.LfTest;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
 
 @Ignore
-public class PersonalizedStreamsClientTest {
-    private static final String NETWORK_NAME = "<NETWORK-NAME>";
-    private static final String NETWORK_KEY = "<NETWORK-KEY>";
-    private static final String SITE_ID = "<SITE-ID>";
-    private static final String SITE_KEY = "<SITE-KEY>";
-    private static final String COLLECTION_ID = "<COLLECTION-ID>";
-    private static final String USER = "<USER-ID>";
-    
+public class PersonalizedStreamsClientTest extends LfTest {
     private Network network;
     private Site site;
     
@@ -44,8 +38,8 @@ public class PersonalizedStreamsClientTest {
     
     @Before
     public void setup() {
-        this.network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-        this.site = network.getSite(SITE_ID, SITE_KEY);
+        network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        site = network.getSite(SITE_ID, SITE_KEY);
         
         this.topic = new Topic(network, "TOPIC", "LABEL");
         this.topic1 = new Topic(network, "1", "UNO");
@@ -196,9 +190,7 @@ public class PersonalizedStreamsClientTest {
     
     @Test
     public void testStreamApi() {
-        String test = PersonalizedStreamsClient.getTopicStream(network, topic, null, null, null);
-        test = PersonalizedStreamsClient.getTopicStream(site, topic, null, null, null);
-        test = PersonalizedStreamsClient.getPersonalStream(network, USER, null, null, null);
+        String test = PersonalizedStreamsClient.getTimelineStream(network, topic.getId() +":topicStream", 50, null, null);
         assertNotNull(test);
     }
 }

@@ -15,15 +15,11 @@ import org.junit.Test;
 
 import com.google.common.collect.Maps;
 import com.livefyre.Livefyre;
+import com.livefyre.config.LfTest;
 import com.livefyre.utils.LivefyreJwtUtil;
 
-public class SiteTest {
+public class SiteTest extends LfTest {
     private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
-    private static final String NETWORK_NAME = "<NETWORK-NAME>";
-    private static final String NETWORK_KEY = "<NETWORK-KEY>";
-    private static final String SITE_ID = "<SITE-ID>";
-    private static final String SITE_KEY = "<SITE-KEY>";
-    private static final String ARTICLE_ID = "<ARTICLE-ID>";
 
     @Test
     @Ignore

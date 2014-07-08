@@ -8,6 +8,8 @@ import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +22,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.PersonalizedStreamsClient;
+import com.livefyre.api.entity.Chronos;
 import com.livefyre.api.entity.Topic;
+import com.livefyre.api.factory.ChronosFactory;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.repackaged.apache.commons.Base64;
@@ -97,7 +101,7 @@ public class Site implements LfCore {
             throw new LivefyreException("Failure creating checksum." + e);
         }
     }
-
+    
     public JSONObject getCollectionContentJson(String articleId) {
         return new JSONObject(articleId);
     }
@@ -178,21 +182,13 @@ public class Site implements LfCore {
         return PersonalizedStreamsClient.deleteCollectionTopics(this, collectionId, topics);
     }
     
-    /* Stream API */
-    public String getTopicStream(Topic topic) {
-        return getTopicStream(topic, null, null, null);
-    }
-
-    public JSONObject getTopicStreamJson(Topic topic) {
-        return getTopicStreamJson(topic, null, null, null);
+    /* Chronos */
+    public Chronos getTopicStreamChronos(Topic topic) {
+        return getTopicStreamChronos(topic, 50, Calendar.getInstance().getTime());
     }
     
-    public JSONObject getTopicStreamJson(Topic topic, Integer limit, Integer until, Integer since) {
-        return new JSONObject(getTopicStream(topic, limit, until, since));
-    }
-    
-    public String getTopicStream(Topic topic, Integer limit, Integer until, Integer since) {
-        return PersonalizedStreamsClient.getTopicStream(this, topic, limit, until, since);
+    public Chronos getTopicStreamChronos(Topic topic, Integer limit, Date date) {
+        return ChronosFactory.getTopicStreamChronos(this, topic, limit, date);
     }
     
     /* Helper methods */

@@ -6,7 +6,7 @@
 * Refactored based on dependency update.
 * Copied necessary pieces from Apache codec into library for JWT creation. @com.livefyre.repackaged.apache.commons
 * Reverted to previous Jersey client to reduce dependencies.
-* Added timeline support.
+* Added timeline and Chronos support.
 
 === 1.2.0 2014-06-13
 
