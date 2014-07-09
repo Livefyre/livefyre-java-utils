@@ -83,6 +83,9 @@ To get a content collection's id:
 site.getCollectionId("articleId");
 ```
 
+
+For additional documentation, see below:
+
 ## Testing
 
 You must have Maven installed. To run the tests, simply run `mvn test`. You can run particular tests by passing `-D test=Class#method` -- for example, `-D test=NetworkTest#testNetworkCreation`.

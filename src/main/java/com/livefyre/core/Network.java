@@ -16,10 +16,10 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.livefyre.api.client.PersonalizedStreamsClient;
-import com.livefyre.api.entity.Chronos;
 import com.livefyre.api.entity.Subscription;
+import com.livefyre.api.entity.TimelineCursor;
 import com.livefyre.api.entity.Topic;
-import com.livefyre.api.factory.ChronosFactory;
+import com.livefyre.api.factory.CursorFactory;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
@@ -164,21 +164,21 @@ public class Network implements LfCore {
         return PersonalizedStreamsClient.getSubscribers(this, topic, limit, offset);
     }
     
-    /* Chronos */
-    public Chronos getTopicStreamChronos(Topic topic) {
-        return getTopicStreamChronos(topic, 50, Calendar.getInstance().getTime());
+    /* Timeline Cursor */
+    public TimelineCursor getTopicStreamCursor(Topic topic) {
+        return getTopicStreamCursor(topic, 50, Calendar.getInstance().getTime());
     }
     
-    public Chronos getTopicStreamChronos(Topic topic, Integer limit, Date date) {
-        return ChronosFactory.getTopicStreamChronos(this, topic, limit, date);
+    public TimelineCursor getTopicStreamCursor(Topic topic, Integer limit, Date date) {
+        return CursorFactory.getTopicStreamCursor(this, topic, limit, date);
     }
     
-    public Chronos getPersonalStreamChronos(String user) {
-        return getPersonalStreamChronos(user, 50, Calendar.getInstance().getTime());
+    public TimelineCursor getPersonalStreamCursor(String user) {
+        return getPersonalStreamCursor(user, 50, Calendar.getInstance().getTime());
     }
     
-    public Chronos getPersonalStreamChronos(String user, Integer limit, Date date) {
-        return ChronosFactory.getPersonalStreamChronos(this, user, limit, date);
+    public TimelineCursor getPersonalStreamCursor(String user, Integer limit, Date date) {
+        return CursorFactory.getPersonalStreamCursor(this, user, limit, date);
     }
     
     /* Helper methods */

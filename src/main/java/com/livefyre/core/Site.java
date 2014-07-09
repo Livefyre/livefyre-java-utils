@@ -22,9 +22,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.PersonalizedStreamsClient;
-import com.livefyre.api.entity.Chronos;
+import com.livefyre.api.entity.TimelineCursor;
 import com.livefyre.api.entity.Topic;
-import com.livefyre.api.factory.ChronosFactory;
+import com.livefyre.api.factory.CursorFactory;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.repackaged.apache.commons.Base64;
@@ -182,13 +182,13 @@ public class Site implements LfCore {
         return PersonalizedStreamsClient.deleteCollectionTopics(this, collectionId, topics);
     }
     
-    /* Chronos */
-    public Chronos getTopicStreamChronos(Topic topic) {
-        return getTopicStreamChronos(topic, 50, Calendar.getInstance().getTime());
+    /* Timeline cursor */
+    public TimelineCursor getTopicStreamCursor(Topic topic) {
+        return getTopicStreamCursor(topic, 50, Calendar.getInstance().getTime());
     }
     
-    public Chronos getTopicStreamChronos(Topic topic, Integer limit, Date date) {
-        return ChronosFactory.getTopicStreamChronos(this, topic, limit, date);
+    public TimelineCursor getTopicStreamCursor(Topic topic, Integer limit, Date date) {
+        return CursorFactory.getTopicStreamCursor(this, topic, limit, date);
     }
     
     /* Helper methods */

@@ -10,12 +10,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.livefyre.Livefyre;
-import com.livefyre.api.factory.ChronosFactory;
+import com.livefyre.api.factory.CursorFactory;
 import com.livefyre.config.LfTest;
 import com.livefyre.core.Network;
 
 @Ignore
-public class ChronosTest extends LfTest {
+public class TimelineCursorTest extends LfTest {
     private Network network;
     
     @Before
@@ -25,8 +25,9 @@ public class ChronosTest extends LfTest {
     
     @Test
     public void testEntity() {
-        Chronos ch = ChronosFactory.getPersonalStreamChronos(network, USER, 50, Calendar.getInstance().getTime());
+        TimelineCursor ch = CursorFactory.getPersonalStreamCursor(network, USER, 50, Calendar.getInstance().getTime());
         
+        ch.next();
         JSONObject json = new JSONObject(ch.previous());
         assertNotNull(json);
     }

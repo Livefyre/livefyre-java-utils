@@ -189,7 +189,7 @@ public class PersonalizedStreamsClientTest extends LfTest {
     }
     
     @Test
-    public void testStreamApi() {
+    public void testTimelineStream() {
         String test = PersonalizedStreamsClient.getTimelineStream(network, topic.getId() +":topicStream", 50, null, null);
         assertNotNull(test);
     }
