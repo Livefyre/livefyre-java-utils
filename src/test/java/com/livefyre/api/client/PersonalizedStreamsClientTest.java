@@ -5,21 +5,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
 import com.livefyre.Livefyre;
 import com.livefyre.api.dto.TopicPostDto;
 import com.livefyre.api.dto.TopicPutDto;
-import com.livefyre.api.entity.Subscription;
-import com.livefyre.api.entity.Topic;
 import com.livefyre.config.LfTest;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
+import com.livefyre.entity.Subscription;
+import com.livefyre.entity.Topic;
 
-@Ignore
 public class PersonalizedStreamsClientTest extends LfTest {
     private Network network;
     private Site site;
@@ -41,14 +40,14 @@ public class PersonalizedStreamsClientTest extends LfTest {
         network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         site = network.getSite(SITE_ID, SITE_KEY);
         
-        this.topic = new Topic(network, "TOPIC", "LABEL");
-        this.topic1 = new Topic(network, "1", "UNO");
-        this.topic2 = new Topic(network, "2", "DOS");
-        this.topic3 = new Topic(network, "3", "TRES");
+        this.topic = Topic.create(network, "TOPIC", "LABEL");
+        this.topic1 = Topic.create(network, "1", "UNO");
+        this.topic2 = Topic.create(network, "2", "DOS");
+        this.topic3 = Topic.create(network, "3", "TRES");
 
-        this.topic4 = new Topic(site, "4", "NET");
-        this.topic5 = new Topic(site, "5", "DASUT");
-        this.topic6 = new Topic(site, "6", "YUSUT");
+        this.topic4 = Topic.create(site, "4", "NET");
+        this.topic5 = Topic.create(site, "5", "DASUT");
+        this.topic6 = Topic.create(site, "6", "YUSUT");
         
         
         this.topics = Lists.newArrayList(topic, topic1, topic2, topic3, topic4, topic5, topic6);
@@ -62,7 +61,7 @@ public class PersonalizedStreamsClientTest extends LfTest {
         Topic t = PersonalizedStreamsClient.getTopic(network, topic.truncatedId());
         assertNotNull(t);
         
-        assertTrue(PersonalizedStreamsClient.deleteTopic(network, t));
+        assertTrue(PersonalizedStreamsClient.patchTopic(network, t));
         
 //      PersonalizedStreamsClientImpl.getTopic(site, t.getId());
         List<Topic> ts = PersonalizedStreamsClient.getTopics(network, null, null);
@@ -77,7 +76,7 @@ public class PersonalizedStreamsClientTest extends LfTest {
         List<Topic> ts = PersonalizedStreamsClient.getTopics(network, 3, 0);
         assertTrue(ts.size() == 3);
         
-        int deleted = PersonalizedStreamsClient.deleteTopics(network, topics);
+        int deleted = PersonalizedStreamsClient.patchTopics(network, topics);
         assertTrue(deleted == topics.size());
         
         ts = PersonalizedStreamsClient.getTopics(network, null, null);
@@ -91,7 +90,7 @@ public class PersonalizedStreamsClientTest extends LfTest {
         Topic t = PersonalizedStreamsClient.getTopic(site, topic4.truncatedId());
         assertNotNull(t);
         
-        assertTrue(PersonalizedStreamsClient.deleteTopic(site, t));
+        assertTrue(PersonalizedStreamsClient.patchTopic(site, t));
         
 //        PersonalizedStreamsClientImpl.getTopic(site, t.getId());
         List<Topic> ts = PersonalizedStreamsClient.getTopics(network, null, null);
@@ -106,7 +105,7 @@ public class PersonalizedStreamsClientTest extends LfTest {
         List<Topic> ts = PersonalizedStreamsClient.getTopics(site, 2, 0);
         assertTrue(ts.size() == 2);
         
-        int deleted = PersonalizedStreamsClient.deleteTopics(site, topics2);
+        int deleted = PersonalizedStreamsClient.patchTopics(site, topics2);
         assertTrue(deleted == topics2.size());
         
         ts = PersonalizedStreamsClient.getTopics(site, null, null);
@@ -132,13 +131,13 @@ public class PersonalizedStreamsClientTest extends LfTest {
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.size() == 3);
         
-        int deleted = PersonalizedStreamsClient.deleteCollectionTopics(site, COLLECTION_ID, topics);
+        int deleted = PersonalizedStreamsClient.patchCollectionTopics(site, COLLECTION_ID, topics);
         assertTrue(deleted == 3);
         
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.isEmpty());
         
-        PersonalizedStreamsClient.deleteTopics(network, topics);
+        PersonalizedStreamsClient.patchTopics(network, topics);
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         
         topicIds.size();
@@ -157,18 +156,18 @@ public class PersonalizedStreamsClientTest extends LfTest {
         List<String> topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.size() == 1);
 
-        int deleted = PersonalizedStreamsClient.deleteCollectionTopics(site, COLLECTION_ID, topics2);
+        int deleted = PersonalizedStreamsClient.patchCollectionTopics(site, COLLECTION_ID, topics2);
         assertTrue(deleted == 1);
         
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.isEmpty());
         
-        PersonalizedStreamsClient.deleteTopics(site, topics2);
+        PersonalizedStreamsClient.patchTopics(site, topics2);
     }
     
     @Test
     public void testSubscriberApi() {
-        PersonalizedStreamsClient.deleteTopics(network, topics);
+        PersonalizedStreamsClient.patchTopics(network, topics);
         PersonalizedStreamsClient.postTopics(network, topics);
         
         List<Subscription> su = PersonalizedStreamsClient.getSubscriptions(network, USER);
@@ -179,18 +178,18 @@ public class PersonalizedStreamsClientTest extends LfTest {
 
         assertTrue(PersonalizedStreamsClient.putSubscriptions(network, USER, topics1).isChanged());
 
-        int del = PersonalizedStreamsClient.deleteSubscriptions(network, USER, topics);
+        int del = PersonalizedStreamsClient.patchSubscriptions(network, USER, topics);
         assertTrue(del == 3);
         
         List<Subscription> sub = PersonalizedStreamsClient.getSubscriptions(network, USER);
         assertTrue(sub.isEmpty());
 
-        PersonalizedStreamsClient.deleteTopics(network, topics);
+        PersonalizedStreamsClient.patchTopics(network, topics);
     }
     
     @Test
     public void testTimelineStream() {
-        String test = PersonalizedStreamsClient.getTimelineStream(network, topic.getId() +":topicStream", 50, null, null);
+        JSONObject test = PersonalizedStreamsClient.getTimelineStream(network, topic.getId() +":topicStream", 50, null, null);
         assertNotNull(test);
     }
 }

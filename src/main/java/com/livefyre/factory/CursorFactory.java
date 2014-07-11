@@ -1,11 +1,11 @@
-package com.livefyre.api.factory;
+package com.livefyre.factory;
 
 import java.util.Date;
 
-import com.livefyre.api.entity.TimelineCursor;
-import com.livefyre.api.entity.Topic;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
+import com.livefyre.entity.TimelineCursor;
+import com.livefyre.entity.Topic;
 
 public class CursorFactory {
     public static TimelineCursor getTopicStreamCursor(LfCore core, Topic topic, Integer limit, Date date) {

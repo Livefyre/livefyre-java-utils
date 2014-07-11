@@ -16,11 +16,11 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.livefyre.api.client.PersonalizedStreamsClient;
-import com.livefyre.api.entity.Subscription;
-import com.livefyre.api.entity.TimelineCursor;
-import com.livefyre.api.entity.Topic;
-import com.livefyre.api.factory.CursorFactory;
+import com.livefyre.entity.Subscription;
+import com.livefyre.entity.TimelineCursor;
+import com.livefyre.entity.Topic;
 import com.livefyre.exceptions.TokenException;
+import com.livefyre.factory.CursorFactory;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -106,13 +106,13 @@ public class Network implements LfCore {
     }
     
     public Topic createOrUpdateTopic(String id, String label) {
-        Topic topic = new Topic(this, id, label);
+        Topic topic = Topic.create(this, id, label);
         PersonalizedStreamsClient.postTopic(this, topic);
         return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClient.deleteTopic(this, topic);
+        return PersonalizedStreamsClient.patchTopic(this, topic);
     }
     
     /* Multiple Topic API */
@@ -127,7 +127,7 @@ public class Network implements LfCore {
     public List<Topic> createOrUpdateTopics(Map<String, String> topicMap) {
         List<Topic> list = Lists.newArrayList();
         for (String k : topicMap.keySet()) {
-            list.add(new Topic(this, k, topicMap.get(k)));
+            list.add(Topic.create(this, k, topicMap.get(k)));
         }
         
         PersonalizedStreamsClient.postTopics(this, list);
@@ -135,7 +135,7 @@ public class Network implements LfCore {
     }
     
     public int deleteTopics(List<Topic> topics) {
-        return PersonalizedStreamsClient.deleteTopics(this, topics);
+        return PersonalizedStreamsClient.patchTopics(this, topics);
     }
     
     /* Subscription API */
@@ -152,7 +152,7 @@ public class Network implements LfCore {
     }
 
     public Integer removeSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClient.deleteSubscriptions(this, user, topics);
+        return PersonalizedStreamsClient.patchSubscriptions(this, user, topics);
     }
     
     /* Subscriber API */

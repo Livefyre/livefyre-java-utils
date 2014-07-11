@@ -10,9 +10,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.livefyre.Livefyre;
-import com.livefyre.api.factory.CursorFactory;
 import com.livefyre.config.LfTest;
 import com.livefyre.core.Network;
+import com.livefyre.entity.TimelineCursor;
+import com.livefyre.factory.CursorFactory;
 
 @Ignore
 public class TimelineCursorTest extends LfTest {

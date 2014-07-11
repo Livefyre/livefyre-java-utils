@@ -22,11 +22,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.PersonalizedStreamsClient;
-import com.livefyre.api.entity.TimelineCursor;
-import com.livefyre.api.entity.Topic;
-import com.livefyre.api.factory.CursorFactory;
+import com.livefyre.entity.TimelineCursor;
+import com.livefyre.entity.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
+import com.livefyre.factory.CursorFactory;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
@@ -133,13 +133,13 @@ public class Site implements LfCore {
     }
     
     public Topic createOrUpdateTopic(String id, String label) {
-        Topic topic = new Topic(this, id, label);
+        Topic topic = Topic.create(this, id, label);
         PersonalizedStreamsClient.postTopic(this, topic);
         return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClient.deleteTopic(this, topic);
+        return PersonalizedStreamsClient.patchTopic(this, topic);
     }
     
     /* Multiple Topic API */
@@ -154,7 +154,7 @@ public class Site implements LfCore {
     public List<Topic> createOrUpdateTopics(Map<String, String> topics) {
         List<Topic> list = Lists.newArrayList();
         for (String k : topics.keySet()) {
-            list.add(new Topic(this, k, topics.get(k)));
+            list.add(Topic.create(this, k, topics.get(k)));
         }
         
         PersonalizedStreamsClient.postTopics(this, list);
@@ -162,7 +162,7 @@ public class Site implements LfCore {
     }
     
     public int deleteTopics(List<Topic> topics) {
-        return PersonalizedStreamsClient.deleteTopics(this, topics);
+        return PersonalizedStreamsClient.patchTopics(this, topics);
     }
     
     /* Collection Topic API */
@@ -179,7 +179,7 @@ public class Site implements LfCore {
     }
     
     public Integer removeCollectionTopics(String collectionId, List<Topic> topics) {
-        return PersonalizedStreamsClient.deleteCollectionTopics(this, collectionId, topics);
+        return PersonalizedStreamsClient.patchCollectionTopics(this, collectionId, topics);
     }
     
     /* Timeline cursor */

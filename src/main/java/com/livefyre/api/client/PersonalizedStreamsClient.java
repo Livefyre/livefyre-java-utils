@@ -15,12 +15,12 @@ import com.google.common.collect.Lists;
 import com.livefyre.api.client.filter.LftokenAuthFilter;
 import com.livefyre.api.dto.TopicPostDto;
 import com.livefyre.api.dto.TopicPutDto;
-import com.livefyre.api.entity.Subscription;
-import com.livefyre.api.entity.Subscription.Type;
-import com.livefyre.api.entity.Topic;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
+import com.livefyre.entity.Subscription;
+import com.livefyre.entity.Subscription.Type;
+import com.livefyre.entity.Topic;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -28,8 +28,8 @@ import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
 public class PersonalizedStreamsClient {
 
-    private static final String BASE_URL = "https://quill.%s/api/v4";
-    private static final String STREAM_BASE_URL = "https://bootstrap.%s/api/v4";
+    private static final String BASE_URL = "http://quill.%s/api/v4";
+    private static final String STREAM_BASE_URL = "http://bootstrap.%s/api/v4";
     
     private static final String TOPIC_PATH = "/%s/";
     private static final String MULTIPLE_TOPIC_PATH = "/%s:topics/";
@@ -48,7 +48,7 @@ public class PersonalizedStreamsClient {
                 .get(String.class);
         
         try {
-            return Topic.fromJson(new JSONObject(jsonResp).getJSONObject("data").getJSONObject("topic"));
+            return Topic.serializeFromJson(new JSONObject(jsonResp).getJSONObject("data").getJSONObject("topic"));
         } catch (JSONException e) {}
         
         return null;
@@ -58,8 +58,8 @@ public class PersonalizedStreamsClient {
         return postTopics(core, Arrays.asList(topic)).isChanged();
     }
     
-    public static boolean deleteTopic(LfCore core, Topic topic) {
-        return deleteTopics(core, Arrays.asList(topic)) == 1;
+    public static boolean patchTopic(LfCore core, Topic topic) {
+        return patchTopics(core, Arrays.asList(topic)) == 1;
     }
     
     /* Multiple Topic API */
@@ -75,7 +75,7 @@ public class PersonalizedStreamsClient {
         try {
             JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("topics");
             for (int i = 0; i < data.length(); i++) {
-                topics.add(Topic.fromJson(data.getJSONObject(i)));
+                topics.add(Topic.serializeFromJson(data.getJSONObject(i)));
             }
         } catch (JSONException e) {}
         
@@ -84,7 +84,7 @@ public class PersonalizedStreamsClient {
     
     public static TopicPostDto postTopics(LfCore core, List<Topic> topics) {
         for (Topic topic : topics) {
-            if (topic.getLabel().length() > 128 || StringUtils.isEmpty(topic.getLabel())) {
+            if (StringUtils.isEmpty(topic.getLabel()) || topic.getLabel().length() > 128) {
                 throw new IllegalArgumentException("Topic label is of incorrect length or empty.");
             }
         }
@@ -105,7 +105,7 @@ public class PersonalizedStreamsClient {
         return dto;
     }
     
-    public static int deleteTopics(LfCore core, List<Topic> topics) {
+    public static int patchTopics(LfCore core, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
         String jsonResp = builder(core)
                 .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
@@ -175,7 +175,7 @@ public class PersonalizedStreamsClient {
         return dto;
     }
     
-    public static int deleteCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static int patchCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
         
         String jsonResp = builder(site.getNetwork())
@@ -204,7 +204,7 @@ public class PersonalizedStreamsClient {
         try {
             JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("subscriptions");
             for (int i = 0; i < data.length(); i++) {
-                subscriptions.add(Subscription.fromJson(data.getJSONObject(i)));
+                subscriptions.add(Subscription.serializeFromJson(data.getJSONObject(i)));
             }
         } catch (JSONException e) {}
         
@@ -213,7 +213,7 @@ public class PersonalizedStreamsClient {
     
     public static int postSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
-        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", getSubscriptions(topics, userUrn))).toString();
+        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
 
         String jsonResp = builder(network, user)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
@@ -231,7 +231,7 @@ public class PersonalizedStreamsClient {
     
     public static TopicPutDto putSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
-        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", getSubscriptions(topics, userUrn))).toString();
+        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
 
         String jsonResp = builder(network, user)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
@@ -248,9 +248,9 @@ public class PersonalizedStreamsClient {
         return dto;
     }
 
-    public static int deleteSubscriptions(Network network, String user, List<Topic> topics) {
+    public static int patchSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
-        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getSubscriptions(topics, userUrn))).toString();
+        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", buildSubscriptions(topics, userUrn))).toString();
 
         String jsonResp = builder(network, user)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
@@ -280,7 +280,7 @@ public class PersonalizedStreamsClient {
         try {
             JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("subscriptions");
             for (int i = 0; i < data.length(); i++) {
-                subscriptions.add(Subscription.fromJson(data.getJSONObject(i)));
+                subscriptions.add(Subscription.serializeFromJson(data.getJSONObject(i)));
             }
         } catch (JSONException e) {}
         
@@ -288,7 +288,7 @@ public class PersonalizedStreamsClient {
     }
     
     /* Stream API */
-    public static String getTimelineStream(LfCore core, String resource, Integer limit, String until, String since) {
+    public static JSONObject getTimelineStream(LfCore core, String resource, Integer limit, String until, String since) {
         WebResource r = streamBuilder(core)
                 .path(TIMELINE_PATH)
                 .queryParam("limit", limit == null ? "50" : limit.toString())
@@ -300,7 +300,7 @@ public class PersonalizedStreamsClient {
             r = r.queryParam("since", since);
         }
         
-        return r.accept(MediaType.APPLICATION_JSON).get(String.class);
+        return new JSONObject(r.accept(MediaType.APPLICATION_JSON).get(String.class));
     }
     
     /* Helper methods */
@@ -333,10 +333,10 @@ public class PersonalizedStreamsClient {
         return ids;
     }
     
-    private static List<Subscription> getSubscriptions(List<Topic> topics, String user) {
+    private static List<Subscription> buildSubscriptions(List<Topic> topics, String user) {
         List<Subscription> subscriptions = Lists.newArrayList();
         for (Topic topic : topics) {
-            subscriptions.add(new Subscription(topic.getId(), user, Type.personalStream));
+            subscriptions.add(new Subscription(topic.getId(), user, Type.personalStream, null));
         }
         return subscriptions;
     }

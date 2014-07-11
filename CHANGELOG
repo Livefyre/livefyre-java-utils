@@ -8,6 +8,7 @@
 * Reverted to previous Jersey client to reduce dependencies.
 * Added timeline support.
 * Updated createCollectionMeta() to also accept a map of options.
+* Updated checksum formula.
 
 === 1.2.0 2014-06-13
 

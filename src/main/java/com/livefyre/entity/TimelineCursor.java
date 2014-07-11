@@ -1,4 +1,4 @@
-package com.livefyre.api.entity;
+package com.livefyre.entity;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,6 +26,8 @@ public class TimelineCursor {
     private boolean previous = false;
     private int limit;
     
+    public TimelineCursor() {}
+    
     public TimelineCursor(LfCore core, String resource, int limit, Date startTime) {
         this.core = core;
         this.resource = resource;
@@ -33,13 +35,13 @@ public class TimelineCursor {
         this.cursorTime = startTime;
     }
     
-    public String next() {
+    public JSONObject next() {
         return next(limit);
     }
     
-    public String next(int limit) {
-        String data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, null, DATE_FORMAT.format(cursorTime));
-        JSONObject cursor = new JSONObject(data).getJSONObject("meta").getJSONObject("cursor");
+    public JSONObject next(int limit) {
+        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, null, DATE_FORMAT.format(cursorTime));
+        JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
         
         next = cursor.getBoolean("hasNext");
         previous = !cursor.isNull("next"); 
@@ -50,16 +52,16 @@ public class TimelineCursor {
             throw new LivefyreException("Chronos: Date is not in the correct format.");
         }
         
-        return new JSONObject(data).getJSONObject("data").toString();
+        return data;
     }
     
-    public String previous() {
+    public JSONObject previous() {
         return previous(limit);
     }
     
-    public String previous(int limit) {
-        String data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, DATE_FORMAT.format(cursorTime), null);
-        JSONObject cursor = new JSONObject(data).getJSONObject("meta").getJSONObject("cursor");
+    public JSONObject previous(int limit) {
+        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, DATE_FORMAT.format(cursorTime), null);
+        JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
         
         previous = cursor.getBoolean("hasPrev");
         next = !cursor.isNull("prev");
@@ -74,8 +76,18 @@ public class TimelineCursor {
     }
 
     /* Getters/Setters */
+    public LfCore getCore() {
+        return core;
+    }
+    public void setCore(LfCore core) {
+        this.core = core;
+    }
     public String getResource() {
         return resource;
+    }
+    /** This method is only here for serialization. Replacing the current resource with a different one will invalidate this cursor. */
+    public void setResource(String resource) {
+        this.resource = resource;
     }
     public Date getCursorTime() {
         return cursorTime;
@@ -84,10 +96,22 @@ public class TimelineCursor {
         this.cursorTime = newTime;
     }
     public boolean hasPrevious() {
+        return isPrevious();
+    }
+    public boolean isPrevious() {
         return previous;
     }
+    public void setPrevious(boolean previous) {
+        this.previous = previous;
+    }
     public boolean hasNext() {
+        return isNext();
+    }
+    public boolean isNext() {
         return next;
+    }
+    public void setNext(boolean next) {
+        this.next = next;
     }
     public int getLimit() {
         return limit;

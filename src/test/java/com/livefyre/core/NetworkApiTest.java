@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.livefyre.Livefyre;
-import com.livefyre.api.entity.Topic;
 import com.livefyre.config.LfTest;
+import com.livefyre.entity.Topic;
 
 @Ignore
 public class NetworkApiTest extends LfTest {
