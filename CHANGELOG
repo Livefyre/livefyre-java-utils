@@ -2,7 +2,7 @@
 
 *** CAUTION: THIS VERSION HAS UPDATED METHODS THAT MAKE PREVIOUS FUNCTION CALLS OBSOLETE ***
 * Removed dependency on Google's Json Token. Using org.json json instead, and updated the way JWT's were made.
-* Updated personalized streams api to be https instead.
+* Updated personalized streams and bootstrap api to be https instead.
 * Refactored based on dependency update.
 * Copied necessary pieces from Apache codec into library for JWT creation. @com.livefyre.repackaged.apache.commons
 * Reverted to previous Jersey client to reduce dependencies.

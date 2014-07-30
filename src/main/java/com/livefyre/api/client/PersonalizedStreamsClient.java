@@ -1,6 +1,5 @@
 package com.livefyre.api.client;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
@@ -28,8 +27,8 @@ import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
 public class PersonalizedStreamsClient {
 
-    private static final String BASE_URL = "http://quill.%s/api/v4";
-    private static final String STREAM_BASE_URL = "http://bootstrap.%s/api/v4";
+    private static final String BASE_URL = "https://%s.quill.fyre.co/api/v4";
+    private static final String STREAM_BASE_URL = "https://bootstrap.livefyre.com/api/v4";
     
     private static final String TOPIC_PATH = "/%s/";
     private static final String MULTIPLE_TOPIC_PATH = "/%s:topics/";
@@ -52,14 +51,6 @@ public class PersonalizedStreamsClient {
         } catch (JSONException e) {}
         
         return null;
-    }
-    
-    public static boolean postTopic(LfCore core, Topic topic) {
-        return postTopics(core, Arrays.asList(topic)).isChanged();
-    }
-    
-    public static boolean patchTopic(LfCore core, Topic topic) {
-        return patchTopics(core, Arrays.asList(topic)) == 1;
     }
     
     /* Multiple Topic API */
@@ -267,7 +258,6 @@ public class PersonalizedStreamsClient {
         }
     }
     
-    /* Subscriber API */
     public static List<Subscription> getSubscribers(Network network, Topic topic, Integer limit, Integer offset) {
         String jsonResp = builder(network)
                 .path(String.format(TOPIC_SUBSCRIPTION_PATH, topic.getId()))
@@ -313,7 +303,7 @@ public class PersonalizedStreamsClient {
     }
     
     private static WebResource streamBuilder(LfCore core) {
-        return client(core, null).resource(String.format(STREAM_BASE_URL, core.getNetworkName()));
+        return client(core, null).resource(STREAM_BASE_URL);
     }
 
     private static Client client(LfCore core, String user) {

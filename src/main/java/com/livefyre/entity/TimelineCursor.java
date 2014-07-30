@@ -1,7 +1,6 @@
 package com.livefyre.entity;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,7 +8,6 @@ import org.json.JSONObject;
 
 import com.livefyre.api.client.PersonalizedStreamsClient;
 import com.livefyre.core.LfCore;
-import com.livefyre.exceptions.LivefyreException;
 
 /**
  * TimelineCursor is an entity that keeps track of positions in timelines for different resources.
@@ -21,7 +19,7 @@ public class TimelineCursor {
 
     private LfCore core;
     private String resource;
-    private Date cursorTime;
+    private String cursorTime;
     private boolean next = false;
     private boolean previous = false;
     private int limit;
@@ -32,7 +30,7 @@ public class TimelineCursor {
         this.core = core;
         this.resource = resource;
         this.limit = limit;
-        this.cursorTime = startTime;
+        this.cursorTime = DATE_FORMAT.format(startTime);
     }
     
     public JSONObject next() {
@@ -40,17 +38,12 @@ public class TimelineCursor {
     }
     
     public JSONObject next(int limit) {
-        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, null, DATE_FORMAT.format(cursorTime));
+        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, null, cursorTime);
         JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
         
         next = cursor.getBoolean("hasNext");
         previous = !cursor.isNull("next"); 
-        
-        try {
-            cursorTime = previous ? DATE_FORMAT.parse(cursor.getString("next")) : cursorTime;
-        } catch (ParseException e) {
-            throw new LivefyreException("Chronos: Date is not in the correct format.");
-        }
+        cursorTime = previous ? cursor.getString("next") : cursorTime;
         
         return data;
     }
@@ -60,17 +53,12 @@ public class TimelineCursor {
     }
     
     public JSONObject previous(int limit) {
-        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, DATE_FORMAT.format(cursorTime), null);
+        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, cursorTime, null);
         JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
         
         previous = cursor.getBoolean("hasPrev");
         next = !cursor.isNull("prev");
-        
-        try {
-            cursorTime = next ? DATE_FORMAT.parse(cursor.getString("prev")) : cursorTime;
-        } catch (ParseException e) {
-            throw new LivefyreException("Chronos: Date is not in the correct format.");
-        }
+        cursorTime = next ? cursor.getString("prev") : cursorTime;
         
         return data;
     }
@@ -89,11 +77,14 @@ public class TimelineCursor {
     public void setResource(String resource) {
         this.resource = resource;
     }
-    public Date getCursorTime() {
+    public String getCursorTime() {
         return cursorTime;
     }
-    public void setCursorTime(Date newTime) {
+    public void setCursorTime(String newTime) {
         this.cursorTime = newTime;
+    }
+    public void setCursorTime(Date newTime) {
+        this.cursorTime = DATE_FORMAT.format(newTime);
     }
     public boolean hasPrevious() {
         return isPrevious();

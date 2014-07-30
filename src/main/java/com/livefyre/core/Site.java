@@ -103,14 +103,14 @@ public class Site implements LfCore {
     }
     
     public JSONObject getCollectionContentJson(String articleId) {
-        return new JSONObject(articleId);
+        return new JSONObject(getCollectionContent(articleId));
     }
 
     public String getCollectionContent(String articleId) {
         checkNotNull(articleId);
 
-        String url = String.format("http://bootstrap.%1$s/bs3/%1$s/%2$s/%3$s/init", network.getName(), id,
-                Base64.encodeBase64URLSafeString(articleId.getBytes()));
+        String b64articleId = Base64.encodeBase64URLSafeString(articleId.getBytes());
+        String url = String.format("https://bootstrap.livefyre.com/bs3/%s/%s/%s/init", network.getName(), id, b64articleId);
 
         ClientResponse response = Client.create()
             .resource(url)
@@ -134,12 +134,12 @@ public class Site implements LfCore {
     
     public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = Topic.create(this, id, label);
-        PersonalizedStreamsClient.postTopic(this, topic);
+        PersonalizedStreamsClient.postTopics(this, Lists.newArrayList(topic));
         return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClient.patchTopic(this, topic);
+        return PersonalizedStreamsClient.patchTopics(this, Lists.newArrayList(topic)) == 1;
     }
     
     /* Multiple Topic API */
@@ -218,7 +218,7 @@ public class Site implements LfCore {
     
     /* Getters/Setters */
     public String buildLivefyreToken() { return network.buildLivefyreToken(); }
-    public String getNetworkName() { return network.getName(); }
+    public String getNetworkName() { return network.getNetworkName(); }
     public Network getNetwork() { return this.network; }
     protected void setNetwork(Network network) { this.network = network; }
     public String getId() { return id; }

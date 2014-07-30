@@ -32,10 +32,12 @@ public class Network implements LfCore {
     
     private String name = null;
     private String key = null;
+    private String networkName = null;
     
     public Network(String name, String key) {
         this.name = checkNotNull(name);
         this.key = checkNotNull(key);
+        this.networkName = this.name.split("\\.")[0];
     }
     
     public boolean setUserSyncUrl(String urlTemplate) {
@@ -107,12 +109,12 @@ public class Network implements LfCore {
     
     public Topic createOrUpdateTopic(String id, String label) {
         Topic topic = Topic.create(this, id, label);
-        PersonalizedStreamsClient.postTopic(this, topic);
+        PersonalizedStreamsClient.postTopics(this, Lists.newArrayList(topic));
         return topic;
     }
     
     public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClient.patchTopic(this, topic);
+        return PersonalizedStreamsClient.patchTopics(this, Lists.newArrayList(topic)) == 1;
     }
     
     /* Multiple Topic API */
@@ -196,10 +198,10 @@ public class Network implements LfCore {
     }
     
     /* Getters/Setters */
-    public String getNetworkName() { return getName(); } // used for the interface
+    public String getNetworkName() { return this.networkName; }
+    protected void setNetworkName(String networkName) { this.networkName = networkName; }
     public String getName() { return name; }
     protected void setName(String name) { this.name = name; }
     public String getKey() { return key; }
-    protected void setKey(String key) { this.key = key;
-    }
+    protected void setKey(String key) { this.key = key; }
 }
