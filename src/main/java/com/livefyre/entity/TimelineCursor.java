@@ -3,6 +3,7 @@ package com.livefyre.entity;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.json.JSONObject;
 
@@ -27,6 +28,7 @@ public class TimelineCursor {
     public TimelineCursor() {}
     
     public TimelineCursor(LfCore core, String resource, int limit, Date startTime) {
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
         this.core = core;
         this.resource = resource;
         this.limit = limit;
