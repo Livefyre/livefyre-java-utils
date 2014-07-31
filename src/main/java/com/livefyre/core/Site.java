@@ -54,16 +54,18 @@ public class Site implements LfCore {
      * 
      * @param extras map of additional params to be included into the collection meta token.
      */
-    public String buildCollectionMetaToken(String title, String articleId, String url, Map<String, Object> extras) {
+    public String buildCollectionMetaToken(String title, String articleId, String url, Map<String, Object> options) {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkNotNull(articleId);
         checkArgument(isValidFullUrl(checkNotNull(url)), "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
+        
+        Map<String, Object> o = options == null ? Maps.<String, Object>newHashMap() : options;
 
-        if (extras.containsKey("type") && !TYPE.contains(extras.get("type"))) {
+        if (o.containsKey("type") && !TYPE.contains(o.get("type"))) {
             throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " +TYPE.toString());
         }
         
-        Map<String, Object> data = Maps.newHashMap(extras);
+        Map<String, Object> data = Maps.newHashMap(o);
         data.put("url", url);
         data.put("title", title);
         data.put("articleId", articleId);

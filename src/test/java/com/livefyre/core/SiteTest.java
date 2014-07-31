@@ -7,14 +7,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
-import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.livefyre.Livefyre;
 import com.livefyre.config.LfTest;
 import com.livefyre.utils.LivefyreJwtUtil;
@@ -82,15 +80,10 @@ public class SiteTest extends LfTest {
             fail("type must be of a known type");
         } catch (IllegalArgumentException e) {}
         
+        site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", null); // checks the null map case
+
         String token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", ImmutableMap.<String,Object>of("tags", "tags", "type", "reviews"));
         assertNotNull(token);
-        
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("tags", "tags");
-        map.put("type", "reviews");
-        String token2 = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", map);
-        
-        assertEquals(token, token2);
         
         JSONObject decodedToken = null;
         try {
