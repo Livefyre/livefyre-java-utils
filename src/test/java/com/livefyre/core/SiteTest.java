@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.livefyre.Livefyre;
 import com.livefyre.config.LfTest;
@@ -65,23 +66,23 @@ public class SiteTest extends LfTest {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         try {
-            site.buildCollectionMetaToken("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", "", null);
+            site.buildCollectionMetaToken("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", null);
             fail("titles longer than 255 char are not allowed");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "tet.com", "" , "");
+            site.buildCollectionMetaToken("", "", "tet.com", null);
             fail("url must start with valid url scheme (http:// or https://)");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "tet.com/", "", "");
+            site.buildCollectionMetaToken("", "", "tet.com/", null);
             fail("url must be a valid domain");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "http://www.test.com", "", "abc");
+            site.buildCollectionMetaToken("", "", "http://www.test.com", ImmutableMap.<String,Object>of("type", "abc"));
             fail("type must be of a known type");
         } catch (IllegalArgumentException e) {}
         
-        String token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "reviews");
+        String token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", ImmutableMap.<String,Object>of("tags", "tags", "type", "reviews"));
         assertNotNull(token);
         
         Map<String, Object> map = Maps.newHashMap();
@@ -101,7 +102,7 @@ public class SiteTest extends LfTest {
         assertEquals(decodedToken.getString("url"), "http://www.livefyre.com");
         assertEquals(decodedToken.getString("type"), "reviews");
         
-        token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "liveblog");
+        token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", ImmutableMap.<String,Object>of("type", "liveblog"));
         assertNotNull(token);
         try {
             decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
@@ -148,15 +149,15 @@ public class SiteTest extends LfTest {
     public void testNullChecks() {
         Site site = new Site(new Network(NETWORK_NAME, NETWORK_KEY), SITE_ID, SITE_KEY);
         try {
-            site.buildCollectionMetaToken(null, null, null, null, null);
+            site.buildCollectionMetaToken(null, null, null, null);
             fail("title cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.buildCollectionMetaToken("", null, null, null, null);
+            site.buildCollectionMetaToken("", null, null, null);
             fail("articleId cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.buildCollectionMetaToken("", "", null, null, null);
+            site.buildCollectionMetaToken("", "", null, null);
             fail("url cannot be null");
         } catch(NullPointerException e) {}
         try {

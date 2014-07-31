@@ -18,7 +18,6 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.PersonalizedStreamsClient;
@@ -47,12 +46,6 @@ public class Site implements LfCore {
         this.network = checkNotNull(network);
         this.id = checkNotNull(id);
         this.key = checkNotNull(key);
-    }
-    
-    /* Kept for backwards compatibility/usability */
-    public String buildCollectionMetaToken(String title, String articleId, String url, String tags, String type) {
-        return buildCollectionMetaToken(title, articleId, url, 
-                ImmutableMap.<String, Object>of("tags", tags == null ? "" : tags, "type", type == null ? "" : type));
     }
     
     /**
