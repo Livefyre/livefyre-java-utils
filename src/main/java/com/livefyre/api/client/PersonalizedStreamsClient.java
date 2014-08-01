@@ -140,7 +140,7 @@ public class PersonalizedStreamsClient {
         return topicIds;
     }
     
-    public static int postCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static int addCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
         
         String jsonResp = builder(site.getNetwork())
@@ -157,7 +157,7 @@ public class PersonalizedStreamsClient {
         }
     }
     
-    public static Map<String, Integer> putCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static Map<String, Integer> replaceCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
         
         String jsonResp = builder(site.getNetwork())
@@ -177,7 +177,7 @@ public class PersonalizedStreamsClient {
         return results;
     }
     
-    public static int patchCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static int removeCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
         
         String jsonResp = builder(site.getNetwork())
@@ -213,7 +213,7 @@ public class PersonalizedStreamsClient {
         return subscriptions;
     }
     
-    public static int postSubscriptions(Network network, String user, List<Topic> topics) {
+    public static int addSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
         String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
 
@@ -231,7 +231,7 @@ public class PersonalizedStreamsClient {
         }
     }
     
-    public static Map<String, Integer> putSubscriptions(Network network, String user, List<Topic> topics) {
+    public static Map<String, Integer> replaceSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
         String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
 
@@ -252,7 +252,7 @@ public class PersonalizedStreamsClient {
         return results;
     }
 
-    public static int patchSubscriptions(Network network, String user, List<Topic> topics) {
+    public static int removeSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
         String form = new JSONObject(ImmutableMap.<String, Object>of("delete", buildSubscriptions(topics, userUrn))).toString();
 

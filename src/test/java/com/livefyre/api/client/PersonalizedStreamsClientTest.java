@@ -97,19 +97,19 @@ public class PersonalizedStreamsClientTest extends LfTest {
         List<String> topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.isEmpty());
         
-        int added = PersonalizedStreamsClient.postCollectionTopics(site, COLLECTION_ID, topics);
+        int added = PersonalizedStreamsClient.addCollectionTopics(site, COLLECTION_ID, topics);
         assertTrue(added == 3);
         
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.size() == 3);
 
-        Map<String, Integer> results = PersonalizedStreamsClient.putCollectionTopics(site, COLLECTION_ID, Lists.newArrayList(topics.get(0)));
+        Map<String, Integer> results = PersonalizedStreamsClient.replaceCollectionTopics(site, COLLECTION_ID, Lists.newArrayList(topics.get(0)));
         assertTrue(results.get("added") > 0 || results.get("removed") > 0);
         
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.size() == 1);
         
-        int deleted = PersonalizedStreamsClient.patchCollectionTopics(site, COLLECTION_ID, topics);
+        int deleted = PersonalizedStreamsClient.removeCollectionTopics(site, COLLECTION_ID, topics);
         assertTrue(deleted == 1);
         
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
@@ -122,16 +122,16 @@ public class PersonalizedStreamsClientTest extends LfTest {
     public void testCollectionTopicApi_site() {
         List<Topic> topics = PersonalizedStreamsClient.createOrUpdateTopics(site, topicMap);
         
-        int added = PersonalizedStreamsClient.postCollectionTopics(site, COLLECTION_ID, topics);
+        int added = PersonalizedStreamsClient.addCollectionTopics(site, COLLECTION_ID, topics);
         assertTrue(added == topics.size());
         
-        Map<String, Integer> results = PersonalizedStreamsClient.putCollectionTopics(site, COLLECTION_ID, Lists.newArrayList(topics.get(0)));
+        Map<String, Integer> results = PersonalizedStreamsClient.replaceCollectionTopics(site, COLLECTION_ID, Lists.newArrayList(topics.get(0)));
         assertTrue(results.get("added") > 0 || results.get("removed") > 0);
         
         List<String> topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
         assertTrue(topicIds.size() == 1);
 
-        int deleted = PersonalizedStreamsClient.patchCollectionTopics(site, COLLECTION_ID, topics);
+        int deleted = PersonalizedStreamsClient.removeCollectionTopics(site, COLLECTION_ID, topics);
         assertTrue(deleted == 1);
         
         topicIds = PersonalizedStreamsClient.getCollectionTopics(site, COLLECTION_ID);
@@ -147,15 +147,15 @@ public class PersonalizedStreamsClientTest extends LfTest {
         List<Subscription> su = PersonalizedStreamsClient.getSubscriptions(network, USER);
         assertTrue(su.isEmpty());
         
-        int subs = PersonalizedStreamsClient.postSubscriptions(network, USER, topics);
+        int subs = PersonalizedStreamsClient.addSubscriptions(network, USER, topics);
         assertTrue(subs == 3);
 
-        Map<String, Integer> results = PersonalizedStreamsClient.putSubscriptions(network, USER, Lists.newArrayList(topics.get(0), topics.get(1)));
+        Map<String, Integer> results = PersonalizedStreamsClient.replaceSubscriptions(network, USER, Lists.newArrayList(topics.get(0), topics.get(1)));
         assertTrue(results.get("added") > 0 || results.get("removed") > 0);
         
         su = PersonalizedStreamsClient.getSubscribers(network, topics.get(0), 100, 0);
 
-        int del = PersonalizedStreamsClient.patchSubscriptions(network, USER, topics);
+        int del = PersonalizedStreamsClient.removeSubscriptions(network, USER, topics);
         assertTrue(del == 2);
         
         List<Subscription> sub = PersonalizedStreamsClient.getSubscriptions(network, USER);
