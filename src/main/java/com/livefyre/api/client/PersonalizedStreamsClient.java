@@ -1,6 +1,7 @@
 package com.livefyre.api.client;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
@@ -11,9 +12,8 @@ import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.livefyre.api.client.filter.LftokenAuthFilter;
-import com.livefyre.api.dto.TopicPostDto;
-import com.livefyre.api.dto.TopicPutDto;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
@@ -53,6 +53,14 @@ public class PersonalizedStreamsClient {
         return null;
     }
     
+    public static Topic createOrUpdateTopic(LfCore core, String topicId, String label) {
+        return createOrUpdateTopics(core, ImmutableMap.of(topicId, label)).get(0);
+    }
+    
+    public static boolean deleteTopic(LfCore core, Topic topic) {
+        return deleteTopics(core, Lists.newArrayList(topic)) == 1;
+    }
+    
     /* Multiple Topic API */
     public static List<Topic> getTopics(LfCore core, Integer limit, Integer offset) {
         String jsonResp = builder(core)
@@ -73,30 +81,31 @@ public class PersonalizedStreamsClient {
         return topics;
     }
     
-    public static TopicPostDto postTopics(LfCore core, List<Topic> topics) {
-        for (Topic topic : topics) {
-            if (StringUtils.isEmpty(topic.getLabel()) || topic.getLabel().length() > 128) {
+    public static List<Topic> createOrUpdateTopics(LfCore core, Map<String, String> topicMap) {
+        List<Topic> topics = Lists.newArrayList();
+        for (String k : topicMap.keySet()) {
+            String label = topicMap.get(k);
+            
+            if (StringUtils.isEmpty(label) || label.length() > 128) {
                 throw new IllegalArgumentException("Topic label is of incorrect length or empty.");
             }
+            
+            topics.add(Topic.create(core, k, label));
         }
         
         String form = new JSONObject(ImmutableMap.<String, Object>of("topics", topics)).toString();
-        String jsonResp = builder(core)
-                .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .post(String.class, form);
+        builder(core)
+            .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
+            .accept(MediaType.APPLICATION_JSON)
+            .type(MediaType.APPLICATION_JSON)
+            .post(String.class, form);
         
-        TopicPostDto dto = new TopicPostDto();
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            dto.update(data);
-        } catch (JSONException e) {}
+        // Doesn't matter what the response details are here as long as it's a 200.
         
-        return dto;
+        return topics;
     }
     
-    public static int patchTopics(LfCore core, List<Topic> topics) {
+    public static int deleteTopics(LfCore core, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
         String jsonResp = builder(core)
                 .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
@@ -148,7 +157,7 @@ public class PersonalizedStreamsClient {
         }
     }
     
-    public static TopicPutDto putCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static Map<String, Integer> putCollectionTopics(Site site, String collectionId, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
         
         String jsonResp = builder(site.getNetwork())
@@ -156,14 +165,16 @@ public class PersonalizedStreamsClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .put(String.class, form);
-        
-        TopicPutDto dto = new TopicPutDto();
+
+        Map<String, Integer> results = Maps.newHashMap();
         try {
             JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            dto.update(data);
+
+            results.put("added", data.has("added") ? data.getInt("added") :0);
+            results.put("removed", data.has("removed") ? data.getInt("removed") : 0);
         } catch (JSONException e) {}
         
-        return dto;
+        return results;
     }
     
     public static int patchCollectionTopics(Site site, String collectionId, List<Topic> topics) {
@@ -220,7 +231,7 @@ public class PersonalizedStreamsClient {
         }
     }
     
-    public static TopicPutDto putSubscriptions(Network network, String user, List<Topic> topics) {
+    public static Map<String, Integer> putSubscriptions(Network network, String user, List<Topic> topics) {
         String userUrn = network.getUserUrn(user);
         String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
 
@@ -230,13 +241,15 @@ public class PersonalizedStreamsClient {
                 .type(MediaType.APPLICATION_JSON)
                 .put(String.class, form);
         
-        TopicPutDto dto = new TopicPutDto();
+        Map<String, Integer> results = Maps.newHashMap();
         try {
             JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            dto.update(data);
+
+            results.put("added", data.has("added") ? data.getInt("added") :0);
+            results.put("removed", data.has("removed") ? data.getInt("removed") : 0);
         } catch (JSONException e) {}
         
-        return dto;
+        return results;
     }
 
     public static int patchSubscriptions(Network network, String user, List<Topic> topics) {
@@ -277,7 +290,9 @@ public class PersonalizedStreamsClient {
         return subscriptions;
     }
     
-    /* Stream API */
+    /**
+     * This call is used specifically by the TimelineCursor class.  
+     */
     public static JSONObject getTimelineStream(LfCore core, String resource, Integer limit, String until, String since) {
         WebResource r = streamBuilder(core)
                 .path(TIMELINE_PATH)

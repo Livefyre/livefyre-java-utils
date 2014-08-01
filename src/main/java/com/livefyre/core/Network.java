@@ -5,8 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.security.InvalidKeyException;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -14,13 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.livefyre.api.client.PersonalizedStreamsClient;
-import com.livefyre.entity.Subscription;
-import com.livefyre.entity.TimelineCursor;
-import com.livefyre.entity.Topic;
 import com.livefyre.exceptions.TokenException;
-import com.livefyre.factory.CursorFactory;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -100,87 +92,6 @@ public class Network implements LfCore {
     
     public Site getSite(String siteId, String siteKey) {
         return new Site(this, siteId, siteKey);
-    }
-    
-    /* Topic API */
-    public Topic getTopic(String topicId) {
-        return PersonalizedStreamsClient.getTopic(this, topicId);
-    }
-    
-    public Topic createOrUpdateTopic(String id, String label) {
-        Topic topic = Topic.create(this, id, label);
-        PersonalizedStreamsClient.postTopics(this, Lists.newArrayList(topic));
-        return topic;
-    }
-    
-    public boolean deleteTopic(Topic topic) {
-        return PersonalizedStreamsClient.patchTopics(this, Lists.newArrayList(topic)) == 1;
-    }
-    
-    /* Multiple Topic API */
-    public List<Topic> getTopics() {
-        return PersonalizedStreamsClient.getTopics(this, null, null);
-    }
-    
-    public List<Topic> getTopics(Integer limit, Integer offset) {
-        return PersonalizedStreamsClient.getTopics(this, limit, offset);
-    }
-    
-    public List<Topic> createOrUpdateTopics(Map<String, String> topicMap) {
-        List<Topic> list = Lists.newArrayList();
-        for (String k : topicMap.keySet()) {
-            list.add(Topic.create(this, k, topicMap.get(k)));
-        }
-        
-        PersonalizedStreamsClient.postTopics(this, list);
-        return list;
-    }
-    
-    public int deleteTopics(List<Topic> topics) {
-        return PersonalizedStreamsClient.patchTopics(this, topics);
-    }
-    
-    /* Subscription API */
-    public List<Subscription> getSubscriptions(String user) {
-        return PersonalizedStreamsClient.getSubscriptions(this, user);
-    }
-    
-    public Integer addSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClient.postSubscriptions(this, user, topics);
-    }
-
-    public boolean updateSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClient.putSubscriptions(this, user, topics).isChanged();
-    }
-
-    public Integer removeSubscriptions(String user, List<Topic> topics) {
-        return PersonalizedStreamsClient.patchSubscriptions(this, user, topics);
-    }
-    
-    /* Subscriber API */
-    public List<Subscription> getSubscribers(Topic topic) {
-        return PersonalizedStreamsClient.getSubscribers(this, topic, null, null);
-    }
-    
-    public List<Subscription> getSubscribers(Topic topic, Integer limit, Integer offset) {
-        return PersonalizedStreamsClient.getSubscribers(this, topic, limit, offset);
-    }
-    
-    /* Timeline Cursor */
-    public TimelineCursor getTopicStreamCursor(Topic topic) {
-        return getTopicStreamCursor(topic, 50, Calendar.getInstance().getTime());
-    }
-    
-    public TimelineCursor getTopicStreamCursor(Topic topic, Integer limit, Date date) {
-        return CursorFactory.getTopicStreamCursor(this, topic, limit, date);
-    }
-    
-    public TimelineCursor getPersonalStreamCursor(String user) {
-        return getPersonalStreamCursor(user, 50, Calendar.getInstance().getTime());
-    }
-    
-    public TimelineCursor getPersonalStreamCursor(String user, Integer limit, Date date) {
-        return CursorFactory.getPersonalStreamCursor(this, user, limit, date);
     }
     
     /* Helper methods */
