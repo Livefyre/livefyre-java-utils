@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -20,6 +21,7 @@ import com.livefyre.core.Site;
 import com.livefyre.entity.Subscription;
 import com.livefyre.entity.Topic;
 
+@Ignore
 public class PersonalizedStreamsClientTest extends LfTest {
     private Network network;
     private Site site;
