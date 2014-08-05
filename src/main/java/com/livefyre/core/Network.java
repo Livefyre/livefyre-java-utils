@@ -36,10 +36,10 @@ public class Network implements LfCore {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
         ClientResponse response = Client.create()
-            .resource(String.format("http://%s/", name))
-            .queryParam("actor_token", buildLivefyreToken())
-            .queryParam("pull_profile_url", urlTemplate)
-            .post(ClientResponse.class);
+                .resource(String.format("http://%s/", name))
+                .queryParam("actor_token", buildLivefyreToken())
+                .queryParam("pull_profile_url", urlTemplate)
+                .post(ClientResponse.class);
         return response.getStatus() == 204;
     }
     
@@ -48,9 +48,9 @@ public class Network implements LfCore {
         
         String url = String.format("http://%s/api/v3_0/user/%s/refresh", name, userId);
         ClientResponse response = Client.create()
-            .resource(url)
-            .queryParam("lftoken", buildLivefyreToken())
-            .post(ClientResponse.class);
+                .resource(url)
+                .queryParam("lftoken", buildLivefyreToken())
+                .post(ClientResponse.class);
         return response.getStatus() == 200;
     }
     

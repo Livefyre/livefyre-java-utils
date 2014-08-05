@@ -8,9 +8,6 @@ import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -18,14 +15,10 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.livefyre.api.client.PersonalizedStreamsClient;
-import com.livefyre.entity.TimelineCursor;
-import com.livefyre.entity.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
-import com.livefyre.factory.CursorFactory;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
@@ -97,6 +90,25 @@ public class Site implements LfCore {
         }
     }
     
+    public String createCollection(String title, String articleId, String url, Map<String, Object> options) {
+        String token = buildCollectionMetaToken(title, articleId, url, options);
+        String checksum =  buildChecksum(title, url, (options != null && options.containsKey("tags")) ? options.get("tags").toString() : null);
+        String uri = String.format("https://%s.quill.fyre.co/api/v3.0/site/%s/collection/create/", getNetworkName(), id);
+        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
+        
+        ClientResponse response = Client.create()
+                .resource(uri)
+                .queryParam("sync", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(ClientResponse.class, form);
+        
+        if (response.getStatus() != 200) {
+            throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
+        }
+        return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
+    }
+    
     public JSONObject getCollectionContentJson(String articleId) {
         return new JSONObject(getCollectionContent(articleId));
     }
@@ -108,9 +120,9 @@ public class Site implements LfCore {
         String url = String.format("https://bootstrap.livefyre.com/bs3/%s/%s/%s/init", network.getName(), id, b64articleId);
 
         ClientResponse response = Client.create()
-            .resource(url)
-            .accept(MediaType.APPLICATION_JSON)
-            .get(ClientResponse.class);
+                .resource(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .get(ClientResponse.class);
         if (response.getStatus() != 200) {
             throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
         }

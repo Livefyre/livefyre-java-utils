@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
+import java.util.Calendar;
 
 import org.json.JSONObject;
 import org.junit.Ignore;
@@ -36,12 +37,15 @@ public class SiteTest extends LfTest {
     
     @Test
     @Ignore
-    public void testGetCollectionId() {
+    public void testCreateCollection() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         Site site = network.getSite(SITE_ID, SITE_KEY);
-        String id = site.getCollectionId(ARTICLE_ID);
+        String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
+
+        String id = site.createCollection(name, name, "http://answers.livefyre.com/JAVA", null);
+        String otherId = site.getCollectionId(name);
         
-        assertNotNull(id);
+        assertEquals(otherId, id);
     }
     
     @Test
