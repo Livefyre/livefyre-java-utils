@@ -7,6 +7,7 @@
 * Copied necessary pieces from Apache codec into library for JWT creation. @com.livefyre.repackaged.apache.commons
 * Reverted to previous Jersey client to reduce dependencies.
 * Added timeline support.
+* Added createCollection method.
 * Updated createCollectionMeta() to also accept a map of options.
 * Updated checksum formula.
 
