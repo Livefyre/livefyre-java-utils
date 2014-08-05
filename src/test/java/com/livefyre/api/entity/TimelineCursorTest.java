@@ -26,7 +26,7 @@ public class TimelineCursorTest extends LfTest {
     
     @Test
     public void testEntity() {
-        TimelineCursor ch = CursorFactory.getPersonalStreamCursor(network, USER, 50, Calendar.getInstance().getTime());
+        TimelineCursor ch = CursorFactory.getPersonalStreamCursor(network, USER_ID, 50, Calendar.getInstance().getTime());
         
         ch.next();
         JSONObject json = new JSONObject(ch.previous());

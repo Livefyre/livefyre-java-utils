@@ -24,6 +24,7 @@ public class PersonalizedStreamsClientTest extends LfTest {
     private Network network;
     private Site site;
     
+    private String userToken;
     private Map<String, String> topicMap;
     
     @Before
@@ -31,6 +32,7 @@ public class PersonalizedStreamsClientTest extends LfTest {
         network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         site = network.getSite(SITE_ID, SITE_KEY);
         
+        this.userToken = network.buildUserAuthToken(USER_ID, USER_ID + "@" + NETWORK_NAME, Network.DEFAULT_EXPIRES);
         this.topicMap = ImmutableMap.of("1", "UNO", "2", "DOS", "3", "TRES");
     }
     
@@ -144,21 +146,21 @@ public class PersonalizedStreamsClientTest extends LfTest {
     public void testSubscriberApi() {
         List<Topic> topics = PersonalizedStreamsClient.createOrUpdateTopics(network, topicMap);
         
-        List<Subscription> su = PersonalizedStreamsClient.getSubscriptions(network, USER);
+        List<Subscription> su = PersonalizedStreamsClient.getSubscriptions(network, USER_ID);
         assertTrue(su.isEmpty());
         
-        int subs = PersonalizedStreamsClient.addSubscriptions(network, USER, topics);
+        int subs = PersonalizedStreamsClient.addSubscriptions(network, userToken, topics);
         assertTrue(subs == 3);
 
-        Map<String, Integer> results = PersonalizedStreamsClient.replaceSubscriptions(network, USER, Lists.newArrayList(topics.get(0), topics.get(1)));
+        Map<String, Integer> results = PersonalizedStreamsClient.replaceSubscriptions(network, userToken, Lists.newArrayList(topics.get(0), topics.get(1)));
         assertTrue(results.get("added") > 0 || results.get("removed") > 0);
         
         su = PersonalizedStreamsClient.getSubscribers(network, topics.get(0), 100, 0);
 
-        int del = PersonalizedStreamsClient.removeSubscriptions(network, USER, topics);
+        int del = PersonalizedStreamsClient.removeSubscriptions(network, userToken, topics);
         assertTrue(del == 2);
         
-        List<Subscription> sub = PersonalizedStreamsClient.getSubscriptions(network, USER);
+        List<Subscription> sub = PersonalizedStreamsClient.getSubscriptions(network, USER_ID);
         assertTrue(sub.isEmpty());
 
         PersonalizedStreamsClient.deleteTopics(network, topics);

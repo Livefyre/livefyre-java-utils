@@ -1,5 +1,6 @@
 package com.livefyre.api.client;
 
+import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import com.livefyre.core.Site;
 import com.livefyre.entity.Subscription;
 import com.livefyre.entity.Subscription.Type;
 import com.livefyre.entity.Topic;
+import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -196,9 +198,9 @@ public class PersonalizedStreamsClient {
     }
     
     /* Subscription API */
-    public static List<Subscription> getSubscriptions(Network network, String user) {
+    public static List<Subscription> getSubscriptions(Network network, String userId) {
         String jsonResp = builder(network)
-                .path(String.format(USER_SUBSCRIPTION_PATH, network.getUserUrn(user)))
+                .path(String.format(USER_SUBSCRIPTION_PATH, network.getUserUrn(userId)))
                 .accept(MediaType.APPLICATION_JSON)
                 .get(String.class);
         
@@ -213,11 +215,12 @@ public class PersonalizedStreamsClient {
         return subscriptions;
     }
     
-    public static int addSubscriptions(Network network, String user, List<Topic> topics) {
-        String userUrn = network.getUserUrn(user);
+    public static int addSubscriptions(Network network, String userToken, List<Topic> topics) {
+        String userId = getUserFromToken(network, userToken);
+        String userUrn = network.getUserUrn(userId);
         String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
 
-        String jsonResp = builder(network, user)
+        String jsonResp = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -231,11 +234,12 @@ public class PersonalizedStreamsClient {
         }
     }
     
-    public static Map<String, Integer> replaceSubscriptions(Network network, String user, List<Topic> topics) {
-        String userUrn = network.getUserUrn(user);
+    public static Map<String, Integer> replaceSubscriptions(Network network, String userToken, List<Topic> topics) {
+        String userId = getUserFromToken(network, userToken);
+        String userUrn = network.getUserUrn(userId);
         String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
 
-        String jsonResp = builder(network, user)
+        String jsonResp = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -252,11 +256,12 @@ public class PersonalizedStreamsClient {
         return results;
     }
 
-    public static int removeSubscriptions(Network network, String user, List<Topic> topics) {
-        String userUrn = network.getUserUrn(user);
+    public static int removeSubscriptions(Network network, String userToken, List<Topic> topics) {
+        String userId = getUserFromToken(network, userToken);
+        String userUrn = network.getUserUrn(userId);
         String form = new JSONObject(ImmutableMap.<String, Object>of("delete", buildSubscriptions(topics, userUrn))).toString();
 
-        String jsonResp = builder(network, user)
+        String jsonResp = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
                 .queryParam("_method", PATCH_METHOD)
                 .accept(MediaType.APPLICATION_JSON)
@@ -313,20 +318,20 @@ public class PersonalizedStreamsClient {
         return builder(core, null);
     }
     
-    private static WebResource builder(LfCore core, String user) {
-        return client(core, user).resource(String.format(BASE_URL, core.getNetworkName()));
+    private static WebResource builder(LfCore core, String userToken) {
+        return client(core, userToken).resource(String.format(BASE_URL, core.getNetworkName()));
     }
     
     private static WebResource streamBuilder(LfCore core) {
         return client(core, null).resource(STREAM_BASE_URL);
     }
 
-    private static Client client(LfCore core, String user) {
+    private static Client client(LfCore core, String userToken) {
         Client c = Client.create();
         c.getProperties().put(URLConnectionClientHandler.PROPERTY_HTTP_URL_CONNECTION_SET_METHOD_WORKAROUND, true);
         c.getProperties().put(ClientConfig.PROPERTY_CONNECT_TIMEOUT, 1000);
         c.getProperties().put(ClientConfig.PROPERTY_READ_TIMEOUT, 10000);
-        c.addFilter(new LftokenAuthFilter(core, user));
+        c.addFilter(new LftokenAuthFilter(core, userToken));
         return c;
     }
     
@@ -338,11 +343,21 @@ public class PersonalizedStreamsClient {
         return ids;
     }
     
-    private static List<Subscription> buildSubscriptions(List<Topic> topics, String user) {
+    private static List<Subscription> buildSubscriptions(List<Topic> topics, String userUrn) {
         List<Subscription> subscriptions = Lists.newArrayList();
         for (Topic topic : topics) {
-            subscriptions.add(new Subscription(topic.getId(), user, Type.personalStream, null));
+            subscriptions.add(new Subscription(topic.getId(), userUrn, Type.personalStream, null));
         }
         return subscriptions;
+    }
+
+    private static String getUserFromToken(Network network, String userToken) {
+        JSONObject json;
+        try {
+            json = LivefyreJwtUtil.decodeLivefyreJwt(network.getKey(), userToken);
+        } catch (InvalidKeyException e1) {
+            throw new IllegalArgumentException("The userToken provided does not belong to this network.");
+        }
+        return json.getString("user_id");
     }
 }

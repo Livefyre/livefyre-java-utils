@@ -19,7 +19,7 @@ public class NetworkTest extends LfTest {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
         assertTrue(network.setUserSyncUrl(USER_SYNC_URL));
-        assertTrue(network.syncUser(USER));
+        assertTrue(network.syncUser(USER_ID));
     }
     
     @Test
