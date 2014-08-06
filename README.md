@@ -12,7 +12,7 @@ Add this dependency to your project's POM:
     <dependency>
       <groupId>com.livefyre</groupId>
       <artifactId>utils</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
 
 ## Usage
@@ -55,10 +55,10 @@ Site site = network.getSite("siteId", "siteKey");
 ```
 
 Building a collection meta token:
-*The "tags" and "type" arguments are optional.*
+*The {options} argument is optional.*
 
 ```Java
-site.buildCollectionMetaToken("title", "articleId", "url", "tags", "type");
+site.buildCollectionMetaToken("title", "articleId", "url", {options});
 ```
 
 Building a checksum:
@@ -83,11 +83,7 @@ To get a content collection's id:
 site.getCollectionId("articleId");
 ```
 
-## Testing
-
-You must have Maven installed. To run the tests, simply run `mvn test`. You can run particular tests by passing `-D test=Class#method` -- for example, `-D test=NetworkTest#testNetworkCreation`.
-
-## Documentation
+## Additional Documentation
 
 Located [here](http://answers.livefyre.com/developers/libraries).
 

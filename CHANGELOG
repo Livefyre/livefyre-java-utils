@@ -1,3 +1,16 @@
+=== 1.3.0 2014-07-30
+
+*** CAUTION: THIS VERSION HAS UPDATED METHODS THAT MAKE PREVIOUS FUNCTION CALLS OBSOLETE ***
+* Removed dependency on Google's Json Token. Using org.json json instead, and updated the way JWT's were made.
+* Updated personalized streams and bootstrap api to be https instead.
+* Refactored based on dependency update.
+* Copied necessary pieces from Apache codec into library for JWT creation. @com.livefyre.repackaged.apache.commons
+* Reverted to previous Jersey client to reduce dependencies.
+* Added timeline support.
+* Added createCollection method.
+* Updated createCollectionMeta() to also accept a map of options.
+* Updated checksum formula.
+
 === 1.2.0 2014-06-13
 
 * Reorganized structure.

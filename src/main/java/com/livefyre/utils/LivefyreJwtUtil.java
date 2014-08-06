@@ -1,96 +1,68 @@
 package com.livefyre.utils;
 
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.Arrays;
+import java.util.Map;
 
-import net.oauth.jsontoken.Checker;
-import net.oauth.jsontoken.JsonToken;
-import net.oauth.jsontoken.JsonTokenParser;
-import net.oauth.jsontoken.crypto.HmacSHA256Signer;
-import net.oauth.jsontoken.crypto.HmacSHA256Verifier;
-import net.oauth.jsontoken.crypto.SignatureAlgorithm;
-import net.oauth.jsontoken.crypto.Verifier;
-import net.oauth.jsontoken.discovery.VerifierProvider;
-import net.oauth.jsontoken.discovery.VerifierProviders;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
+import com.livefyre.repackaged.apache.commons.Base64;
+import com.livefyre.repackaged.apache.commons.StringUtils;
 
 public class LivefyreJwtUtil {
 
-    private LivefyreJwtUtil() {}
+    private static final String ALGORITHM = "HmacSHA256";
 
-    public static String getJwtUserAuthToken(String networkName, String networkSecret, String userId, String displayName,
-            double expires) throws InvalidKeyException, SignatureException {
-        HmacSHA256Signer signer = new HmacSHA256Signer(null, null, networkSecret.getBytes());
-        JsonToken mToken = new JsonToken(signer);
-        JsonObject tokenJSON = mToken.getPayloadAsJsonObject();
-        tokenJSON.addProperty("domain", networkName);
-        tokenJSON.addProperty("user_id", userId);
-        tokenJSON.addProperty("display_name", displayName);
-        tokenJSON.addProperty("expires", getExpiryInSeconds(expires));
-        return mToken.serializeAndSign();
+    /* Prevent instantiation */
+    private LivefyreJwtUtil() { }
+
+    public static String encodeLivefyreJwt(String key, Map<String, Object> data) throws InvalidKeyException {
+        return serializeAndSign(key, new JSONObject(data));
     }
 
-    public static String getJwtCollectionMetaToken(String siteSecret, String title, String tags, String url,
-            String articleId, String type) throws InvalidKeyException, SignatureException {
-        HmacSHA256Signer signer = new HmacSHA256Signer(null, null, siteSecret.getBytes());
-        JsonToken mToken = new JsonToken(signer);
-        JsonObject tokenJSON = mToken.getPayloadAsJsonObject();
-        
-        tokenJSON.addProperty("url", url);
-        tokenJSON.addProperty("tags", tags);
-        tokenJSON.addProperty("title", title);
-        tokenJSON.addProperty("articleId", articleId);
-        if (!StringUtils.isEmpty(type)) {
-            tokenJSON.addProperty("type", type);
+    public static JSONObject decodeLivefyreJwt(String secret, String jwt) throws InvalidKeyException {
+        try {
+            final SecretKeySpec secret_key = new SecretKeySpec(secret.getBytes(), ALGORITHM);
+            final Mac mac = Mac.getInstance(ALGORITHM);
+            mac.init(secret_key);
+            
+            String[] split = jwt.split("\\.");
+            
+            byte[] sig = mac.doFinal(new StringBuilder(split[0]).append(".").append(split[1]).toString().getBytes());
+            if (!Arrays.equals(sig, Base64.decodeBase64(split[2]))) {
+                throw new InvalidKeyException("signature verification failed");
+            }
+
+            return new JSONObject(new String(Base64.decodeBase64(split[1])));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("This error should never occur: ", e);
         }
-        
-        return mToken.serializeAndSign();
     }
     
-    public static String getChecksum(String title, String url, String tags) throws NoSuchAlgorithmException {
-        JsonObject tokenJSON = new JsonObject();
-        
-        tokenJSON.addProperty("url", url);
-        tokenJSON.addProperty("tags", tags);
-        tokenJSON.addProperty("title", title);
-        
-        return Hex.encodeHexString(MessageDigest.getInstance("MD5").digest(tokenJSON.toString().getBytes()));
-    }
-
-    public static JsonToken decodeJwt(String secret, String jwt) throws InvalidKeyException {
-        final Verifier hmacVerifier = new HmacSHA256Verifier(secret.getBytes());
-        VerifierProvider hmacLocator = new VerifierProvider() {
-            public List<Verifier> findVerifier(String id, String key) {
-                return Lists.newArrayList(hmacVerifier);
-            }
-        };
-        VerifierProviders locators = new VerifierProviders();
-        locators.setVerifierProvider(SignatureAlgorithm.HS256, hmacLocator);
-
-        JsonTokenParser parser = new JsonTokenParser(locators, new Checker() {
-            public void check(JsonObject payload) {}
-        });
+    private static String serializeAndSign(String key, JSONObject data) throws InvalidKeyException {
         try {
-            return parser.verifyAndDeserialize(jwt);
-        } catch (SignatureException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+            JSONObject header = new JSONObject();
+            header.put("alg", "HS256");
+            header.put("typ", "JWT");
+            
+            final SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(), ALGORITHM);
+            final Mac sha256_HMAC = Mac.getInstance(ALGORITHM);
+            sha256_HMAC.init(secret_key);
 
-    private static long getExpiryInSeconds(double secTillExpire) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.add(Calendar.SECOND, (int) secTillExpire);
-        return cal.getTimeInMillis() / 1000L;
+            String jwtHeader = Base64.encodeBase64URLSafeString(StringUtils.getBytesUtf8(header.toString()));
+            String jwtClaims = Base64.encodeBase64URLSafeString(StringUtils.getBytesUtf8(data.toString()));
+            String jwtBase = jwtHeader+"."+jwtClaims;
+
+            String jwtSignature = Base64.encodeBase64URLSafeString(sha256_HMAC.doFinal(StringUtils.getBytesUsAscii((jwtBase))));
+            String jwtToken = jwtBase+"."+jwtSignature;
+            
+            return jwtToken;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("This error should never occur: ", e);
+        }
     }
 }

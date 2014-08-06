@@ -1,34 +1,24 @@
 package com.livefyre.api.client.filter;
 
-import java.io.IOException;
-
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
-
 import com.livefyre.core.LfCore;
-import com.livefyre.core.Network;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.filter.ClientFilter;
 
-public class LftokenAuthFilter implements ClientRequestFilter {
+public class LftokenAuthFilter extends ClientFilter {
     private final LfCore core;
-    private final String user;
+    private final String userToken;
     
-    public LftokenAuthFilter(LfCore core, String user) {
+    public LftokenAuthFilter(LfCore core, String userToken) {
         this.core = core;
-        this.user = user;
+        this.userToken = userToken;
     }
     
-    public void filter(ClientRequestContext requestContext) throws IOException {
-        String token = null;
+    @Override
+    public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
+        cr.getHeaders().add("Authorization", "lftoken " + (userToken == null ? core.buildLivefyreToken() : userToken));
         
-        if (this.user != null) {
-            try {
-                Network network = (Network) core;
-                token = network.buildUserAuthToken(this.user, "", Network.DEFAULT_EXPIRES);
-            } catch (ClassCastException ex) {
-                // that didn't work. REVERT REVERT!
-            }
-        }
-        
-        requestContext.getHeaders().add("Authorization", "lftoken " + (token == null ? core.buildLivefyreToken() : token));
+        return getNext().handle(cr);
     }
 }

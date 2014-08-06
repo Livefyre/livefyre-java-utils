@@ -7,23 +7,19 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
+import java.util.Calendar;
 
-import net.oauth.jsontoken.JsonToken;
-
+import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.gson.JsonObject;
+import com.google.common.collect.ImmutableMap;
 import com.livefyre.Livefyre;
+import com.livefyre.config.LfTest;
 import com.livefyre.utils.LivefyreJwtUtil;
 
-public class SiteTest {
-    private static final String CHECKSUM = "6e2e4faf7b95f896260fe695eafb34ba";
-    private static final String NETWORK_NAME = "<NETWORK-NAME>";
-    private static final String NETWORK_KEY = "<NETWORK-KEY>";
-    private static final String SITE_ID = "<SITE-ID>";
-    private static final String SITE_KEY = "<SITE-KEY>";
-    private static final String ARTICLE_ID = "<ARTICLE-ID>";
+public class SiteTest extends LfTest {
+    private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
 
     @Test
     @Ignore
@@ -34,19 +30,22 @@ public class SiteTest {
         
         assertNotNull(collectionContent);
         
-        JsonObject collectionJson = site.getCollectionContentJson(ARTICLE_ID);
+        JSONObject collectionJson = site.getCollectionContentJson(ARTICLE_ID);
         
         assertNotNull(collectionJson);
     }
     
     @Test
     @Ignore
-    public void testGetCollectionId() {
+    public void testCreateCollection() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         Site site = network.getSite(SITE_ID, SITE_KEY);
-        String id = site.getCollectionId(ARTICLE_ID);
+        String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
+
+        String id = site.createCollection(name, name, "http://answers.livefyre.com/JAVA", null);
+        String otherId = site.getCollectionId(name);
         
-        assertNotNull(id);
+        assertEquals(otherId, id);
     }
     
     @Test
@@ -69,43 +68,46 @@ public class SiteTest {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         try {
-            site.buildCollectionMetaToken("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", "", null);
+            site.buildCollectionMetaToken("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", null);
             fail("titles longer than 255 char are not allowed");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "tet.com", "" , "");
+            site.buildCollectionMetaToken("", "", "tet.com", null);
             fail("url must start with valid url scheme (http:// or https://)");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "tet.com/", "", "");
+            site.buildCollectionMetaToken("", "", "tet.com/", null);
             fail("url must be a valid domain");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildCollectionMetaToken("", "", "http://www.test.com", "", "abc");
+            site.buildCollectionMetaToken("", "", "http://www.test.com", ImmutableMap.<String,Object>of("type", "abc"));
             fail("type must be of a known type");
         } catch (IllegalArgumentException e) {}
         
-        String token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "reviews");
+        site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", null); // checks the null map case
+
+        String token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", ImmutableMap.<String,Object>of("tags", "tags", "type", "reviews"));
         assertNotNull(token);
-        JsonToken decodedToken = null;
+        
+        JSONObject decodedToken = null;
         try {
-            decodedToken = LivefyreJwtUtil.decodeJwt(SITE_KEY, token);
+            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
         
-        assertEquals(decodedToken.getParamAsPrimitive("url").getAsString(), "http://www.livefyre.com");
-        assertEquals(decodedToken.getParamAsPrimitive("type").getAsString(), "reviews");
+        assertEquals(decodedToken.getString("url"), "http://www.livefyre.com");
+        assertEquals(decodedToken.getString("type"), "reviews");
         
-        token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", "tags", "liveblog");
+        token = site.buildCollectionMetaToken("title", "testId", "http://www.livefyre.com", ImmutableMap.<String,Object>of("type", "liveblog"));
         assertNotNull(token);
         try {
-            decodedToken = LivefyreJwtUtil.decodeJwt(SITE_KEY, token);
+            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't fail");
         }
         
-        assertEquals(decodedToken.getParamAsPrimitive("type").getAsString(), "liveblog");
+        assertEquals(decodedToken.getString("type"), "liveblog");
     }
     
     @Test
@@ -144,15 +146,15 @@ public class SiteTest {
     public void testNullChecks() {
         Site site = new Site(new Network(NETWORK_NAME, NETWORK_KEY), SITE_ID, SITE_KEY);
         try {
-            site.buildCollectionMetaToken(null, null, null, null, null);
+            site.buildCollectionMetaToken(null, null, null, null);
             fail("title cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.buildCollectionMetaToken("", null, null, null, null);
+            site.buildCollectionMetaToken("", null, null, null);
             fail("articleId cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.buildCollectionMetaToken("", "", null, null, null);
+            site.buildCollectionMetaToken("", "", null, null);
             fail("url cannot be null");
         } catch(NullPointerException e) {}
         try {

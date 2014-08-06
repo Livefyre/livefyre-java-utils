@@ -1,35 +1,44 @@
-package com.livefyre.api.entity;
+package com.livefyre.entity;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import org.json.JSONObject;
 
 import com.livefyre.core.LfCore;
 
-@XmlRootElement()
 public class Topic {
-    private static final String TOPIC_IDEN = ":topic=";
+    private static final String TOPIC_IDENTIFIER = ":topic=";
     private String id;
     private String label;
     private Integer createdAt;
     private Integer modifiedAt;
     
-    /**
-     * Use the constructor with params to generate Topic objects. Otherwise id's (urns) will not be formed properly.
-     */
     public Topic() {}
     
-    public Topic(LfCore core, String id, String label) {
-        this.id = Topic.generateUrn(core, id);
+    public Topic(String id, String label, Integer createdAt, Integer modifiedAt) {
+        this.id = id;
         this.label = label;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+    }
+    
+    /**
+     * Use this method to generate Topic objects. Otherwise id's (urns) will not be formed properly.
+     */
+    public static Topic create(LfCore core, String id, String label) {
+        return new Topic(generateUrn(core, id), label, null, null);
     }
     
     public static String generateUrn(LfCore core, String id) {
-        return core.getUrn() + TOPIC_IDEN + id;
+        return core.getUrn() + TOPIC_IDENTIFIER + id;
+    }
+
+    public static Topic serializeFromJson(JSONObject json) {
+        return new Topic(json.getString("id"), json.getString("label"), json.getInt("createdAt"), json.getInt("modifiedAt"));
     }
     
-    public String getTruncatedId() {
-        return id.substring(id.indexOf(TOPIC_IDEN) + TOPIC_IDEN.length());
+    public String truncatedId() {
+        return id.substring(id.indexOf(TOPIC_IDENTIFIER) + TOPIC_IDENTIFIER.length());
     }
     public Date getCreatedAtDate() {
         return new Date(createdAt.longValue()*1000);
@@ -37,6 +46,8 @@ public class Topic {
     public Date getModifiedAtDate() {
         return new Date(modifiedAt.longValue()*1000);
     }
+    
+    /* Getters/Setters */
     public String getId() {
         return id;
     }

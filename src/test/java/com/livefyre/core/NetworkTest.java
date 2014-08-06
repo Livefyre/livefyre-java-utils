@@ -8,12 +8,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.livefyre.Livefyre;
+import com.livefyre.config.LfTest;
 
-public class NetworkTest {
-    private static final String NETWORK_NAME = "<NETWORK-NAME>";
-    private static final String NETWORK_KEY = "<NETWORK-KEY>";
-    private static final String USER_SYNC_URL = "<USER-SYNC-URL>";
-    private static final String USER = "<USER>";
+public class NetworkTest extends LfTest {
+    private static final String USER_SYNC_URL = "<USER-SYNC-URL {id}>";
     
     @Test
     @Ignore
@@ -21,7 +19,7 @@ public class NetworkTest {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
         assertTrue(network.setUserSyncUrl(USER_SYNC_URL));
-        assertTrue(network.syncUser(USER));
+        assertTrue(network.syncUser(USER_ID));
     }
     
     @Test
