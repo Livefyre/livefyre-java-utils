@@ -27,7 +27,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
-public class PersonalizedStreamsClient {
+public class PersonalizedStream {
 
     private static final String BASE_URL = "https://%s.quill.fyre.co/api/v4";
     private static final String STREAM_BASE_URL = "https://bootstrap.livefyre.com/api/v4";

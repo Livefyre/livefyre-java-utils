@@ -7,7 +7,7 @@ import java.util.TimeZone;
 
 import org.json.JSONObject;
 
-import com.livefyre.api.client.PersonalizedStreamsClient;
+import com.livefyre.api.client.PersonalizedStream;
 import com.livefyre.core.LfCore;
 
 /**
@@ -40,7 +40,7 @@ public class TimelineCursor {
     }
     
     public JSONObject next(int limit) {
-        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, null, cursorTime);
+        JSONObject data = PersonalizedStream.getTimelineStream(core, resource, limit, null, cursorTime);
         JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
         
         next = cursor.getBoolean("hasNext");
@@ -55,7 +55,7 @@ public class TimelineCursor {
     }
     
     public JSONObject previous(int limit) {
-        JSONObject data = PersonalizedStreamsClient.getTimelineStream(core, resource, limit, cursorTime, null);
+        JSONObject data = PersonalizedStream.getTimelineStream(core, resource, limit, cursorTime, null);
         JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
         
         previous = cursor.getBoolean("hasPrev");
