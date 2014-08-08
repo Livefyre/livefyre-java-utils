@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.livefyre.api.client.Domain;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.repackaged.apache.commons.Base64;
@@ -93,7 +94,7 @@ public class Site implements LfCore {
     public String createCollection(String title, String articleId, String url, Map<String, Object> options) {
         String token = buildCollectionMetaToken(title, articleId, url, options);
         String checksum =  buildChecksum(title, url, (options != null && options.containsKey("tags")) ? options.get("tags").toString() : null);
-        String uri = String.format("https://%s.quill.fyre.co/api/v3.0/site/%s/collection/create/", getNetworkName(), id);
+        String uri = String.format("%s/api/v3.0/site/%s/collection/create/", Domain.quill(this), id);
         String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
         
         ClientResponse response = Client.create()
@@ -117,7 +118,7 @@ public class Site implements LfCore {
         checkNotNull(articleId);
 
         String b64articleId = Base64.encodeBase64URLSafeString(articleId.getBytes());
-        String url = String.format("https://bootstrap.livefyre.com/bs3/%s/%s/%s/init", network.getName(), id, b64articleId);
+        String url = String.format("%s/bs3/%s/%s/%s/init", Domain.bootstrap(this), network.getName(), id, b64articleId);
 
         ClientResponse response = Client.create()
                 .resource(url)

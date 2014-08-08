@@ -24,6 +24,7 @@ public class Network implements LfCore {
     
     private String name = null;
     private String key = null;
+    private boolean ssl = true;
     private String networkName = null;
     
     public Network(String name, String key) {
@@ -115,4 +116,6 @@ public class Network implements LfCore {
     protected void setName(String name) { this.name = name; }
     public String getKey() { return key; }
     protected void setKey(String key) { this.key = key; }
+    public boolean isSsl() { return ssl; }
+    public void setSsl(boolean ssl) { this.ssl = ssl; }
 }

@@ -4,3 +4,5 @@ target
 *.prefs
 
 Makefile
+
+test.properties

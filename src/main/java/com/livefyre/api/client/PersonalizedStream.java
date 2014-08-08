@@ -29,8 +29,8 @@ import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
 public class PersonalizedStream {
 
-    private static final String BASE_URL = "https://%s.quill.fyre.co/api/v4";
-    private static final String STREAM_BASE_URL = "https://bootstrap.livefyre.com/api/v4";
+    private static final String BASE_URL = "%s/api/v4";
+    private static final String STREAM_BASE_URL = "%s/api/v4";
     
     private static final String TOPIC_PATH = "/%s/";
     private static final String MULTIPLE_TOPIC_PATH = "/%s:topics/";
@@ -319,11 +319,11 @@ public class PersonalizedStream {
     }
     
     private static WebResource builder(LfCore core, String userToken) {
-        return client(core, userToken).resource(String.format(BASE_URL, core.getNetworkName()));
+        return client(core, userToken).resource(String.format(BASE_URL, Domain.quill(core), core.getNetworkName()));
     }
     
     private static WebResource streamBuilder(LfCore core) {
-        return client(core, null).resource(STREAM_BASE_URL);
+        return client(core, null).resource(String.format(STREAM_BASE_URL, Domain.bootstrap(core)));
     }
 
     private static Client client(LfCore core, String userToken) {

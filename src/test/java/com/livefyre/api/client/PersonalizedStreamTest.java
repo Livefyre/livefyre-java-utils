@@ -32,6 +32,7 @@ public class PersonalizedStreamTest extends LfTest {
     @Before
     public void setup() {
         network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+//        network.setSsl(false);
         site = network.getSite(SITE_ID, SITE_KEY);
         
         this.userToken = network.buildUserAuthToken(USER_ID, USER_ID + "@" + NETWORK_NAME, Network.DEFAULT_EXPIRES);
