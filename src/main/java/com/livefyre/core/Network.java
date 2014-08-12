@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
+import com.livefyre.api.client.Domain;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
@@ -37,7 +38,7 @@ public class Network implements LfCore {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
         ClientResponse response = Client.create()
-                .resource(String.format("http://%s/", name))
+                .resource(String.format("%s/", Domain.quill(this)))
                 .queryParam("actor_token", buildLivefyreToken())
                 .queryParam("pull_profile_url", urlTemplate)
                 .post(ClientResponse.class);
@@ -47,7 +48,7 @@ public class Network implements LfCore {
     public boolean syncUser(String userId) {
         checkNotNull(userId);
         
-        String url = String.format("http://%s/api/v3_0/user/%s/refresh", name, userId);
+        String url = String.format("%s/api/v3_0/user/%s/refresh", Domain.quill(this), userId);
         ClientResponse response = Client.create()
                 .resource(url)
                 .queryParam("lftoken", buildLivefyreToken())
