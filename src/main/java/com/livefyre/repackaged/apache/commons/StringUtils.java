@@ -25,7 +25,7 @@ package com.livefyre.repackaged.apache.commons;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.commons.lang.CharEncoding;
+import com.livefyre.repackaged.apache.commons.codec.CharEncoding;
 
 /**
  * Converts String to and from bytes using the encodings required by the Java specification. These encodings are specified in <a

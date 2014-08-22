@@ -1,3 +1,7 @@
+=== 1.3.3 2014-08-22
+
+* Added padding for base64 encode.
+
 === 1.3.2 2014-08-11
 
 * Added the of the API calls be to SSL toggleable.

@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
@@ -118,6 +119,9 @@ public class Site implements LfCore {
         checkNotNull(articleId);
 
         String b64articleId = Base64.encodeBase64URLSafeString(articleId.getBytes());
+        if (b64articleId.length() % 4 != 0) { 
+            b64articleId = b64articleId + StringUtils.repeat("=", b64articleId.length() % 4);
+        }
         String url = String.format("%s/bs3/%s/%s/%s/init", Domain.bootstrap(this), network.getName(), id, b64articleId);
 
         ClientResponse response = Client.create()
