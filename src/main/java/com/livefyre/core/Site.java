@@ -120,7 +120,7 @@ public class Site implements LfCore {
 
         String b64articleId = Base64.encodeBase64URLSafeString(articleId.getBytes());
         if (b64articleId.length() % 4 != 0) { 
-            b64articleId = b64articleId + StringUtils.repeat("=", b64articleId.length() % 4);
+            b64articleId = b64articleId + StringUtils.repeat("=", 4 - (b64articleId.length() % 4));
         }
         String url = String.format("%s/bs3/%s/%s/%s/init", Domain.bootstrap(this), network.getName(), id, b64articleId);
 

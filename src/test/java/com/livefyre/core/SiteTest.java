@@ -24,8 +24,7 @@ public class SiteTest extends LfTest {
     @Test
     @Ignore
     public void testGetCollectionInfo() {
-        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-        Site site = network.getSite(SITE_ID, SITE_KEY);
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String collectionContent = site.getCollectionContent(ARTICLE_ID);
         
         assertNotNull(collectionContent);
@@ -38,8 +37,7 @@ public class SiteTest extends LfTest {
     @Test
     @Ignore
     public void testCreateCollection() {
-        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-        Site site = network.getSite(SITE_ID, SITE_KEY);
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
 
         String id = site.createCollection(name, name, "http://answers.livefyre.com/JAVA", null);
