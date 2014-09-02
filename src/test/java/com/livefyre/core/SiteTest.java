@@ -20,7 +20,7 @@ import com.livefyre.config.LfTest;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class SiteTest extends LfTest {
-    private static final String CHECKSUM = "bdbb0d238b8e8d46fc244cc8db70d935";
+    private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
 
     @Test
     @Ignore

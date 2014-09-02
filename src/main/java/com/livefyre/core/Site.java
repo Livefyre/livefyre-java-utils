@@ -84,15 +84,15 @@ public class Site implements LfCore {
         checkArgument(isValidFullUrl(checkNotNull(url)),
             "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
 
-        Map<String, Object> map = Maps.newTreeMap();
+        Map<String, Object> attr = Maps.newTreeMap();
         if (options != null) { 
-            map.putAll(options);
+            attr.putAll(options);
         }
-        map.put("url", url);
-        map.put("title", "title");
+        attr.put("url", url);
+        attr.put("title", "title");
         
         try {
-            JSONObject json = new JSONObject(options);
+            JSONObject json = new JSONObject(attr);
             byte[] digest = MessageDigest.getInstance("MD5").digest(json.toString().getBytes());
             return printHexBinary(digest);
         } catch (NoSuchAlgorithmException e) {
