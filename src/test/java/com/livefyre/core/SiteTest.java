@@ -14,12 +14,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.livefyre.Livefyre;
 import com.livefyre.config.LfTest;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class SiteTest extends LfTest {
-    private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
+    private static final String CHECKSUM = "bdbb0d238b8e8d46fc244cc8db70d935";
 
     @Test
     @Ignore
@@ -36,12 +37,16 @@ public class SiteTest extends LfTest {
     
     @Test
     @Ignore
-    public void testCreateCollection() {
+    public void testCreateUpdateCollection() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
 
         String id = site.createCollection(name, name, "http://answers.livefyre.com/JAVA", null);
         String otherId = site.getCollectionId(name);
+        
+        assertEquals(otherId, id);
+
+        id = site.createOrUpdateCollection(name, name, "http://answers.livefyre.com/JAVA", ImmutableMap.<String, Object>of("tags", "super"));
         
         assertEquals(otherId, id);
     }
@@ -113,15 +118,15 @@ public class SiteTest extends LfTest {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         try {
-            site.buildChecksum("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "");
+            site.buildChecksum("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", Maps.<String, Object>newHashMap());
             fail("titles longer than 255 char are not allowed");
         } catch (IllegalArgumentException e) {}
         try {
-            site.buildChecksum("", "tet.com", "");
+            site.buildChecksum("", "tet.com", Maps.<String, Object>newHashMap());
             fail("url must start with valid url scheme (http:// or https://)");
         } catch (IllegalArgumentException e) {}
         
-        String checksum = site.buildChecksum("title", "https://www.url.com", "tags");
+        String checksum = site.buildChecksum("title", "https://www.url.com", ImmutableMap.<String, Object>of("tags", "tags"));
         assertNotNull(checksum);
         assertEquals(CHECKSUM, checksum);
     }

@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -71,20 +72,27 @@ public class Site implements LfCore {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
         }
     }
-
+    
+    @Deprecated
+    /** Use buildChecksum(String, String, Map) instead. */
     public String buildChecksum(String title, String url, String tags) {
+        return buildChecksum(title, url, ImmutableMap.<String, Object>of("tags", tags));
+    }
+
+    public String buildChecksum(String title, String url, Map<String, Object> options) {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkArgument(isValidFullUrl(checkNotNull(url)),
             "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
 
-        String t = tags == null ? "" : tags;
-
+        Map<String, Object> map = Maps.newTreeMap();
+        if (options != null) { 
+            map.putAll(options);
+        }
+        map.put("url", url);
+        map.put("title", "title");
+        
         try {
-            JSONObject json = new JSONObject();
-            json.put("url", url);
-            json.put("tags", t);
-            json.put("title", title);
-            
+            JSONObject json = new JSONObject(options);
             byte[] digest = MessageDigest.getInstance("MD5").digest(json.toString().getBytes());
             return printHexBinary(digest);
         } catch (NoSuchAlgorithmException e) {
@@ -94,10 +102,32 @@ public class Site implements LfCore {
     
     public String createCollection(String title, String articleId, String url, Map<String, Object> options) {
         String token = buildCollectionMetaToken(title, articleId, url, options);
-        String checksum =  buildChecksum(title, url, (options != null && options.containsKey("tags")) ? options.get("tags").toString() : null);
-        String uri = String.format("%s/api/v3.0/site/%s/collection/create/", Domain.quill(this), id);
+        String checksum =  buildChecksum(title, url, options);
         String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
         
+        return modifyCollection(form, "create");
+    }
+    
+    public String createOrUpdateCollection(String title, String articleId, String url, Map<String, Object> options) {
+        String token = buildCollectionMetaToken(title, articleId, url, options);
+        String checksum =  buildChecksum(title, url, options);
+        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
+        
+        try {
+            return modifyCollection(form, "create");
+        } catch (LivefyreException e) {
+            // check status returned, if 409, try updating instead
+            CharMatcher ASCII_DIGITS=CharMatcher.inRange('0','9').precomputed();  
+            
+            if ("409".equals(ASCII_DIGITS.retainFrom(e.toString()))) {
+                return modifyCollection(form, "update");
+            }
+            throw e;
+        }
+    }
+    
+    private String modifyCollection(String form, String method) {
+        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), id, method);
         ClientResponse response = Client.create()
                 .resource(uri)
                 .queryParam("sync", "1")
@@ -105,10 +135,10 @@ public class Site implements LfCore {
                 .type(MediaType.APPLICATION_JSON)
                 .post(ClientResponse.class, form);
         
-        if (response.getStatus() != 200) {
-            throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
+        if (response.getStatus() == 200) {
+            return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
         }
-        return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
+        throw new LivefyreException("Error creating/updating Livefyre collection. Status code: " + response.getStatus());
     }
     
     public JSONObject getCollectionContentJson(String articleId) {
