@@ -21,7 +21,7 @@ import com.livefyre.config.UnitTest;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class CollectionTest extends LfTest {
-    private static final String CHECKSUM = "bdbb0d238b8e8d46fc244cc8db70d935";
+    private static final String CHECKSUM = "f99927e6dfd7203f51a3d290d9947290";
 
     @Test
     @Category(IntegrationTest.class)

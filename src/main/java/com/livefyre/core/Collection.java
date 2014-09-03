@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.Domain;
 import com.livefyre.exceptions.LivefyreException;
@@ -109,18 +108,18 @@ public class Collection {
         attr.put("url", url);
         attr.put("title", title);
         
-        return new JSONObject(options);
+        return new JSONObject(attr);
     }
     
     /** 
      * @return a JSONObject that contains the collection's article id, checksum, and encrypted token.
      */
     public JSONObject getPayload() {
-        JSONObject json = new JSONObject(
-                ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", buildCollectionMetaToken(), "checksum", buildChecksum()));
-//        json.put("articleId", articleId);
-//        json.put("checksum", buildChecksum());
-//        json.put("collectionMeta", buildCollectionMetaToken());
+        JSONObject json = new JSONObject();
+//                ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", buildCollectionMetaToken(), "checksum", buildChecksum()));
+        json.put("articleId", articleId);
+        json.put("checksum", buildChecksum());
+        json.put("collectionMeta", buildCollectionMetaToken());
         return json;
     }
 
