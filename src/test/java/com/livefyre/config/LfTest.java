@@ -36,7 +36,7 @@ public class LfTest {
             ARTICLE_ID = prop.getProperty(prefix+"ARTICLE_ID");
             return;
         } catch (IOException e) {
-            System.err.println("Issue loading file.");
+            // file missing. continue.
         }
         
      // CIRCLE CI

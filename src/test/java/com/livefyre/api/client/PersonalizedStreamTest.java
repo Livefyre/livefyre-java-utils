@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -35,7 +36,6 @@ public class PersonalizedStreamTest extends LfTest {
     @Before
     public void setup() {
         network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-        network.setSsl(false);
         site = network.getSite(SITE_ID, SITE_KEY);
         
         this.userToken = network.buildUserAuthToken(USER_ID, USER_ID + "@" + NETWORK_NAME, Network.DEFAULT_EXPIRES);
@@ -171,6 +171,7 @@ public class PersonalizedStreamTest extends LfTest {
     }
     
     @Test
+    @Ignore
     public void testTimelineStream() {
         Topic topic = PersonalizedStream.createOrUpdateTopic(network, "TOPIC", "LABEL");
         JSONObject test = PersonalizedStream.getTimelineStream(network, topic.getId() +":topicStream", 50, null, null);
