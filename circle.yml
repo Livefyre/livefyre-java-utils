@@ -1,5 +1,5 @@
 deployment:
   production:
     branch: 1.4.0
-    override:
+    commands:
       - mvn clean deploy
