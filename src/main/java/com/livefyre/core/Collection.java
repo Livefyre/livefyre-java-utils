@@ -59,6 +59,7 @@ public class Collection {
         this.options = options == null ? Maps.<String, Object> newHashMap() : options;
     }
     
+    //createOrUpdate instead?
     public Collection create() {
         ClientResponse response = invokeCollectionApi("create");
         if (response.getStatus() == 200) {
@@ -72,19 +73,12 @@ public class Collection {
     }
     
     public Collection update() {
-        ClientResponse response = invokeCollectionApi("create");
+        ClientResponse response = invokeCollectionApi("update");
         if (response.getStatus() == 200) {
-            setCollectionId(new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId"));
             return this;
         }
-        if (response.getStatus() == 409) {
-            response = invokeCollectionApi("update");
-
-            if (response.getStatus() == 200) {
-                return this;
-            }
-        }
-        throw new LivefyreException("Error creating/updating Livefyre collection. Status code: " + response.getStatus());
+        
+        throw new LivefyreException("Error updating Livefyre collection. Status code: " + response.getStatus());
     }
     
     public String buildCollectionMetaToken() {
@@ -164,8 +158,7 @@ public class Collection {
     public Site getSite() { return site; }
     protected void setSite(Site site) { this.site = site; }
     public String getCollectionId() { return collectionId; }
-    /* This method should not be used without referring to Livefyre API. */
-    public void setCollectionId(String collectionId) { this.collectionId = collectionId; }
+    protected void setCollectionId(String collectionId) { this.collectionId = collectionId; }
     public String getArticleId() { return articleId; }
     public Collection setArticleId(String articleId) { this.articleId = articleId; return this; }
     public String getTitle() { return title; }

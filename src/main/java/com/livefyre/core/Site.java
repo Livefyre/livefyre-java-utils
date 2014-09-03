@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
@@ -27,8 +28,9 @@ public class Site implements LfCore {
         this.key = checkNotNull(key);
     }
     
-    public Collection createCollection(String name, String name2, String string, Object object) {
-        return new Collection(this, "", "", "", null).create();
+    public Collection createCollection(String articleId, String title, String url, Map<String, Object> options) {
+        //just have client create/update?
+        return new Collection(this, articleId, title, url, options).create();
     }
     
     public JSONObject getCollectionContentJson(String articleId) {
