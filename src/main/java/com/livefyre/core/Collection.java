@@ -10,13 +10,18 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
+
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.livefyre.api.client.Domain;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 
 public class Collection {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
@@ -55,42 +60,33 @@ public class Collection {
     }
     
     public Collection create() {
-        return this;
+        ClientResponse response = invokeCollectionApi("create");
+        if (response.getStatus() == 200) {
+            setCollectionId(new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString(
+                    "collectionId"));
+            return this;
+        } else if (response.getStatus() == 409) {
+            throw new LivefyreException("Error: Collection already exists.");
+        }
+        throw new LivefyreException("Error creating Livefyre collection. Status code: " + response.getStatus());
     }
     
     public Collection update() {
-        return this;
+        ClientResponse response = invokeCollectionApi("create");
+        if (response.getStatus() == 200) {
+            setCollectionId(new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId"));
+            return this;
+        }
+        if (response.getStatus() == 409) {
+            response = invokeCollectionApi("update");
+
+            if (response.getStatus() == 200) {
+                return this;
+            }
+        }
+        throw new LivefyreException("Error creating/updating Livefyre collection. Status code: " + response.getStatus());
     }
     
-//    public Collection createCollection(String title, String articleId, String url, Map<String, Object> options) {
-//        Collection collection = new Collection(this, title, articleId, url, options);
-//        
-//        ClientResponse response =  invokeCollectionApi(collection, "create");
-//        if (response.getStatus() == 200) {
-//            collection.setCollectionId(new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId"));
-//            return collection; 
-//        } else if (response.getStatus() == 409) {
-//            throw new LivefyreException("Error: Collection already exists.");
-//        }
-//        throw new LivefyreException("Error creating Livefyre collection. Status code: " + response.getStatus());
-//    }
-//    
-//    public Collection createOrUpdateCollection(Collection collection) {
-//        ClientResponse response = invokeCollectionApi(collection, "create");
-//        if (response.getStatus() == 200) {
-//            collection.setCollectionId(new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId"));
-//            return collection;
-//        }
-//        if (response.getStatus() == 409) {
-//            response = invokeCollectionApi(collection, "update");
-//
-//            if (response.getStatus() == 200) {
-//                return collection;
-//            }
-//        }
-//        throw new LivefyreException("Error creating/updating Livefyre collection. Status code: " + response.getStatus());
-//    }
-
     public String buildCollectionMetaToken() {
         try {
             JSONObject json = getJson();
@@ -141,6 +137,17 @@ public class Collection {
             return false;
         }
         return true;
+    }
+
+    private ClientResponse invokeCollectionApi(String method) {
+        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(site), site.getId(), method);
+        ClientResponse response = Client.create()
+                .resource(uri)
+                .queryParam("sync", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(ClientResponse.class, getPayload());
+        return response;
     }
 
     private static final char[] hexCode = "0123456789abcdef".toCharArray();

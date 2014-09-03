@@ -28,7 +28,7 @@ public class LivefyreJwtUtilTest extends LfTest {
         );
         
         try {
-            token = LivefyreJwtUtil.encodeLivefyreJwt(NETWORK_KEY, data);
+            token = LivefyreJwtUtil.serializeAndSign(NETWORK_KEY, new JSONObject(data));
             json = LivefyreJwtUtil.decodeLivefyreJwt(NETWORK_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't be an issue encoding/decoding");

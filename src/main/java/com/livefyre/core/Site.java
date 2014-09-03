@@ -73,17 +73,6 @@ public class Site implements LfCore {
         return true;
     }
     
-    private ClientResponse invokeCollectionApi(Collection collection, String method) {
-        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), id, method);
-        ClientResponse response = Client.create()
-                .resource(uri)
-                .queryParam("sync", "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, collection.getPayload());
-        return response;
-    }
-    
     /* Getters/Setters */
     public String buildLivefyreToken() { return network.buildLivefyreToken(); }
     public String getNetworkName() { return network.getNetworkName(); }
