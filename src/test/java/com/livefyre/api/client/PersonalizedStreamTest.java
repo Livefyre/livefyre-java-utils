@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -21,7 +20,6 @@ import com.livefyre.core.Site;
 import com.livefyre.entity.Subscription;
 import com.livefyre.entity.Topic;
 
-@Ignore
 public class PersonalizedStreamTest extends LfTest {
     private Network network;
     private Site site;
@@ -32,7 +30,7 @@ public class PersonalizedStreamTest extends LfTest {
     @Before
     public void setup() {
         network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-//        network.setSsl(false);
+        network.setSsl(false);
         site = network.getSite(SITE_ID, SITE_KEY);
         
         this.userToken = network.buildUserAuthToken(USER_ID, USER_ID + "@" + NETWORK_NAME, Network.DEFAULT_EXPIRES);

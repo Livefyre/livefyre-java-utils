@@ -15,7 +15,7 @@ public class LfTest {
     protected String ARTICLE_ID = "<ARTICLE-ID>";
     
     public LfTest() {
-        setPropValues(LfEnvironments.PROD);
+        setPropValues(LfEnvironments.QA);
     }
     
     public void setPropValues(LfEnvironments env) {

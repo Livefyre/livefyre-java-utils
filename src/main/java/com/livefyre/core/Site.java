@@ -1,39 +1,22 @@
 package com.livefyre.core;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.livefyre.api.client.Domain;
 import com.livefyre.exceptions.LivefyreException;
-import com.livefyre.exceptions.TokenException;
 import com.livefyre.repackaged.apache.commons.Base64;
-import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class Site implements LfCore {
-    private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
-    private static final ImmutableList<String> TYPE = ImmutableList.of(
-        "reviews", "sidenotes", "ratings", "counting",
-        "liveblog", "livechat", "livecomments", ""
-    );
-
     private Network network = null;
     private String id = null;
     private String key = null;
@@ -44,101 +27,8 @@ public class Site implements LfCore {
         this.key = checkNotNull(key);
     }
     
-    /**
-     * This method allows a variety of parameters/options to be passed in as a map.  Some examples are 'tags', 'type', 'extensions',
-     * 'tags', etc.  Please refer to http://answers.livefyre.com/developers/getting-started/tokens/collectionmeta/ for more info.
-     * 
-     * @param extras map of additional params to be included into the collection meta token.
-     */
-    public String buildCollectionMetaToken(String title, String articleId, String url, Map<String, Object> options) {
-        checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
-        checkNotNull(articleId);
-        checkArgument(isValidFullUrl(checkNotNull(url)), "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
-        
-        Map<String, Object> o = options == null ? Maps.<String, Object>newHashMap() : options;
-
-        if (o.containsKey("type") && !TYPE.contains(o.get("type"))) {
-            throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " +TYPE.toString());
-        }
-        
-        Map<String, Object> data = Maps.newHashMap(o);
-        data.put("url", url);
-        data.put("title", title);
-        data.put("articleId", articleId);
-        
-        try {
-            return LivefyreJwtUtil.encodeLivefyreJwt(key, data);
-        } catch (InvalidKeyException e) {
-            throw new TokenException(TOKEN_FAILURE_MSG + e);
-        }
-    }
-    
-    @Deprecated
-    /** Use buildChecksum(String, String, Map) instead. */
-    public String buildChecksum(String title, String url, String tags) {
-        return buildChecksum(title, url, ImmutableMap.<String, Object>of("tags", tags));
-    }
-
-    public String buildChecksum(String title, String url, Map<String, Object> options) {
-        checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
-        checkArgument(isValidFullUrl(checkNotNull(url)),
-            "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
-
-        Map<String, Object> attr = Maps.newTreeMap();
-        if (options != null) { 
-            attr.putAll(options);
-        }
-        attr.put("url", url);
-        attr.put("title", "title");
-        
-        try {
-            JSONObject json = new JSONObject(attr);
-            byte[] digest = MessageDigest.getInstance("MD5").digest(json.toString().getBytes());
-            return printHexBinary(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw new LivefyreException("Failure creating checksum." + e);
-        }
-    }
-    
-    public String createCollection(String title, String articleId, String url, Map<String, Object> options) {
-        String token = buildCollectionMetaToken(title, articleId, url, options);
-        String checksum =  buildChecksum(title, url, options);
-        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
-        
-        return modifyCollection(form, "create");
-    }
-    
-    public String createOrUpdateCollection(String title, String articleId, String url, Map<String, Object> options) {
-        String token = buildCollectionMetaToken(title, articleId, url, options);
-        String checksum =  buildChecksum(title, url, options);
-        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
-        
-        try {
-            return modifyCollection(form, "create");
-        } catch (LivefyreException e) {
-            // check status returned, if 409, try updating instead
-            CharMatcher ASCII_DIGITS=CharMatcher.inRange('0','9').precomputed();  
-            
-            if ("409".equals(ASCII_DIGITS.retainFrom(e.toString()))) {
-                return modifyCollection(form, "update");
-            }
-            throw e;
-        }
-    }
-    
-    private String modifyCollection(String form, String method) {
-        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), id, method);
-        ClientResponse response = Client.create()
-                .resource(uri)
-                .queryParam("sync", "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, form);
-        
-        if (response.getStatus() == 200) {
-            return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
-        }
-        throw new LivefyreException("Error creating/updating Livefyre collection. Status code: " + response.getStatus());
+    public Collection createCollection(String name, String name2, String string, Object object) {
+        return new Collection(this, "", "", "", null).create();
     }
     
     public JSONObject getCollectionContentJson(String articleId) {
@@ -183,15 +73,15 @@ public class Site implements LfCore {
         return true;
     }
     
-    private static final char[] hexCode = "0123456789abcdef".toCharArray();
-    
-    private String printHexBinary(byte[] data) {
-        StringBuilder r = new StringBuilder(data.length * 2);
-        for (byte b : data) {
-            r.append(hexCode[(b >> 4) & 0xF]);
-            r.append(hexCode[(b & 0xF)]);
-        }
-        return r.toString();
+    private ClientResponse invokeCollectionApi(Collection collection, String method) {
+        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), id, method);
+        ClientResponse response = Client.create()
+                .resource(uri)
+                .queryParam("sync", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(ClientResponse.class, collection.getPayload());
+        return response;
     }
     
     /* Getters/Setters */

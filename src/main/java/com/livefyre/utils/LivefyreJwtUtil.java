@@ -3,7 +3,6 @@ package com.livefyre.utils;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,11 +18,7 @@ public class LivefyreJwtUtil {
 
     /* Prevent instantiation */
     private LivefyreJwtUtil() { }
-
-    public static String encodeLivefyreJwt(String key, Map<String, Object> data) throws InvalidKeyException {
-        return serializeAndSign(key, new JSONObject(data));
-    }
-
+    
     public static JSONObject decodeLivefyreJwt(String secret, String jwt) throws InvalidKeyException {
         try {
             final SecretKeySpec secret_key = new SecretKeySpec(secret.getBytes(), ALGORITHM);
@@ -43,7 +38,7 @@ public class LivefyreJwtUtil {
         }
     }
     
-    private static String serializeAndSign(String key, JSONObject data) throws InvalidKeyException {
+    public static String serializeAndSign(String key, JSONObject data) throws InvalidKeyException {
         try {
             JSONObject header = new JSONObject();
             header.put("alg", "HS256");

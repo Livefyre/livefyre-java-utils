@@ -1,4 +1,4 @@
-=== 1.3.5 2014-09-02
+=== 1.4.0 2014-09-02
 
 * Added createOrUpdateCollection method.
 * Extended checksum to calculate based on an array of options.

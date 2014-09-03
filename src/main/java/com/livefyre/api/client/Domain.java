@@ -12,7 +12,7 @@ public class Domain {
     
     public static String bootstrap(LfCore core) {
         Network network = getNetworkFromCore(core);
-        return network.isSsl() ? "https://bootstrap.livefyre.com" : String.format("http://bootstrap.%s", network.getName());
+        return network.isSsl() ? String.format("https://%s.bootstrap.fyre.co", network.getNetworkName()) : String.format("http://%s.bootstrap.fyre.co", network.getNetworkName());
     }
 
     private static Network getNetworkFromCore(LfCore core) {

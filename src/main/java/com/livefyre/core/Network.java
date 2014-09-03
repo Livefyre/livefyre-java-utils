@@ -73,7 +73,7 @@ public class Network implements LfCore {
         );
         
         try {
-            return LivefyreJwtUtil.encodeLivefyreJwt(key, data);
+            return LivefyreJwtUtil.serializeAndSign(key, new JSONObject(data));
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure creating token." +e);
         }
