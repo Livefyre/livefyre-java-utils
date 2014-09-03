@@ -28,9 +28,11 @@ public class Site implements LfCore {
         this.key = checkNotNull(key);
     }
     
+    /**
+     * Creates and returns a Collection object. Be sure to call createOrUpdate() on it to notify Livefyre.
+     */
     public Collection createCollection(String articleId, String title, String url, Map<String, Object> options) {
-        //just have client create/update?
-        return new Collection(this, articleId, title, url, options).create();
+        return new Collection(this, articleId, title, url, options);
     }
     
     public JSONObject getCollectionContentJson(String articleId) {

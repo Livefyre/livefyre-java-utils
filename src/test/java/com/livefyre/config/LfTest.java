@@ -3,6 +3,7 @@ package com.livefyre.config;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 public class LfTest {
@@ -15,17 +16,32 @@ public class LfTest {
     protected String ARTICLE_ID = "<ARTICLE-ID>";
     
     public LfTest() {
-        setPropValues(LfEnvironments.QA);
+        // For local dev testing
+        setPropValues(LfEnvironments.PROD);
+
+        // CIRCLE CI
+        try {
+            Map<String, String> env = System.getenv();
+            
+            NETWORK_NAME = env.get("NETWORK_NAME");
+            NETWORK_KEY = env.get("NETWORK_KEY");
+            SITE_ID = env.get("SITE_ID");
+            SITE_KEY = env.get("SITE_KEY");
+            COLLECTION_ID = env.get("COLLECTION_ID");
+            USER_ID = env.get("USER_ID");
+            ARTICLE_ID = env.get("ARTICLE_ID");
+        } catch (NullPointerException e) {
+            System.err.println("Variables haven't been set anywhere!");
+        }
     }
     
     public void setPropValues(LfEnvironments env) {
-        Properties prop = new Properties();
-        String prefix = env.toString();
- 
         try {
+            String prefix = env.toString();
             InputStream inputStream = new FileInputStream("test.properties");
+            Properties prop = new Properties();
+
             prop.load(inputStream);
-            
             NETWORK_NAME = prop.getProperty(prefix+"NETWORK_NAME");
             NETWORK_KEY = prop.getProperty(prefix+"NETWORK_KEY");
             SITE_ID = prop.getProperty(prefix+"SITE_ID");

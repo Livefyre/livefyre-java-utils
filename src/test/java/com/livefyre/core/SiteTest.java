@@ -1,21 +1,20 @@
 package com.livefyre.core;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.util.Calendar;
-
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
+import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
+import com.livefyre.config.UnitTest;
 
 public class SiteTest extends LfTest {
     @Test
-    @Ignore
+    @Category(IntegrationTest.class)
     public void testGetCollectionInfo() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String collectionContent = site.getCollectionContent(ARTICLE_ID);
@@ -28,22 +27,7 @@ public class SiteTest extends LfTest {
     }
     
     @Test
-    @Ignore
-    public void testCreateUpdateCollection() {
-        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
-        String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
-
-        Collection collection = site.createCollection(name, name, "http://answers.livefyre.com/JAVA", null);
-        String otherId = site.getCollectionId(name);
-        
-        assertEquals(otherId, collection.getCollectionId());
-
-//        id = site.createOrUpdateCollection(name, name, "http://answers.livefyre.com/JAVA", ImmutableMap.<String, Object>of("tags", "super"));
-//        
-//        assertEquals(otherId, id);
-    }
-    
-    @Test
+    @Category(UnitTest.class)
     public void testSiteCreation() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         try {

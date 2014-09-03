@@ -6,16 +6,17 @@ import java.util.Calendar;
 
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
+import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
 import com.livefyre.core.Network;
 import com.livefyre.entity.TimelineCursor;
 import com.livefyre.factory.CursorFactory;
 
-@Ignore
+@Category(IntegrationTest.class)
 public class TimelineCursorTest extends LfTest {
     private Network network;
     

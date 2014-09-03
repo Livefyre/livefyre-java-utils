@@ -7,19 +7,40 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
+import java.util.Calendar;
 
 import org.json.JSONObject;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.google.common.collect.ImmutableMap;
 import com.livefyre.Livefyre;
+import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
+import com.livefyre.config.UnitTest;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class CollectionTest extends LfTest {
     private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testCreateUpdateCollection() {
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
+        String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
+
+        Collection collection = site.createCollection(name, name, "http://answers.livefyre.com/JAVA", null);
+        String otherId = site.getCollectionId(name);
+        
+        assertEquals(otherId, collection.getCollectionId());
+
+//        id = site.createOrUpdateCollection(name, name, "http://answers.livefyre.com/JAVA", ImmutableMap.<String, Object>of("tags", "super"));
+//        
+//        assertEquals(otherId, id);
+    }
     
     @Test
+    @Category(UnitTest.class)
     public void testSiteCollectionToken() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
@@ -68,6 +89,7 @@ public class CollectionTest extends LfTest {
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testSiteChecksum() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         Collection collection = site.createCollection("articleId", "title", "https://www.url.com", ImmutableMap.<String, Object>of("tags", "tags"));
@@ -77,6 +99,7 @@ public class CollectionTest extends LfTest {
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testSiteUrlChecker() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
@@ -90,6 +113,7 @@ public class CollectionTest extends LfTest {
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testNullChecks() {
         Site site = new Site(new Network(NETWORK_NAME, NETWORK_KEY), SITE_ID, SITE_KEY);
         try {

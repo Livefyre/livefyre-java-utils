@@ -38,10 +38,10 @@ public class Collection {
     private Map<String, Object> options;
 
     /**
-     * This method allows a variety of parameters/options to be passed in as a map.  Some examples are 'tags', 'type', 'extensions',
+     * Options accepts a map of key/value pairs for your Collection. Some examples are 'tags', 'type', 'extensions',
      * 'tags', etc.  Please refer to http://answers.livefyre.com/developers/getting-started/tokens/collectionmeta/ for more info.
      * 
-     * @param extras map of additional params to be included into the collection meta token.
+     * @param options map of additional params to be included into the collection meta token.
      */
     public Collection(Site site, String articleId, String title, String url, Map<String, Object> options) {
         checkNotNull(articleId);
@@ -59,26 +59,24 @@ public class Collection {
         this.options = options == null ? Maps.<String, Object> newHashMap() : options;
     }
     
-    //createOrUpdate instead?
-    public Collection create() {
+    /**
+     * Informs Livefyre to either create or update a collection based on the attributes of this Collection.
+     * @returns this
+     */
+    public Collection createOrUpdate() {
         ClientResponse response = invokeCollectionApi("create");
         if (response.getStatus() == 200) {
             setCollectionId(new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString(
                     "collectionId"));
             return this;
         } else if (response.getStatus() == 409) {
-            throw new LivefyreException("Error: Collection already exists.");
+            response = invokeCollectionApi("update");
+            if (response.getStatus() == 200) {
+                return this;
+            }
+            throw new LivefyreException("Error updating Livefyre collection. Status code: " + response.getStatus());
         }
         throw new LivefyreException("Error creating Livefyre collection. Status code: " + response.getStatus());
-    }
-    
-    public Collection update() {
-        ClientResponse response = invokeCollectionApi("update");
-        if (response.getStatus() == 200) {
-            return this;
-        }
-        
-        throw new LivefyreException("Error updating Livefyre collection. Status code: " + response.getStatus());
     }
     
     public String buildCollectionMetaToken() {

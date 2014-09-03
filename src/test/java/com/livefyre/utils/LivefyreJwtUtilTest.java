@@ -9,12 +9,14 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.google.common.collect.ImmutableMap;
 import com.livefyre.config.LfTest;
+import com.livefyre.config.UnitTest;
 
+@Category(UnitTest.class)
 public class LivefyreJwtUtilTest extends LfTest {
-
     @Test
     public void testJwtEncodeDecode() {
         String token = null;

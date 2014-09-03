@@ -10,16 +10,19 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.livefyre.Livefyre;
+import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
 import com.livefyre.entity.Subscription;
 import com.livefyre.entity.Topic;
 
+@Category(IntegrationTest.class)
 public class PersonalizedStreamTest extends LfTest {
     private Network network;
     private Site site;

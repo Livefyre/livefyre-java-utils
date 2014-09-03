@@ -4,17 +4,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
+import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
+import com.livefyre.config.UnitTest;
 
 public class NetworkTest extends LfTest {
     private static final String USER_SYNC_URL = "<USER-SYNC-URL {id}>";
     
     @Test
-    @Ignore
+    @Category(IntegrationTest.class)
     public void testSetUserSync() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
@@ -23,6 +25,7 @@ public class NetworkTest extends LfTest {
     }
     
     @Test
+    @Category(IntegrationTest.class)
     public void testNetworkCreation() {
         try {
             Livefyre.getNetwork("", null);
@@ -37,6 +40,7 @@ public class NetworkTest extends LfTest {
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testNetworkSetUserSyncId() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         try {
@@ -46,6 +50,7 @@ public class NetworkTest extends LfTest {
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testNetworkUserToken() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
@@ -61,6 +66,7 @@ public class NetworkTest extends LfTest {
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testNullChecks() {
         Network network = new Network("", "");
         network.setName(null);
