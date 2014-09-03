@@ -10,7 +10,6 @@ import java.security.InvalidKeyException;
 import java.util.Calendar;
 
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -23,7 +22,6 @@ public class SiteTest extends LfTest {
     private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
 
     @Test
-    @Ignore
     public void testGetCollectionInfo() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String collectionContent = site.getCollectionContent(ARTICLE_ID);
@@ -36,7 +34,6 @@ public class SiteTest extends LfTest {
     }
     
     @Test
-    @Ignore
     public void testCreateUpdateCollection() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String name = "JavaCreateCollection" + Calendar.getInstance().getTime();

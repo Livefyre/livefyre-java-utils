@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -85,11 +84,11 @@ public class Site implements LfCore {
             "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
 
         Map<String, Object> attr = Maps.newTreeMap();
+        attr.put("title", title);
+        attr.put("url", url);
         if (options != null) { 
             attr.putAll(options);
         }
-        attr.put("url", url);
-        attr.put("title", "title");
         
         try {
             JSONObject json = new JSONObject(attr);
@@ -101,44 +100,33 @@ public class Site implements LfCore {
     }
     
     public String createCollection(String title, String articleId, String url, Map<String, Object> options) {
-        String token = buildCollectionMetaToken(title, articleId, url, options);
-        String checksum =  buildChecksum(title, url, options);
-        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
+        String payload = getPayload(title, articleId, url, options);
         
-        return modifyCollection(form, "create");
+        ClientResponse response = modifyCollection(payload, "create");
+        if (response.getStatus() == 200) {
+            return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
+        } else if (response.getStatus() == 409) {
+            throw new LivefyreException("Error creating collection. Collection already exists.");
+        }
+        throw new LivefyreException("Error creating collection. Status code: " + response.getStatus());
     }
     
     public String createOrUpdateCollection(String title, String articleId, String url, Map<String, Object> options) {
-        String token = buildCollectionMetaToken(title, articleId, url, options);
-        String checksum =  buildChecksum(title, url, options);
-        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
+        String payload = getPayload(title, articleId, url, options);
         
-        try {
-            return modifyCollection(form, "create");
-        } catch (LivefyreException e) {
-            // check status returned, if 409, try updating instead
-            CharMatcher ASCII_DIGITS=CharMatcher.inRange('0','9').precomputed();  
-            
-            if ("409".equals(ASCII_DIGITS.retainFrom(e.toString()))) {
-                return modifyCollection(form, "update");
-            }
-            throw e;
-        }
-    }
-    
-    private String modifyCollection(String form, String method) {
-        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), id, method);
-        ClientResponse response = Client.create()
-                .resource(uri)
-                .queryParam("sync", "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, form);
-        
+        ClientResponse response = modifyCollection(payload, "create");
         if (response.getStatus() == 200) {
             return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
         }
-        throw new LivefyreException("Error creating/updating Livefyre collection. Status code: " + response.getStatus());
+        if (response.getStatus() != 409) {
+            throw new LivefyreException("Error creating collection. Status code: " + response.getStatus());
+        }
+        
+        response = modifyCollection(payload, "update");
+        if (response.getStatus() == 200) {
+            return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
+        }
+        throw new LivefyreException("Error updating collection. Status code: " + response.getStatus());
     }
     
     public JSONObject getCollectionContentJson(String articleId) {
@@ -181,6 +169,24 @@ public class Site implements LfCore {
             return false;
         }
         return true;
+    }
+    
+    private String getPayload(String title, String articleId, String url, Map<String, Object> options) {
+        String token = buildCollectionMetaToken(title, articleId, url, options);
+        String checksum =  buildChecksum(title, url, options);
+        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
+        return form;
+    }
+    
+    private ClientResponse modifyCollection(String payload, String method) {
+        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), id, method);
+        ClientResponse response = Client.create()
+                .resource(uri)
+                .queryParam("sync", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .post(ClientResponse.class, payload);
+        return response;
     }
     
     private static final char[] hexCode = "0123456789abcdef".toCharArray();
