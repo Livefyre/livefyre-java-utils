@@ -1,5 +1,0 @@
-test:
-  override:
-    - mvn clean install
-    - mvn test -Dtest=UnitTestSuite
-    - mvn test -Dtest=IntegrationTestSuite

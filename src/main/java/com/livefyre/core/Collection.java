@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.Domain;
 import com.livefyre.exceptions.LivefyreException;
@@ -48,7 +49,7 @@ public class Collection {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkArgument(isValidFullUrl(checkNotNull(url)),
                 "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
-        if (options.containsKey("type") && !TYPE.contains(options.get("type"))) {
+        if (options != null && (options.containsKey("type") && !TYPE.contains(options.get("type")))) {
             throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " + TYPE.toString());
         }
         
@@ -115,10 +116,11 @@ public class Collection {
      * @return a JSONObject that contains the collection's article id, checksum, and encrypted token.
      */
     public JSONObject getPayload() {
-        JSONObject json = new JSONObject();
-        json.put("articleId", articleId);
-        json.put("checksum", buildChecksum());
-        json.put("collectionMeta", buildCollectionMetaToken());
+        JSONObject json = new JSONObject(
+                ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", buildCollectionMetaToken(), "checksum", buildChecksum()));
+//        json.put("articleId", articleId);
+//        json.put("checksum", buildChecksum());
+//        json.put("collectionMeta", buildCollectionMetaToken());
         return json;
     }
 
@@ -138,7 +140,7 @@ public class Collection {
                 .queryParam("sync", "1")
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, getPayload());
+                .post(ClientResponse.class, getPayload().toString());
         return response;
     }
 

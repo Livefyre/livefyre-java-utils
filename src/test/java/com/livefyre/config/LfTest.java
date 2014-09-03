@@ -16,23 +16,7 @@ public class LfTest {
     protected String ARTICLE_ID = "<ARTICLE-ID>";
     
     public LfTest() {
-        // For local dev testing
         setPropValues(LfEnvironments.PROD);
-
-        // CIRCLE CI
-        try {
-            Map<String, String> env = System.getenv();
-            
-            NETWORK_NAME = env.get("NETWORK_NAME");
-            NETWORK_KEY = env.get("NETWORK_KEY");
-            SITE_ID = env.get("SITE_ID");
-            SITE_KEY = env.get("SITE_KEY");
-            COLLECTION_ID = env.get("COLLECTION_ID");
-            USER_ID = env.get("USER_ID");
-            ARTICLE_ID = env.get("ARTICLE_ID");
-        } catch (NullPointerException e) {
-            System.err.println("Variables haven't been set anywhere!");
-        }
     }
     
     public void setPropValues(LfEnvironments env) {
@@ -49,8 +33,24 @@ public class LfTest {
             COLLECTION_ID = prop.getProperty(prefix+"COLLECTION_ID");
             USER_ID = prop.getProperty(prefix+"USER_ID");
             ARTICLE_ID = prop.getProperty(prefix+"ARTICLE_ID");
+            return;
         } catch (IOException e) {
             System.err.println("Issue loading file.");
+        }
+        
+     // CIRCLE CI
+        try {
+            Map<String, String> sys = System.getenv();
+            
+            NETWORK_NAME = sys.get("NETWORK_NAME");
+            NETWORK_KEY = sys.get("NETWORK_KEY");
+            SITE_ID = sys.get("SITE_ID");
+            SITE_KEY = sys.get("SITE_KEY");
+            COLLECTION_ID = sys.get("COLLECTION_ID");
+            USER_ID = sys.get("USER_ID");
+            ARTICLE_ID = sys.get("ARTICLE_ID");
+        } catch (NullPointerException e) {
+            System.err.println("Variables haven't been set anywhere!");
         }
     }
     

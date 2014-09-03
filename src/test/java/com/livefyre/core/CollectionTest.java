@@ -21,7 +21,7 @@ import com.livefyre.config.UnitTest;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class CollectionTest extends LfTest {
-    private static final String CHECKSUM = "4464458a10c305693b5bf4d43a384be7";
+    private static final String CHECKSUM = "bdbb0d238b8e8d46fc244cc8db70d935";
 
     @Test
     @Category(IntegrationTest.class)
@@ -29,14 +29,12 @@ public class CollectionTest extends LfTest {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
 
-        Collection collection = site.createCollection(name, name, "http://answers.livefyre.com/JAVA", null);
+        Collection collection = site.buildCollection(name, name, "http://answers.livefyre.com/JAVA", null).createOrUpdate();
         String otherId = site.getCollectionId(name);
-        
         assertEquals(otherId, collection.getCollectionId());
 
-//        id = site.createOrUpdateCollection(name, name, "http://answers.livefyre.com/JAVA", ImmutableMap.<String, Object>of("tags", "super"));
-//        
-//        assertEquals(otherId, id);
+        Collection coll1 = collection.setOptions(ImmutableMap.<String, Object>of("tags", "super")).createOrUpdate();
+        assertEquals("super", coll1.getOptions().get("tags"));
     }
     
     @Test
@@ -45,25 +43,25 @@ public class CollectionTest extends LfTest {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         try {
-            site.createCollection("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", null);
+            site.buildCollection("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", null);
             fail("titles longer than 255 char are not allowed");
         } catch (IllegalArgumentException e) {}
         try {
-            site.createCollection("", "", "tet.com", null);
+            site.buildCollection("", "", "tet.com", null);
             fail("url must start with valid url scheme (http:// or https://)");
         } catch (IllegalArgumentException e) {}
         try {
-            site.createCollection("", "", "tet.com/", null);
+            site.buildCollection("", "", "tet.com/", null);
             fail("url must be a valid domain");
         } catch (IllegalArgumentException e) {}
         try {
-            site.createCollection("", "", "http://www.test.com", ImmutableMap.<String,Object>of("type", "abc"));
+            site.buildCollection("", "", "http://www.test.com", ImmutableMap.<String,Object>of("type", "abc"));
             fail("type must be of a known type");
         } catch (IllegalArgumentException e) {}
         
-        site.createCollection("title", "testId", "http://www.livefyre.com", null); // checks the null map case
+        site.buildCollection("title", "testId", "http://www.livefyre.com", null); // checks the null map case
 
-        String token = site.createCollection("title", "testId", "http://www.livefyre.com",
+        String token = site.buildCollection("title", "testId", "http://www.livefyre.com",
                 ImmutableMap.<String,Object>of("tags", "tags", "type", "reviews")).buildCollectionMetaToken();
         assertNotNull(token);
         
@@ -77,7 +75,7 @@ public class CollectionTest extends LfTest {
         assertEquals(decodedToken.getString("url"), "http://www.livefyre.com");
         assertEquals(decodedToken.getString("type"), "reviews");
         
-        token = site.createCollection("title", "testId", "http://www.livefyre.com", ImmutableMap.<String,Object>of("type", "liveblog")).buildCollectionMetaToken();
+        token = site.buildCollection("title", "testId", "http://www.livefyre.com", ImmutableMap.<String,Object>of("type", "liveblog")).buildCollectionMetaToken();
         assertNotNull(token);
         try {
             decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
@@ -92,7 +90,7 @@ public class CollectionTest extends LfTest {
     @Category(UnitTest.class)
     public void testSiteChecksum() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
-        Collection collection = site.createCollection("articleId", "title", "https://www.url.com", ImmutableMap.<String, Object>of("tags", "tags"));
+        Collection collection = site.buildCollection("articleId", "title", "https://www.url.com", ImmutableMap.<String, Object>of("tags", "tags"));
         String checksum = collection.buildChecksum();
         assertNotNull(checksum);
         assertEquals(CHECKSUM, checksum);
@@ -117,15 +115,15 @@ public class CollectionTest extends LfTest {
     public void testNullChecks() {
         Site site = new Site(new Network(NETWORK_NAME, NETWORK_KEY), SITE_ID, SITE_KEY);
         try {
-            site.createCollection(null, null, null, null);
+            site.buildCollection(null, null, null, null);
             fail("title cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.createCollection("", null, null, null);
+            site.buildCollection("", null, null, null);
             fail("articleId cannot be null");
         } catch(NullPointerException e) {}
         try {
-            site.createCollection("", "", null, null);
+            site.buildCollection("", "", null, null);
             fail("url cannot be null");
         } catch(NullPointerException e) {}
         try {

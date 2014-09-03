@@ -31,7 +31,7 @@ public class Site implements LfCore {
     /**
      * Creates and returns a Collection object. Be sure to call createOrUpdate() on it to notify Livefyre.
      */
-    public Collection createCollection(String articleId, String title, String url, Map<String, Object> options) {
+    public Collection buildCollection(String articleId, String title, String url, Map<String, Object> options) {
         return new Collection(this, articleId, title, url, options);
     }
     
