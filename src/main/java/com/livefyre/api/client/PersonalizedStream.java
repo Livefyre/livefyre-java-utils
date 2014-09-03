@@ -15,9 +15,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.filter.LftokenAuthFilter;
+import com.livefyre.core.Collection;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
-import com.livefyre.core.Site;
 import com.livefyre.entity.Subscription;
 import com.livefyre.entity.Subscription.Type;
 import com.livefyre.entity.Topic;
@@ -34,7 +34,6 @@ public class PersonalizedStream {
     
     private static final String TOPIC_PATH = "/%s/";
     private static final String MULTIPLE_TOPIC_PATH = "/%s:topics/";
-    private static final String COLLECTION_TOPICS_PATH = "/%s:collection=%s:topics/";
     private static final String USER_SUBSCRIPTION_PATH = "/%s:subscriptions/";
     private static final String TOPIC_SUBSCRIPTION_PATH = "/%s:subscribers/";
     private static final String TIMELINE_PATH = "/timeline/";
@@ -125,9 +124,9 @@ public class PersonalizedStream {
     }
     
     /* Collection Topic API */
-    public static List<String> getCollectionTopics(Site site, String collectionId) {
-        String jsonResp = builder(site.getNetwork())
-                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+    public static List<String> getCollectionTopics(Collection collection) {
+        String jsonResp = builder(collection)
+                .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .accept(MediaType.APPLICATION_JSON)
                 .get(String.class);
         
@@ -142,11 +141,11 @@ public class PersonalizedStream {
         return topicIds;
     }
     
-    public static int addCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static int addCollectionTopics(Collection collection, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
         
-        String jsonResp = builder(site.getNetwork())
-                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+        String jsonResp = builder(collection)
+                .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .post(String.class, form);
@@ -159,11 +158,11 @@ public class PersonalizedStream {
         }
     }
     
-    public static Map<String, Integer> replaceCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static Map<String, Integer> replaceCollectionTopics(Collection collection, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
         
-        String jsonResp = builder(site.getNetwork())
-                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+        String jsonResp = builder(collection)
+                .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .put(String.class, form);
@@ -179,11 +178,11 @@ public class PersonalizedStream {
         return results;
     }
     
-    public static int removeCollectionTopics(Site site, String collectionId, List<Topic> topics) {
+    public static int removeCollectionTopics(Collection collection, List<Topic> topics) {
         String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
         
-        String jsonResp = builder(site.getNetwork())
-                .path(String.format(COLLECTION_TOPICS_PATH, site.getUrn(), collectionId))
+        String jsonResp = builder(collection)
+                .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .queryParam("_method", PATCH_METHOD)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

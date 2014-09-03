@@ -27,9 +27,9 @@ public class CollectionTest extends LfTest {
     @Category(IntegrationTest.class)
     public void testCreateUpdateCollection() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
-        String name = "JavaCreateCollection" + Calendar.getInstance().getTime();
+        String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
 
-        Collection collection = site.buildCollection(name, name, "http://answers.livefyre.com/JAVA", null).createOrUpdate();
+        Collection collection = site.buildCollection(name, name, URL, null).createOrUpdate();
         String otherId = site.getCollectionId(name);
         assertEquals(otherId, collection.getCollectionId());
 
@@ -39,7 +39,7 @@ public class CollectionTest extends LfTest {
     
     @Test
     @Category(UnitTest.class)
-    public void testSiteCollectionToken() {
+    public void testCreateCollectionToken() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
         try {
@@ -59,8 +59,6 @@ public class CollectionTest extends LfTest {
             fail("type must be of a known type");
         } catch (IllegalArgumentException e) {}
         
-        site.buildCollection("title", "testId", "http://www.livefyre.com", null); // checks the null map case
-
         String token = site.buildCollection("title", "testId", "http://www.livefyre.com",
                 ImmutableMap.<String,Object>of("tags", "tags", "type", "reviews")).buildCollectionMetaToken();
         assertNotNull(token);
@@ -88,7 +86,7 @@ public class CollectionTest extends LfTest {
     
     @Test
     @Category(UnitTest.class)
-    public void testSiteChecksum() {
+    public void testCollectionChecksum() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         Collection collection = site.buildCollection("articleId", "title", "https://www.url.com", ImmutableMap.<String, Object>of("tags", "tags"));
         String checksum = collection.buildChecksum();
@@ -98,21 +96,22 @@ public class CollectionTest extends LfTest {
     
     @Test
     @Category(UnitTest.class)
-    public void testSiteUrlChecker() {
+    public void testCollectionUrlChecker() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
+        Collection collection = site.buildCollection("", "", "http://filler.com", null);
         
-        assertFalse(site.isValidFullUrl("test.com"));
-        assertTrue(site.isValidFullUrl("http://localhost:8000"));
-        assertTrue(site.isValidFullUrl("http://清华大学.cn"));
-        assertTrue(site.isValidFullUrl("http://www.mysite.com/myresumé.html"));
-        assertTrue(site.isValidFullUrl("https://test.com/"));
-        assertTrue(site.isValidFullUrl("http://test.com/"));
-        assertTrue(site.isValidFullUrl("https://test.com/path/test.-_~!$&'()*+,;=:@/dash"));
+        assertFalse(collection.isValidFullUrl("test.com"));
+        assertTrue(collection.isValidFullUrl("http://localhost:8000"));
+        assertTrue(collection.isValidFullUrl("http://清华大学.cn"));
+        assertTrue(collection.isValidFullUrl("http://www.mysite.com/myresumé.html"));
+        assertTrue(collection.isValidFullUrl("https://test.com/"));
+        assertTrue(collection.isValidFullUrl("http://test.com/"));
+        assertTrue(collection.isValidFullUrl("https://test.com/path/test.-_~!$&'()*+,;=:@/dash"));
     }
     
     @Test
     @Category(UnitTest.class)
-    public void testNullChecks() {
+    public void testInstantiationNullChecks() {
         Site site = new Site(new Network(NETWORK_NAME, NETWORK_KEY), SITE_ID, SITE_KEY);
         try {
             site.buildCollection(null, null, null, null);

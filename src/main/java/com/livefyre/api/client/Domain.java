@@ -1,5 +1,6 @@
 package com.livefyre.api.client;
 
+import com.livefyre.core.Collection;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
@@ -18,8 +19,10 @@ public class Domain {
     private static Network getNetworkFromCore(LfCore core) {
         if (core.getClass().equals(Network.class)) {
             return (Network) core;
-        } else {
+        } else if (core.getClass().equals(Site.class)) {
             return ((Site) core).getNetwork();
+        } else {
+            return ((Collection) core).getSite().getNetwork();
         }
     }
 }

@@ -23,7 +23,7 @@ import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
-public class Collection {
+public class Collection implements LfCore {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
     private static final ImmutableList<String> TYPE = ImmutableList.of(
             "reviews", "sidenotes", "ratings", "counting",
@@ -116,7 +116,6 @@ public class Collection {
      */
     public JSONObject getPayload() {
         JSONObject json = new JSONObject();
-//                ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", buildCollectionMetaToken(), "checksum", buildChecksum()));
         json.put("articleId", articleId);
         json.put("checksum", buildChecksum());
         json.put("collectionMeta", buildCollectionMetaToken());
@@ -166,4 +165,14 @@ public class Collection {
     public Collection setUrl(String url) { this.url = url; return this; }
     public Map<String, Object> getOptions() { return options; }
     public Collection setOptions(Map<String, Object> options) { this.options = options; return this; }
+
+    public String buildLivefyreToken() {
+        return site.buildLivefyreToken();
+    }
+
+    public String getNetworkName() { return site.getNetworkName(); }
+
+    public String getUrn() {
+        return String.format("%s:collection=%s", site.getUrn(), collectionId);
+    }
 }

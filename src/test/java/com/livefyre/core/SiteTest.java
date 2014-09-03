@@ -1,5 +1,6 @@
 package com.livefyre.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -18,12 +19,21 @@ public class SiteTest extends LfTest {
     public void testGetCollectionInfo() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String collectionContent = site.getCollectionContent(ARTICLE_ID);
-        
         assertNotNull(collectionContent);
         
         JSONObject collectionJson = site.getCollectionContentJson(ARTICLE_ID);
-        
         assertNotNull(collectionJson);
+        
+        String collectionId = site.getCollectionId(ARTICLE_ID);
+        assertEquals(COLLECTION_ID, collectionId);
+    }
+    
+    @Test
+    @Category(UnitTest.class)
+    public void testBuildCollection() {
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
+        Collection collection  = site.buildCollection(ARTICLE_ID, "", URL, null);
+        assertNotNull(collection);
     }
     
     @Test

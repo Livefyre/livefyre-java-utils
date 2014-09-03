@@ -2,8 +2,6 @@ package com.livefyre.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -66,15 +64,6 @@ public class Site implements LfCore {
     /* Helper methods */
     public String getUrn() {
         return network.getUrn()+":site="+id;
-    }
-    
-    protected boolean isValidFullUrl(String url) {
-        try {
-            new URL(url);
-        } catch (MalformedURLException e) {
-            return false;
-        }
-        return true;
     }
     
     /* Getters/Setters */

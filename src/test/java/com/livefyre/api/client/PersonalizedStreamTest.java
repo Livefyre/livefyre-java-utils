@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
+import com.livefyre.core.Collection;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
 import com.livefyre.entity.Subscription;
@@ -47,9 +49,6 @@ public class PersonalizedStreamTest extends LfTest {
         assertNotNull(t);
         
         assertTrue(PersonalizedStream.deleteTopic(network, t));
-        
-        List<Topic> ts = PersonalizedStream.getTopics(network, null, null);
-        assertTrue(ts.isEmpty());
     }
     
     @Test
@@ -62,9 +61,6 @@ public class PersonalizedStreamTest extends LfTest {
         
         int deleted = PersonalizedStream.deleteTopics(network, topics);
         assertEquals(deleted, topics.size());
-        
-        ts = PersonalizedStream.getTopics(network, null, null);
-        assertTrue(ts.isEmpty());
     }
     
     @Test
@@ -76,9 +72,6 @@ public class PersonalizedStreamTest extends LfTest {
         assertEquals(t.getLabel(), topic.getLabel());
         
         assertTrue(PersonalizedStream.deleteTopic(site, t));
-        
-        List<Topic> ts = PersonalizedStream.getTopics(network, null, null);
-        assertTrue(ts.isEmpty());
     }
     
     @Test
@@ -91,35 +84,37 @@ public class PersonalizedStreamTest extends LfTest {
         
         int deleted = PersonalizedStream.deleteTopics(site, topics);
         assertEquals(deleted, topics.size());
-        
-        ts = PersonalizedStream.getTopics(site, null, null);
-        assertTrue(ts.isEmpty());
     }
     
     @Test
     public void testCollectionTopicApi_network() {
         List<Topic> topics = PersonalizedStream.createOrUpdateTopics(network, topicMap);
+        String collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
+        Collection collection = site.buildCollection(collectionName, collectionName, URL, null).createOrUpdate();
         
-        List<String> topicIds = PersonalizedStream.getCollectionTopics(site, COLLECTION_ID);
+        List<String> topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.isEmpty());
         
-        int added = PersonalizedStream.addCollectionTopics(site, COLLECTION_ID, topics);
+        int added = PersonalizedStream.addCollectionTopics(collection, topics);
         assertTrue(added == 3);
         
-        topicIds = PersonalizedStream.getCollectionTopics(site, COLLECTION_ID);
+        topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.size() == 3);
 
-        Map<String, Integer> results = PersonalizedStream.replaceCollectionTopics(site, COLLECTION_ID, Lists.newArrayList(topics.get(0)));
+        Map<String, Integer> results = PersonalizedStream.replaceCollectionTopics(collection, Lists.newArrayList(topics.get(0)));
         assertTrue(results.get("added") > 0 || results.get("removed") > 0);
         
-        topicIds = PersonalizedStream.getCollectionTopics(site, COLLECTION_ID);
+        topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.size() == 1);
         
-        int deleted = PersonalizedStream.removeCollectionTopics(site, COLLECTION_ID, topics);
+        int deleted = PersonalizedStream.removeCollectionTopics(collection, topics);
         assertTrue(deleted == 1);
         
-        topicIds = PersonalizedStream.getCollectionTopics(site, COLLECTION_ID);
+        topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.isEmpty());
+
+//        collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
+//        site.buildCollection(collectionName, collectionName, URL, ImmutableMap.<String, Object>of("topics", topics)).createOrUpdate();
         
         PersonalizedStream.deleteTopics(network, topics);
     }
@@ -127,21 +122,26 @@ public class PersonalizedStreamTest extends LfTest {
     @Test
     public void testCollectionTopicApi_site() {
         List<Topic> topics = PersonalizedStream.createOrUpdateTopics(site, topicMap);
+        String collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
+        Collection collection = site.buildCollection(collectionName, collectionName, URL, null).createOrUpdate();
         
-        int added = PersonalizedStream.addCollectionTopics(site, COLLECTION_ID, topics);
+        int added = PersonalizedStream.addCollectionTopics(collection, topics);
         assertTrue(added == topics.size());
         
-        Map<String, Integer> results = PersonalizedStream.replaceCollectionTopics(site, COLLECTION_ID, Lists.newArrayList(topics.get(0)));
+        Map<String, Integer> results = PersonalizedStream.replaceCollectionTopics(collection, Lists.newArrayList(topics.get(0)));
         assertTrue(results.get("added") > 0 || results.get("removed") > 0);
         
-        List<String> topicIds = PersonalizedStream.getCollectionTopics(site, COLLECTION_ID);
+        List<String> topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.size() == 1);
 
-        int deleted = PersonalizedStream.removeCollectionTopics(site, COLLECTION_ID, topics);
+        int deleted = PersonalizedStream.removeCollectionTopics(collection, topics);
         assertTrue(deleted == 1);
         
-        topicIds = PersonalizedStream.getCollectionTopics(site, COLLECTION_ID);
+        topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.isEmpty());
+        
+        collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
+        site.buildCollection(collectionName, collectionName, URL, ImmutableMap.<String, Object>of("topics", topics)).createOrUpdate();
         
         PersonalizedStream.deleteTopics(site, topics);
     }
