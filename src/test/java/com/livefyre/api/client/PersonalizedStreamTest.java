@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -113,9 +112,6 @@ public class PersonalizedStreamTest extends LfTest {
         topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.isEmpty());
 
-//        collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
-//        site.buildCollection(collectionName, collectionName, URL, ImmutableMap.<String, Object>of("topics", topics)).createOrUpdate();
-        
         PersonalizedStream.deleteTopics(network, topics);
     }
 
@@ -171,7 +167,6 @@ public class PersonalizedStreamTest extends LfTest {
     }
     
     @Test
-    @Ignore
     public void testTimelineStream() {
         Topic topic = PersonalizedStream.createOrUpdateTopic(network, "TOPIC", "LABEL");
         JSONObject test = PersonalizedStream.getTimelineStream(network, topic.getId() +":topicStream", 50, null, null);

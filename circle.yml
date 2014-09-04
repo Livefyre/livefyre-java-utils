@@ -1,5 +1,8 @@
-deployment:
-  production:
-    branch: 1.4.0
-    commands:
-      - mvn clean deploy
+# deployment:
+#   production:
+#     branch: 1.4.0
+#     commands:
+#       - mvn clean deploy -DskipTests
+test:
+  post:
+    - mvn test -Dtest=IntegrationTestSuite

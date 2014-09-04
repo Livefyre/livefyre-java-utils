@@ -6,7 +6,6 @@ import java.util.Calendar;
 
 import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -27,7 +26,6 @@ public class TimelineCursorTest extends LfTest {
     }
     
     @Test
-    @Ignore
     public void testEntity() {
         TimelineCursor ch = CursorFactory.getPersonalStreamCursor(network, USER_ID, 50, Calendar.getInstance().getTime());
         
