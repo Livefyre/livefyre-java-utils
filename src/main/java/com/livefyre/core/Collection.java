@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.livefyre.api.client.Domain;
+import com.livefyre.entity.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
@@ -35,6 +36,7 @@ public class Collection implements LfCore {
     private String articleId;
     private String title;
     private String url;
+    private boolean networkIssued;
     private Map<String, Object> options;
 
     /**
@@ -48,8 +50,13 @@ public class Collection implements LfCore {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkArgument(isValidFullUrl(checkNotNull(url)),
                 "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
-        if (options != null && (options.containsKey("type") && !TYPE.contains(options.get("type")))) {
-            throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " + TYPE.toString());
+        if (options != null) {
+            if (options.containsKey("type") && !TYPE.contains(options.get("type"))) {
+                throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " + TYPE.toString());
+            }
+            if (options.containsKey("topics")) {
+                networkIssued = checkTopics(site, options.get("topics"));
+            }
         }
         
         this.site = site;
@@ -82,7 +89,10 @@ public class Collection implements LfCore {
     public String buildCollectionMetaToken() {
         try {
             JSONObject json = getJson();
-            return LivefyreJwtUtil.serializeAndSign(site.getKey(), json);
+            if (networkIssued) {
+                json.put("iss", site.getNetwork().getUrn()); // eventually we want to make this networkIssued ? site.getNetwork().getUrn() : site.getUrn()
+            }
+            return LivefyreJwtUtil.serializeAndSign(networkIssued ? site.getNetwork().getKey() : site.getKey(), json);
         } catch (InvalidKeyException e) {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
         }
@@ -152,6 +162,25 @@ public class Collection implements LfCore {
         }
         return r.toString();
     }
+
+    private boolean checkTopics(Site site, Object obj) {
+        if (obj instanceof Iterable<?>) {
+            Iterable<?> topics = (Iterable<?>) obj;
+            
+            for (Object topic : topics) {
+                String networkUrn = site.getNetwork().getUrn();
+                if (topic instanceof Topic) {
+                    Topic t = ((Topic) topic);
+                    String topicId = t.getId();
+                    if (!topicId.startsWith(networkUrn) || topicId.replace(networkUrn, "").startsWith(":site=")) {
+                        continue;
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     
     public Site getSite() { return site; }
     protected void setSite(Site site) { this.site = site; }
@@ -165,6 +194,8 @@ public class Collection implements LfCore {
     public Collection setUrl(String url) { this.url = url; return this; }
     public Map<String, Object> getOptions() { return options; }
     public Collection setOptions(Map<String, Object> options) { this.options = options; return this; }
+    public boolean isNetworkIssued() { return networkIssued; }
+    protected void setNetworkIssued(boolean networkIssued) { this.networkIssued = networkIssued; }
 
     public String buildLivefyreToken() {
         return site.buildLivefyreToken();

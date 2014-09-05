@@ -8,25 +8,34 @@ import static org.junit.Assert.fail;
 
 import java.security.InvalidKeyException;
 import java.util.Calendar;
+import java.util.List;
 
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
+import com.livefyre.entity.Topic;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class CollectionTest extends LfTest {
     private static final String CHECKSUM = "f99927e6dfd7203f51a3d290d9947290";
+    private Site site;
+    
+    @Before
+    public void setup() {
+        site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
+    }
 
     @Test
     @Category(IntegrationTest.class)
     public void testCreateUpdateCollection() {
-        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
 
         Collection collection = site.buildCollection(name, name, URL, null).createOrUpdate();
@@ -40,8 +49,6 @@ public class CollectionTest extends LfTest {
     @Test
     @Category(UnitTest.class)
     public void testCreateCollectionToken() {
-        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
-        
         try {
             site.buildCollection("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "", null);
             fail("titles longer than 255 char are not allowed");
@@ -82,12 +89,29 @@ public class CollectionTest extends LfTest {
         }
         
         assertEquals(decodedToken.getString("type"), "liveblog");
+        
+        // test network topics
+        List<Topic> topics = Lists.newArrayList(Topic.create(site.getNetwork(), "1", "1"));
+        Collection coll = site.buildCollection("id", "title", "http://www.livefyre.com", ImmutableMap.<String, Object>of("topics", topics));
+        assertTrue(coll.isNetworkIssued());
+        
+        token = coll.buildCollectionMetaToken();
+        try {
+            LivefyreJwtUtil.decodeLivefyreJwt(site.getKey(), token);
+            fail("Should be encoded with network key.");
+        } catch (InvalidKeyException e) {}
+        
+        try {
+            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(site.getNetwork().getKey(), token);
+        } catch (InvalidKeyException e) {
+            fail("Should pass when decoded with network key.");
+        }
+        assertEquals(decodedToken.getString("iss"), site.getNetwork().getUrn());
     }
     
     @Test
     @Category(UnitTest.class)
     public void testCollectionChecksum() {
-        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         Collection collection = site.buildCollection("articleId", "title", "https://www.url.com", ImmutableMap.<String, Object>of("tags", "tags"));
         String checksum = collection.buildChecksum();
         assertNotNull(checksum);
@@ -97,7 +121,6 @@ public class CollectionTest extends LfTest {
     @Test
     @Category(UnitTest.class)
     public void testCollectionUrlChecker() {
-        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         Collection collection = site.buildCollection("", "", "http://filler.com", null);
         
         assertFalse(collection.isValidFullUrl("test.com"));
@@ -111,8 +134,25 @@ public class CollectionTest extends LfTest {
     
     @Test
     @Category(UnitTest.class)
+    public void testCollectionJsonPayload() {
+        Collection collection = site.buildCollection(ARTICLE_ID, ARTICLE_ID, URL, ImmutableMap.<String, Object>of("tags", "tags"));
+        JSONObject json = collection.getJson();
+        assertNotNull(json);
+        assertEquals(json.getString("articleId"), ARTICLE_ID);
+        assertEquals(json.getString("title"), ARTICLE_ID);
+        assertEquals(json.getString("url"), URL);
+        assertEquals(json.getString("tags"), "tags");
+        
+        JSONObject payload = collection.getPayload();
+        assertNotNull(payload);
+        assertEquals(payload.getString("articleId"), ARTICLE_ID);
+        assertEquals(payload.getString("checksum"), collection.buildChecksum());
+        assertEquals(payload.getString("collectionMeta"), collection.buildCollectionMetaToken());
+    }
+    
+    @Test
+    @Category(UnitTest.class)
     public void testInstantiationNullChecks() {
-        Site site = new Site(new Network(NETWORK_NAME, NETWORK_KEY), SITE_ID, SITE_KEY);
         try {
             site.buildCollection(null, null, null, null);
             fail("title cannot be null");

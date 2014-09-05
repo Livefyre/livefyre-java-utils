@@ -112,6 +112,9 @@ public class PersonalizedStreamTest extends LfTest {
         topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.isEmpty());
 
+        collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
+        site.buildCollection(collectionName, collectionName, URL, ImmutableMap.<String, Object>of("topics", topics)).createOrUpdate();
+
         PersonalizedStream.deleteTopics(network, topics);
     }
 

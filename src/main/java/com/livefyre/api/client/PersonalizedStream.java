@@ -159,13 +159,14 @@ public class PersonalizedStream {
     }
     
     public static Map<String, Integer> replaceCollectionTopics(Collection collection, List<Topic> topics) {
-        String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
-        
+        JSONObject formJson = new JSONObject();
+        formJson.put("topicIds", getTopicIds(topics));
+
         String jsonResp = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .put(String.class, form);
+                .put(String.class, formJson.toString());
 
         Map<String, Integer> results = Maps.newHashMap();
         try {
