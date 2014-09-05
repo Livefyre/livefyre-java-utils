@@ -182,6 +182,14 @@ public class Collection implements LfCore {
         return false;
     }
     
+    public String buildLivefyreToken() {
+        return site.buildLivefyreToken();
+    }
+    
+    public String getUrn() {
+        return String.format("%s:collection=%s", site.getUrn(), collectionId);
+    }
+    
     public Site getSite() { return site; }
     protected void setSite(Site site) { this.site = site; }
     public String getCollectionId() { return collectionId; }
@@ -196,14 +204,4 @@ public class Collection implements LfCore {
     public Collection setOptions(Map<String, Object> options) { this.options = options; return this; }
     public boolean isNetworkIssued() { return networkIssued; }
     protected void setNetworkIssued(boolean networkIssued) { this.networkIssued = networkIssued; }
-
-    public String buildLivefyreToken() {
-        return site.buildLivefyreToken();
-    }
-
-    public String getNetworkName() { return site.getNetworkName(); }
-
-    public String getUrn() {
-        return String.format("%s:collection=%s", site.getUrn(), collectionId);
-    }
 }

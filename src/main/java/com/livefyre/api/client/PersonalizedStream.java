@@ -319,7 +319,7 @@ public class PersonalizedStream {
     }
     
     private static WebResource builder(LfCore core, String userToken) {
-        return client(core, userToken).resource(String.format(BASE_URL, Domain.quill(core), core.getNetworkName()));
+        return client(core, userToken).resource(String.format(BASE_URL, Domain.quill(core)));
     }
     
     private static WebResource streamBuilder(LfCore core) {

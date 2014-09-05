@@ -6,6 +6,5 @@ package com.livefyre.core;
  */
 public interface LfCore {
     public String buildLivefyreToken();
-    public String getNetworkName();
     public String getUrn();
 }

@@ -62,13 +62,15 @@ public class Site implements LfCore {
     }
     
     /* Helper methods */
+    public String buildLivefyreToken() {
+        return network.buildLivefyreToken();
+    }
+
     public String getUrn() {
         return network.getUrn()+":site="+id;
     }
     
     /* Getters/Setters */
-    public String buildLivefyreToken() { return network.buildLivefyreToken(); }
-    public String getNetworkName() { return network.getNetworkName(); }
     public Network getNetwork() { return this.network; }
     protected void setNetwork(Network network) { this.network = network; }
     public String getId() { return id; }
