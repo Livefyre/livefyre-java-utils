@@ -1,33 +1,16 @@
 package com.livefyre.core;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
-import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
 
 public class SiteTest extends LfTest {
-    @Test
-    @Category(IntegrationTest.class)
-    public void testGetCollectionInfo() {
-        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
-        String collectionContent = site.getCollectionContent(ARTICLE_ID);
-        assertNotNull(collectionContent);
-        
-        JSONObject collectionJson = site.getCollectionContentJson(ARTICLE_ID);
-        assertNotNull(collectionJson);
-        
-        String collectionId = site.getCollectionId(ARTICLE_ID);
-        assertEquals(COLLECTION_ID, collectionId);
-    }
-    
     @Test
     @Category(UnitTest.class)
     public void testBuildCollection() {

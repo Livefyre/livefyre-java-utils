@@ -39,7 +39,7 @@ public class CollectionTest extends LfTest {
         String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
 
         Collection collection = site.buildCollection(name, name, URL, null).createOrUpdate();
-        String otherId = site.getCollectionId(name);
+        String otherId = collection.getCollectionContent().getJSONObject("collectionSettings").getString("collectionId");
         assertEquals(otherId, collection.getCollectionId());
 
         Collection coll1 = collection.setOptions(ImmutableMap.<String, Object>of("tags", "super")).createOrUpdate();
@@ -164,10 +164,6 @@ public class CollectionTest extends LfTest {
         try {
             site.buildCollection("", "", null, null);
             fail("url cannot be null");
-        } catch(NullPointerException e) {}
-        try {
-            site.getCollectionContent(null);
-            fail("displayName cannot be null");
         } catch(NullPointerException e) {}
     }
 }

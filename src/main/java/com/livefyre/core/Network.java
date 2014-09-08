@@ -34,6 +34,13 @@ public class Network implements LfCore {
         this.networkName = this.name.split("\\.")[0];
     }
     
+    /**
+     * Updates the user sync url. Makes an external API call. 
+     * 
+     * @see http://answers.livefyre.com/developers/user-auth/remote-profiles/#ping-for-pull.
+     * @param urlTemplate the url template to set.
+     * @return true if the update was successful.
+     */
     public boolean setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
@@ -45,6 +52,12 @@ public class Network implements LfCore {
         return response.getStatus() == 204;
     }
     
+    /**
+     * Informs Livefyre to fetch user information based on the user sync url. Makes an external API call.
+     * 
+     * @param userId 
+     * @return true if the sync was successful.
+     */
     public boolean syncUser(String userId) {
         checkNotNull(userId);
         
@@ -56,10 +69,22 @@ public class Network implements LfCore {
         return response.getStatus() == 200;
     }
     
+    /**
+     * Generates a user auth system token.
+     */
     public String buildLivefyreToken() {
         return buildUserAuthToken(DEFAULT_USER, DEFAULT_USER, DEFAULT_EXPIRES);
     }
     
+    /**
+     * Generates a user auth token passed on the params passed in. This method serializes the params
+     * and signs the String with the Network key.
+     * 
+     * @param userId the user id for this token.
+     * @param displayName the display name for this token.
+     * @param expires when the token should expire from the time of its creation in seconds.
+     * @return String
+     */
     public String buildUserAuthToken(String userId, String displayName, Double expires) {
         checkArgument(StringUtils.isAlphanumeric(checkNotNull(userId)), "userId is not alphanumeric.");
         checkNotNull(displayName);
@@ -79,6 +104,11 @@ public class Network implements LfCore {
         }
     }
     
+    /**
+     * Checks to see if the passed in system token is still valid.
+     * 
+     * @return true if the token is still valid.
+     */
     public boolean validateLivefyreToken(String lfToken) {
         checkNotNull(lfToken);
 
@@ -92,18 +122,18 @@ public class Network implements LfCore {
         }
     }
     
+    /**
+     * Constructs a new Site object based on the parameters passed in.
+     * 
+     * @param siteId the id for the Site.
+     * @param siteKey the secret key for the Site.
+     * @return Site
+     */
     public Site getSite(String siteId, String siteKey) {
         return new Site(this, siteId, siteKey);
     }
     
-    /* Helper methods */
-    public String getUrn() {
-        return "urn:livefyre:"+name;
-    }
-    public String getUserUrn(String user) {
-        return getUrn()+":user="+user;
-    }
-    
+    /* Protected/private methods */
     private long getExpiryInSeconds(double secTillExpire) {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.add(Calendar.SECOND, (int) secTillExpire);
@@ -111,12 +141,51 @@ public class Network implements LfCore {
     }
     
     /* Getters/Setters */
-    public String getNetworkName() { return this.networkName; }
-    protected void setNetworkName(String networkName) { this.networkName = networkName; }
-    public String getName() { return name; }
-    protected void setName(String name) { this.name = name; }
-    public String getKey() { return key; }
-    protected void setKey(String key) { this.key = key; }
-    public boolean isSsl() { return ssl; }
-    public void setSsl(boolean ssl) { this.ssl = ssl; }
+    public String getUrn() {
+        return "urn:livefyre:"+name;
+    }
+    
+    public String getUserUrn(String user) {
+        return getUrn()+":user="+user;
+    }
+
+    public String getNetworkName() {
+        return this.networkName;
+    }
+
+    /**
+     * It is preferable to use the constructor to set the networkName.
+     */
+    public void setNetworkName(String networkName) {
+        this.networkName = networkName;
+    }
+
+    public String getName() {
+        return name;
+    }
+    
+    /**
+     * It is preferable to use the constructor to set the name.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * It is preferable to use the constructor to set the key.
+     */
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public boolean isSsl() {
+        return ssl;
+    }
+
+    public void setSsl(boolean ssl) {
+        this.ssl = ssl; }
 }

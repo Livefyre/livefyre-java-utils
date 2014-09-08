@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
@@ -20,17 +21,16 @@ import com.livefyre.api.client.Domain;
 import com.livefyre.entity.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
+import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class Collection implements LfCore {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
-    private static final ImmutableList<String> TYPE = ImmutableList.of(
-            "reviews", "sidenotes", "ratings", "counting",
-            "liveblog", "livechat", "livecomments", ""
-        );
-    
+    private static final ImmutableList<String> TYPE = ImmutableList.of("reviews", "sidenotes", "ratings", "counting",
+            "liveblog", "livechat", "livecomments", "");
+
     private Site site;
     private String collectionId;
     private String articleId;
@@ -39,12 +39,6 @@ public class Collection implements LfCore {
     private boolean networkIssued;
     private Map<String, Object> options;
 
-    /**
-     * Options accepts a map of key/value pairs for your Collection. Some examples are 'tags', 'type', 'extensions',
-     * 'tags', etc.  Please refer to http://answers.livefyre.com/developers/getting-started/tokens/collectionmeta/ for more info.
-     * 
-     * @param options map of additional params to be included into the collection meta token.
-     */
     public Collection(Site site, String articleId, String title, String url, Map<String, Object> options) {
         checkNotNull(articleId);
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
@@ -52,23 +46,26 @@ public class Collection implements LfCore {
                 "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
         if (options != null) {
             if (options.containsKey("type") && !TYPE.contains(options.get("type"))) {
-                throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " + TYPE.toString());
+                throw new IllegalArgumentException("type is not a recognized type. should be one of these types: "
+                        + TYPE.toString());
             }
             if (options.containsKey("topics")) {
                 networkIssued = checkTopics(site, options.get("topics"));
             }
         }
-        
+
         this.site = site;
         this.articleId = articleId;
         this.title = title;
         this.url = url;
         this.options = options == null ? Maps.<String, Object> newHashMap() : options;
     }
-    
+
     /**
      * Informs Livefyre to either create or update a collection based on the attributes of this Collection.
-     * @returns this
+     * Makes an external API call. Returns this.
+     * 
+     * @returns Collection
      */
     public Collection createOrUpdate() {
         ClientResponse response = invokeCollectionApi("create");
@@ -85,7 +82,11 @@ public class Collection implements LfCore {
         }
         throw new LivefyreException("Error creating Livefyre collection. Status code: " + response.getStatus());
     }
-    
+
+    /**
+     * Generates a collection meta token representing this collection.
+     * @return String.
+     */
     public String buildCollectionMetaToken() {
         try {
             JSONObject json = getJson();
@@ -97,7 +98,12 @@ public class Collection implements LfCore {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
         }
     }
-    
+
+    /**
+     * Generates a MD5-encrypted checksum based on this collection's attributes.
+     * 
+     * @return String.
+     */
     public String buildChecksum() {
         try {
             JSONObject json = getJson();
@@ -107,7 +113,27 @@ public class Collection implements LfCore {
             throw new LivefyreException("Failure creating checksum." + e);
         }
     }
-    
+
+    /**
+     * Retrieves this collection's information from Livefyre. Makes an external API call.
+     * 
+     * @return JSONObject.
+     */
+    public JSONObject getCollectionContent() {
+        String b64articleId = Base64.encodeBase64URLSafeString(articleId.getBytes());
+        if (b64articleId.length() % 4 != 0) {
+            b64articleId = b64articleId + StringUtils.repeat("=", 4 - (b64articleId.length() % 4));
+        }
+        String url = String.format("%s/bs3/%s/%s/%s/init", Domain.bootstrap(this), site.getNetwork().getName(), site.getId(), b64articleId);
+
+        ClientResponse response = Client.create().resource(url).accept(MediaType.APPLICATION_JSON)
+                .get(ClientResponse.class);
+        if (response.getStatus() != 200) {
+            throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
+        }
+        return new JSONObject(response.getEntity(String.class));
+    }
+
     /**
      * @return a JSONObject that contains this collection's attributes.
      */
@@ -117,11 +143,11 @@ public class Collection implements LfCore {
         attr.put("articleId", articleId);
         attr.put("url", url);
         attr.put("title", title);
-        
+
         return new JSONObject(attr);
     }
-    
-    /** 
+
+    /**
      * @return a JSONObject that contains the collection's article id, checksum, and encrypted token.
      */
     public JSONObject getPayload() {
@@ -132,6 +158,7 @@ public class Collection implements LfCore {
         return json;
     }
 
+    /* Protected/private methods */
     protected boolean isValidFullUrl(String url) {
         try {
             new URL(url);
@@ -143,11 +170,8 @@ public class Collection implements LfCore {
 
     private ClientResponse invokeCollectionApi(String method) {
         String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(site), site.getId(), method);
-        ClientResponse response = Client.create()
-                .resource(uri)
-                .queryParam("sync", "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
+        ClientResponse response = Client.create().resource(uri).queryParam("sync", "1")
+                .accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON)
                 .post(ClientResponse.class, getPayload().toString());
         return response;
     }
@@ -166,42 +190,100 @@ public class Collection implements LfCore {
     private boolean checkTopics(Site site, Object obj) {
         if (obj instanceof Iterable<?>) {
             Iterable<?> topics = (Iterable<?>) obj;
-            
+    
+            String networkUrn = site.getNetwork().getUrn();
             for (Object topic : topics) {
-                String networkUrn = site.getNetwork().getUrn();
-                if (topic instanceof Topic) {
-                    Topic t = ((Topic) topic);
-                    String topicId = t.getId();
-                    if (!topicId.startsWith(networkUrn) || topicId.replace(networkUrn, "").startsWith(":site=")) {
-                        continue;
-                    }
-                    return true;
+                if (!(topic instanceof Topic)) {
+                    return false;
                 }
+                String topicId = ((Topic) topic).getId();
+                if (!topicId.startsWith(networkUrn) || topicId.replace(networkUrn, "").startsWith(":site=")) {
+                    continue;
+                }
+                return true;
             }
         }
         return false;
     }
-    
+
+    /* Getters/setters */
     public String buildLivefyreToken() {
         return site.buildLivefyreToken();
     }
-    
+
     public String getUrn() {
         return String.format("%s:collection=%s", site.getUrn(), collectionId);
     }
+
+    public Site getSite() {
+        return site;
+    }
+
+    /**
+     * It is preferable to use the constructor to set the Site object. 
+     */
+    public void setSite(Site site) {
+        this.site = site;
+    }
+
+    public String getCollectionId() {
+        if (collectionId == null) {
+            throw new LivefyreException("Call createOrUpdate() to have the collection id set!");
+        }
+        return collectionId;
+    }
     
-    public Site getSite() { return site; }
-    protected void setSite(Site site) { this.site = site; }
-    public String getCollectionId() { return collectionId; }
-    protected void setCollectionId(String collectionId) { this.collectionId = collectionId; }
-    public String getArticleId() { return articleId; }
-    public Collection setArticleId(String articleId) { this.articleId = articleId; return this; }
-    public String getTitle() { return title; }
-    public Collection setTitle(String title) { this.title = title; return this; }
-    public String getUrl() { return url; }
-    public Collection setUrl(String url) { this.url = url; return this; }
-    public Map<String, Object> getOptions() { return options; }
-    public Collection setOptions(Map<String, Object> options) { this.options = options; return this; }
-    public boolean isNetworkIssued() { return networkIssued; }
-    protected void setNetworkIssued(boolean networkIssued) { this.networkIssued = networkIssued; }
+    /**
+     * It is preferable to use createOrUpdate() to set the collectionId.
+     */
+    public void setCollectionId(String collectionId) {
+        this.collectionId = collectionId;
+    }
+
+    public String getArticleId() {
+        return articleId;
+    }
+
+    public Collection setArticleId(String articleId) {
+        this.articleId = articleId;
+        return this;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Collection setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public Collection setUrl(String url) {
+        this.url = url;
+        return this;
+    }
+
+    public Map<String, Object> getOptions() {
+        return options;
+    }
+
+    public Collection setOptions(Map<String, Object> options) {
+        this.options = options;
+        return this;
+    }
+
+    public boolean isNetworkIssued() {
+        return networkIssued;
+    }
+
+    /**
+     * It is preferable to use the constructor to set networkIssued. 
+     */
+    public void setNetworkIssued(boolean networkIssued) {
+        this.networkIssued = networkIssued;
+    }
 }

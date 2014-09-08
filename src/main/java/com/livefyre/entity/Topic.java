@@ -13,7 +13,7 @@ public class Topic {
     private Integer createdAt;
     private Integer modifiedAt;
     
-    public Topic() {}
+    public Topic() { }
     
     public Topic(String id, String label, Integer createdAt, Integer modifiedAt) {
         this.id = id;
@@ -40,35 +40,44 @@ public class Topic {
     public String truncatedId() {
         return id.substring(id.indexOf(TOPIC_IDENTIFIER) + TOPIC_IDENTIFIER.length());
     }
+
     public Date getCreatedAtDate() {
-        return new Date(createdAt.longValue()*1000);
+        return new Date(createdAt.longValue() * 1000);
     }
+
     public Date getModifiedAtDate() {
-        return new Date(modifiedAt.longValue()*1000);
+        return new Date(modifiedAt.longValue() * 1000);
     }
-    
+
     /* Getters/Setters */
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
+
     public String getLabel() {
         return label;
     }
+
     public void setLabel(String label) {
         this.label = label;
     }
+
     public Integer getCreatedAt() {
         return createdAt;
     }
+
     public void setCreatedAt(Integer createdAt) {
         this.createdAt = createdAt;
     }
+
     public Integer getModifiedAt() {
         return modifiedAt;
     }
+
     public void setModifiedAt(Integer modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
