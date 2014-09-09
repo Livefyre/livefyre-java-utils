@@ -134,24 +134,6 @@ public class CollectionTest extends LfTest {
     
     @Test
     @Category(UnitTest.class)
-    public void testCollectionJsonPayload() {
-        Collection collection = site.buildCollection(ARTICLE_ID, ARTICLE_ID, URL, ImmutableMap.<String, Object>of("tags", "tags"));
-        JSONObject json = collection.getJson();
-        assertNotNull(json);
-        assertEquals(json.getString("articleId"), ARTICLE_ID);
-        assertEquals(json.getString("title"), ARTICLE_ID);
-        assertEquals(json.getString("url"), URL);
-        assertEquals(json.getString("tags"), "tags");
-        
-        JSONObject payload = collection.getPayload();
-        assertNotNull(payload);
-        assertEquals(payload.getString("articleId"), ARTICLE_ID);
-        assertEquals(payload.getString("checksum"), collection.buildChecksum());
-        assertEquals(payload.getString("collectionMeta"), collection.buildCollectionMetaToken());
-    }
-    
-    @Test
-    @Category(UnitTest.class)
     public void testInstantiationNullChecks() {
         try {
             site.buildCollection(null, null, null, null);

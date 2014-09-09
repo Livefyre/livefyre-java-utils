@@ -134,30 +134,6 @@ public class Collection implements LfCore {
         return new JSONObject(response.getEntity(String.class));
     }
 
-    /**
-     * @return a JSONObject that contains this collection's attributes.
-     */
-    public JSONObject getJson() {
-        Map<String, Object> attr = Maps.newTreeMap();
-        attr.putAll(options);
-        attr.put("articleId", articleId);
-        attr.put("url", url);
-        attr.put("title", title);
-
-        return new JSONObject(attr);
-    }
-
-    /**
-     * @return a JSONObject that contains the collection's article id, checksum, and encrypted token.
-     */
-    public JSONObject getPayload() {
-        JSONObject json = new JSONObject();
-        json.put("articleId", articleId);
-        json.put("checksum", buildChecksum());
-        json.put("collectionMeta", buildCollectionMetaToken());
-        return json;
-    }
-
     /* Protected/private methods */
     protected boolean isValidFullUrl(String url) {
         try {
@@ -166,6 +142,24 @@ public class Collection implements LfCore {
             return false;
         }
         return true;
+    }
+    
+    private JSONObject getJson() {
+        Map<String, Object> attr = Maps.newTreeMap();
+        attr.putAll(options);
+        attr.put("articleId", articleId);
+        attr.put("url", url);
+        attr.put("title", title);
+        
+        return new JSONObject(attr);
+    }
+    
+    private JSONObject getPayload() {
+        JSONObject json = new JSONObject();
+        json.put("articleId", articleId);
+        json.put("checksum", buildChecksum());
+        json.put("collectionMeta", buildCollectionMetaToken());
+        return json;
     }
 
     private ClientResponse invokeCollectionApi(String method) {
