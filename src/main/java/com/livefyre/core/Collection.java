@@ -46,11 +46,10 @@ public class Collection implements LfCore {
                 "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
         if (options != null) {
             if (options.containsKey("type") && !TYPE.contains(options.get("type"))) {
-                throw new IllegalArgumentException("type is not a recognized type. should be one of these types: "
-                        + TYPE.toString());
+                throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " + TYPE.toString());
             }
             if (options.containsKey("topics")) {
-                networkIssued = checkTopics(site, options.get("topics"));
+                networkIssued = checkTopics(site.getNetwork().getUrn(), options.get("topics"));
             }
         }
 
@@ -181,20 +180,18 @@ public class Collection implements LfCore {
         return r.toString();
     }
 
-    private boolean checkTopics(Site site, Object obj) {
+    private boolean checkTopics(String networkUrn, Object obj) {
         if (obj instanceof Iterable<?>) {
             Iterable<?> topics = (Iterable<?>) obj;
     
-            String networkUrn = site.getNetwork().getUrn();
             for (Object topic : topics) {
                 if (!(topic instanceof Topic)) {
                     return false;
                 }
                 String topicId = ((Topic) topic).getId();
-                if (!topicId.startsWith(networkUrn) || topicId.replace(networkUrn, "").startsWith(":site=")) {
-                    continue;
+                if (topicId.startsWith(networkUrn) && !topicId.replace(networkUrn, "").startsWith(":site=")) {
+                    return true;
                 }
-                return true;
             }
         }
         return false;
