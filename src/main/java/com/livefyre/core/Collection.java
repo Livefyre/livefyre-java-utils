@@ -89,9 +89,7 @@ public class Collection implements LfCore {
     public String buildCollectionMetaToken() {
         try {
             JSONObject json = getJson();
-            if (networkIssued) {
-                json.put("iss", site.getNetwork().getUrn()); // eventually we want to make this networkIssued ? site.getNetwork().getUrn() : site.getUrn()
-            }
+            json.put("iss", networkIssued ? site.getNetwork().getUrn() : site.getUrn());
             return LivefyreJwtUtil.serializeAndSign(networkIssued ? site.getNetwork().getKey() : site.getKey(), json);
         } catch (InvalidKeyException e) {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
@@ -219,7 +217,7 @@ public class Collection implements LfCore {
 
     public String getCollectionId() {
         if (collectionId == null) {
-            throw new LivefyreException("Call createOrUpdate() to have the collection id set!");
+            throw new LivefyreException("Call createOrUpdate() to set the collection id.");
         }
         return collectionId;
     }
