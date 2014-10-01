@@ -2,7 +2,7 @@ package com.livefyre.entity;
 
 import java.util.Date;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public class Subscription {
     private String to;
@@ -19,8 +19,12 @@ public class Subscription {
         this.createdAt = createdAt;
     }
 
-    public static Subscription serializeFromJson(JSONObject json) {
-        return new Subscription(json.getString("to"), json.getString("by"), Type.valueOf(json.getString("type")), json.getInt("createdAt"));
+    public static Subscription serializeFromJson(JsonObject json) {
+        return new Subscription(
+            json.get("to").getAsString(),
+            json.get("by").getAsString(),
+            Type.valueOf(json.get("type").getAsString()),
+            json.get("createdAt").getAsInt());
     }
 
     public Date createdAtDate() {

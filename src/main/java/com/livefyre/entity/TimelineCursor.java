@@ -5,9 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.json.JSONObject;
-
-import com.livefyre.api.client.PersonalizedStream;
+import com.google.gson.JsonObject;
+import com.livefyre.api.PersonalizedStream;
 import com.livefyre.core.LfCore;
 
 /**
@@ -35,7 +34,7 @@ public class TimelineCursor {
         this.cursorTime = DATE_FORMAT.format(startTime);
     }
 
-    public JSONObject next() {
+    public JsonObject next() {
         return next(limit);
     }
     
@@ -44,18 +43,18 @@ public class TimelineCursor {
 
      * @return JSONObject
      */
-    public JSONObject next(int limit) {
-        JSONObject data = PersonalizedStream.getTimelineStream(core, resource, limit, null, cursorTime);
-        JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
+    public JsonObject next(int limit) {
+        JsonObject data = PersonalizedStream.getTimelineStream(core, resource, limit, null, cursorTime);
+        JsonObject cursor = data.getAsJsonObject("meta").getAsJsonObject("cursor");
 
-        next = cursor.getBoolean("hasNext");
-        previous = !cursor.isNull("next");
-        cursorTime = previous ? cursor.getString("next") : cursorTime;
+        next = cursor.get("hasNext").getAsBoolean();
+        previous = !cursor.get("next").isJsonNull();
+        cursorTime = previous ? cursor.get("next").getAsString() : cursorTime;
 
         return data;
     }
 
-    public JSONObject previous() {
+    public JsonObject previous() {
         return previous(limit);
     }
 
@@ -64,13 +63,13 @@ public class TimelineCursor {
 
      * @return JSONObject
      */
-    public JSONObject previous(int limit) {
-        JSONObject data = PersonalizedStream.getTimelineStream(core, resource, limit, cursorTime, null);
-        JSONObject cursor = data.getJSONObject("meta").getJSONObject("cursor");
+    public JsonObject previous(int limit) {
+        JsonObject data = PersonalizedStream.getTimelineStream(core, resource, limit, cursorTime, null);
+        JsonObject cursor = data.getAsJsonObject("meta").getAsJsonObject("cursor");
 
-        previous = cursor.getBoolean("hasPrev");
-        next = !cursor.isNull("prev");
-        cursorTime = next ? cursor.getString("prev") : cursorTime;
+        previous = cursor.get("hasPrev").getAsBoolean();
+        next = !cursor.get("prev").isJsonNull();
+        cursorTime = next ? cursor.get("prev").getAsString() : cursorTime;
 
         return data;
     }

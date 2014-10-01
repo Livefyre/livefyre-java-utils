@@ -2,8 +2,7 @@ package com.livefyre.entity;
 
 import java.util.Date;
 
-import org.json.JSONObject;
-
+import com.google.gson.JsonObject;
 import com.livefyre.core.LfCore;
 
 public class Topic {
@@ -33,19 +32,23 @@ public class Topic {
         return core.getUrn() + TOPIC_IDENTIFIER + id;
     }
 
-    public static Topic serializeFromJson(JSONObject json) {
-        return new Topic(json.getString("id"), json.getString("label"), json.getInt("createdAt"), json.getInt("modifiedAt"));
+    public static Topic serializeFromJson(JsonObject json) {
+        return new Topic(
+            json.get("id").getAsString(),
+            json.get("label").getAsString(),
+            json.get("createdAt").getAsInt(),
+            json.get("modifiedAt").getAsInt());
     }
     
     public String truncatedId() {
         return id.substring(id.indexOf(TOPIC_IDENTIFIER) + TOPIC_IDENTIFIER.length());
     }
 
-    public Date getCreatedAtDate() {
+    public Date createdAtDate() {
         return new Date(createdAt.longValue() * 1000);
     }
 
-    public Date getModifiedAtDate() {
+    public Date modifiedAtDate() {
         return new Date(modifiedAt.longValue() * 1000);
     }
 

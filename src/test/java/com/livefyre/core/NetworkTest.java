@@ -1,5 +1,6 @@
 package com.livefyre.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -63,6 +64,24 @@ public class NetworkTest extends LfTest {
         
         assertNotNull(token);
         assertTrue(network.validateLivefyreToken(token));
+    }
+    
+    @Test
+    @Category(UnitTest.class)
+    public void testGetSite() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        try {
+            network.getSite(SITE_ID, null);
+            fail("siteKey cannot be null");
+        } catch(NullPointerException e) {}
+        try {
+            network.getSite(null, SITE_KEY);
+            fail("siteId cannot be null");
+        } catch(NullPointerException e) {}
+        Site site = network.getSite(SITE_ID, SITE_KEY);
+        assertNotNull(site);
+        assertEquals(SITE_ID, site.getId());
+        assertEquals(SITE_KEY, site.getKey());
     }
     
     @Test

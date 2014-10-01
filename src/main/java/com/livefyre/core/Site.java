@@ -29,8 +29,8 @@ public class Site implements LfCore {
      * @param options map of additional params to be included with the collection.
      * @return Collection
      */
-    public Collection buildCollection(String articleId, String title, String url, Map<String, Object> options) {
-        return new Collection(this, articleId, title, url, options);
+    public Collection buildCollection(String title, String articleId, String url, Map<String, Object> options) {
+        return new Collection(this, title, articleId, url, options);
     }
 
     /* Getters/Setters */

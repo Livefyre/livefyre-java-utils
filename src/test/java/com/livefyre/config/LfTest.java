@@ -14,6 +14,7 @@ public class LfTest {
     protected String COLLECTION_ID = "<COLLECTION-ID>";
     protected String USER_ID = "<USER-ID>";
     protected String ARTICLE_ID = "<ARTICLE-ID>";
+    protected final static String TITLE = "JavaTest";
     protected final static String URL = "http://answers.livefyre.com/JAVA";
     
     public LfTest() {

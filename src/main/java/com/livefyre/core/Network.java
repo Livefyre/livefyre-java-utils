@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
-import com.livefyre.api.client.Domain;
+import com.google.gson.JsonObject;
+import com.livefyre.api.Domain;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
@@ -98,7 +98,7 @@ public class Network implements LfCore {
         );
         
         try {
-            return LivefyreJwtUtil.serializeAndSign(key, new JSONObject(data));
+            return LivefyreJwtUtil.serializeAndSign(key, data);
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure creating token." +e);
         }
@@ -113,10 +113,10 @@ public class Network implements LfCore {
         checkNotNull(lfToken);
 
         try {
-            JSONObject json = LivefyreJwtUtil.decodeLivefyreJwt(key, lfToken);
-            return json.getString("domain").compareTo(name) == 0
-                && json.getString("user_id").compareTo("system") == 0
-                && json.getInt("expires") >= Calendar.getInstance().getTimeInMillis()/1000L;
+            JsonObject json = LivefyreJwtUtil.decodeLivefyreJwt(key, lfToken);
+            return json.get("domain").getAsString().compareTo(name) == 0
+                && json.get("user_id").getAsString().compareTo("system") == 0
+                && json.get("expires").getAsLong() >= Calendar.getInstance().getTimeInMillis()/1000L;
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure decrypting token." +e);
         }

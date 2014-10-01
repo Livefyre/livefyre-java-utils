@@ -1,4 +1,4 @@
-package com.livefyre.api.client;
+package com.livefyre.api;
 
 import com.livefyre.core.Collection;
 import com.livefyre.core.LfCore;

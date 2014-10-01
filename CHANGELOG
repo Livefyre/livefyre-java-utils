@@ -1,8 +1,9 @@
-=== 1.4.0 2014-09-04
+=== 2.0.0 2014-09-29
 
 * Refactored Collection related methods into it's own class.
 * Split tests into unit/integration stages.
-* Added additional configuration settings for automatic deployment.
+* Added many more unit tests.
+* Removed JSON library in favor of Google gson.
 
 === 1.3.5 2014-09-02
 

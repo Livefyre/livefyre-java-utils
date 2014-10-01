@@ -1,4 +1,4 @@
-package com.livefyre.api.client;
+package com.livefyre.api;
 
 import java.security.InvalidKeyException;
 import java.util.List;
@@ -7,14 +7,13 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.livefyre.api.client.filter.LftokenAuthFilter;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.livefyre.api.filter.LftokenAuthFilter;
 import com.livefyre.core.Collection;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
@@ -22,6 +21,7 @@ import com.livefyre.entity.Subscription;
 import com.livefyre.entity.Subscription.Type;
 import com.livefyre.entity.Topic;
 import com.livefyre.utils.LivefyreJwtUtil;
+import com.livefyre.utils.LivefyreUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -47,11 +47,8 @@ public class PersonalizedStream {
                 .accept(MediaType.APPLICATION_JSON)
                 .get(String.class);
         
-        try {
-            return Topic.serializeFromJson(new JSONObject(jsonResp).getJSONObject("data").getJSONObject("topic"));
-        } catch (JSONException e) {}
-        
-        return null;
+        return Topic.serializeFromJson(
+                LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data").getAsJsonObject("topic"));
     }
     
     public static Topic createOrUpdateTopic(LfCore core, String topicId, String label) {
@@ -72,13 +69,13 @@ public class PersonalizedStream {
                 .get(String.class);
         
         List<Topic> topics = Lists.newArrayList();
-        try {
-            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("topics");
-            for (int i = 0; i < data.length(); i++) {
-                topics.add(Topic.serializeFromJson(data.getJSONObject(i)));
-            }
-        } catch (JSONException e) {}
+        JsonArray data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data").getAsJsonArray("topics");
         
+        if (data != null) {
+            for (int i = 0; i < data.size(); i++) {
+                topics.add(Topic.serializeFromJson(data.get(i).getAsJsonObject()));
+            }
+        }
         return topics;
     }
     
@@ -94,7 +91,7 @@ public class PersonalizedStream {
             topics.add(Topic.create(core, k, label));
         }
         
-        String form = new JSONObject(ImmutableMap.<String, Object>of("topics", topics)).toString();
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("topics", topics));
         builder(core)
             .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
             .accept(MediaType.APPLICATION_JSON)
@@ -102,12 +99,11 @@ public class PersonalizedStream {
             .post(String.class, form);
         
         // Doesn't matter what the response details are here as long as it's a 200.
-        
         return topics;
     }
     
     public static int deleteTopics(LfCore core, List<Topic> topics) {
-        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("delete", getTopicIds(topics)));
         String jsonResp = builder(core)
                 .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
                 .queryParam("_method", PATCH_METHOD)
@@ -115,12 +111,8 @@ public class PersonalizedStream {
                 .type(MediaType.APPLICATION_JSON)
                 .post(String.class, form);
         
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            return data.getInt("deleted");
-        } catch (JSONException e) {
-            return 0;
-        }
+        JsonObject data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data");
+        return data.has("deleted") ? data.get("deleted").getAsInt() : 0;
     }
     
     /* Collection Topic API */
@@ -131,56 +123,47 @@ public class PersonalizedStream {
                 .get(String.class);
         
         List<String> topicIds = Lists.newArrayList();
-        try {
-            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("topicIds");
-            for (int i = 0; i < data.length(); i++) {
-                topicIds.add(data.getString(i));
+        JsonArray data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data").getAsJsonArray("topicIds");
+        if (data != null) {
+            for (int i = 0; i < data.size(); i++) {
+                topicIds.add(data.get(i).getAsString());
             }
-        } catch (JSONException e) {}
-        
+        }
         return topicIds;
     }
     
     public static int addCollectionTopics(Collection collection, List<Topic> topics) {
-        String form = new JSONObject(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics))).toString();
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics)));
         
         String jsonResp = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .post(String.class, form);
-        
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            return data.getInt("added");
-        } catch (JSONException e) {
-            return 0;
-        }
+    
+        JsonObject data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data");
+        return data.has("added") ? data.get("added").getAsInt() : 0;
     }
     
     public static Map<String, Integer> replaceCollectionTopics(Collection collection, List<Topic> topics) {
-        JSONObject formJson = new JSONObject();
-        formJson.put("topicIds", getTopicIds(topics));
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("topicIds", getTopicIds(topics)));
 
         String jsonResp = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .put(String.class, formJson.toString());
+                .put(String.class, form);
 
         Map<String, Integer> results = Maps.newHashMap();
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+        JsonObject data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data");
 
-            results.put("added", data.has("added") ? data.getInt("added") :0);
-            results.put("removed", data.has("removed") ? data.getInt("removed") : 0);
-        } catch (JSONException e) {}
-        
+        results.put("added", data.has("added") ? data.get("added").getAsInt() : 0);
+        results.put("removed", data.has("removed") ? data.get("removed").getAsInt() : 0);
         return results;
     }
     
     public static int removeCollectionTopics(Collection collection, List<Topic> topics) {
-        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", getTopicIds(topics))).toString();
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("delete", getTopicIds(topics)));
         
         String jsonResp = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
@@ -189,12 +172,8 @@ public class PersonalizedStream {
                 .type(MediaType.APPLICATION_JSON)
                 .post(String.class, form);
         
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            return data.getInt("removed");
-        } catch (JSONException e) {
-            return 0;
-        }
+        JsonObject data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data");
+        return data.has("removed") ? data.get("removed").getAsInt() : 0;
     }
     
     /* Subscription API */
@@ -205,20 +184,19 @@ public class PersonalizedStream {
                 .get(String.class);
         
         List<Subscription> subscriptions = Lists.newArrayList();
-        try {
-            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("subscriptions");
-            for (int i = 0; i < data.length(); i++) {
-                subscriptions.add(Subscription.serializeFromJson(data.getJSONObject(i)));
+        JsonArray data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data").getAsJsonArray("subscriptions");
+        if (data != null) {
+            for (int i = 0; i < data.size(); i++) {
+                subscriptions.add(Subscription.serializeFromJson(data.get(i).getAsJsonObject()));
             }
-        } catch (JSONException e) {}
-        
+        }
         return subscriptions;
     }
     
     public static int addSubscriptions(Network network, String userToken, List<Topic> topics) {
         String userId = getUserFromToken(network, userToken);
         String userUrn = network.getUserUrn(userId);
-        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn)));
 
         String jsonResp = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
@@ -226,18 +204,14 @@ public class PersonalizedStream {
                 .type(MediaType.APPLICATION_JSON)
                 .post(String.class, form);
         
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            return data.getInt("added");
-        } catch (JSONException e) {
-            return 0;
-        }
+        JsonObject data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data");
+        return data.has("added") ? data.get("added").getAsInt() : 0;
     }
     
     public static Map<String, Integer> replaceSubscriptions(Network network, String userToken, List<Topic> topics) {
         String userId = getUserFromToken(network, userToken);
         String userUrn = network.getUserUrn(userId);
-        String form = new JSONObject(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn))).toString();
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn)));
 
         String jsonResp = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
@@ -246,20 +220,17 @@ public class PersonalizedStream {
                 .put(String.class, form);
         
         Map<String, Integer> results = Maps.newHashMap();
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
+        JsonObject data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data");
 
-            results.put("added", data.has("added") ? data.getInt("added") :0);
-            results.put("removed", data.has("removed") ? data.getInt("removed") : 0);
-        } catch (JSONException e) {}
-        
+        results.put("added", data.has("added") ? data.get("added").getAsInt() : 0);
+        results.put("removed", data.has("removed") ? data.get("removed").getAsInt() : 0);
         return results;
     }
 
     public static int removeSubscriptions(Network network, String userToken, List<Topic> topics) {
         String userId = getUserFromToken(network, userToken);
         String userUrn = network.getUserUrn(userId);
-        String form = new JSONObject(ImmutableMap.<String, Object>of("delete", buildSubscriptions(topics, userUrn))).toString();
+        String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("delete", buildSubscriptions(topics, userUrn)));
 
         String jsonResp = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
@@ -268,12 +239,8 @@ public class PersonalizedStream {
                 .type(MediaType.APPLICATION_JSON)
                 .post(String.class, form);
         
-        try {
-            JSONObject data = new JSONObject(jsonResp).getJSONObject("data");
-            return data.getInt("removed");
-        } catch (JSONException e) {
-            return 0;
-        }
+        JsonObject data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data");
+        return data.has("removed") ? data.get("removed").getAsInt() : 0;
     }
     
     public static List<Subscription> getSubscribers(Network network, Topic topic, Integer limit, Integer offset) {
@@ -285,20 +252,20 @@ public class PersonalizedStream {
                 .get(String.class);
         
         List<Subscription> subscriptions = Lists.newArrayList();
-        try {
-            JSONArray data = new JSONObject(jsonResp).getJSONObject("data").getJSONArray("subscriptions");
-            for (int i = 0; i < data.length(); i++) {
-                subscriptions.add(Subscription.serializeFromJson(data.getJSONObject(i)));
-            }
-        } catch (JSONException e) {}
+        JsonArray data = LivefyreUtil.stringToJson(jsonResp).getAsJsonObject("data").getAsJsonArray("subscriptions");
         
+        if (data != null) {
+            for (int i = 0; i < data.size(); i++) {
+                subscriptions.add(Subscription.serializeFromJson(data.get(i).getAsJsonObject()));
+            }
+        }
         return subscriptions;
     }
     
     /**
      * This call is used specifically by the TimelineCursor class.  
      */
-    public static JSONObject getTimelineStream(LfCore core, String resource, Integer limit, String until, String since) {
+    public static JsonObject getTimelineStream(LfCore core, String resource, Integer limit, String until, String since) {
         WebResource r = streamBuilder(core)
                 .path(TIMELINE_PATH)
                 .queryParam("limit", limit == null ? "50" : limit.toString())
@@ -310,7 +277,7 @@ public class PersonalizedStream {
             r = r.queryParam("since", since);
         }
         
-        return new JSONObject(r.accept(MediaType.APPLICATION_JSON).get(String.class));
+        return LivefyreUtil.stringToJson(r.accept(MediaType.APPLICATION_JSON).get(String.class));
     }
     
     /* Helper methods */
@@ -352,12 +319,12 @@ public class PersonalizedStream {
     }
 
     private static String getUserFromToken(Network network, String userToken) {
-        JSONObject json;
+        JsonObject json;
         try {
             json = LivefyreJwtUtil.decodeLivefyreJwt(network.getKey(), userToken);
         } catch (InvalidKeyException e1) {
             throw new IllegalArgumentException("The userToken provided does not belong to this network.");
         }
-        return json.getString("user_id");
+        return json.get("user_id").getAsString();
     }
 }

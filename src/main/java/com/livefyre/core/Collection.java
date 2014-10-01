@@ -3,8 +3,6 @@ package com.livefyre.core;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,16 +11,19 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.livefyre.api.client.Domain;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.livefyre.api.Domain;
 import com.livefyre.entity.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.utils.LivefyreJwtUtil;
+import com.livefyre.utils.LivefyreUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
@@ -39,10 +40,10 @@ public class Collection implements LfCore {
     private boolean networkIssued;
     private Map<String, Object> options;
 
-    public Collection(Site site, String articleId, String title, String url, Map<String, Object> options) {
+    public Collection(Site site, String title, String articleId, String url, Map<String, Object> options) {
         checkNotNull(articleId);
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
-        checkArgument(isValidFullUrl(checkNotNull(url)),
+        checkArgument(LivefyreUtil.isValidFullUrl(checkNotNull(url)),
                 "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
         if (options != null) {
             if (options.containsKey("type") && !TYPE.contains(options.get("type"))) {
@@ -69,8 +70,8 @@ public class Collection implements LfCore {
     public Collection createOrUpdate() {
         ClientResponse response = invokeCollectionApi("create");
         if (response.getStatus() == 200) {
-            setCollectionId(new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString(
-                    "collectionId"));
+            setCollectionId(LivefyreUtil.stringToJson(response.getEntity(String.class))
+                    .getAsJsonObject("data").get("collectionId").getAsString());
             return this;
         } else if (response.getStatus() == 409) {
             response = invokeCollectionApi("update");
@@ -88,7 +89,7 @@ public class Collection implements LfCore {
      */
     public String buildCollectionMetaToken() {
         try {
-            JSONObject json = getJson();
+            Map<String, Object> json = getAttr();
             json.put("iss", networkIssued ? site.getNetwork().getUrn() : site.getUrn());
             return LivefyreJwtUtil.serializeAndSign(networkIssued ? site.getNetwork().getKey() : site.getKey(), json);
         } catch (InvalidKeyException e) {
@@ -103,8 +104,8 @@ public class Collection implements LfCore {
      */
     public String buildChecksum() {
         try {
-            JSONObject json = getJson();
-            byte[] digest = MessageDigest.getInstance("MD5").digest(json.toString().getBytes());
+            Map<String, Object> attr = getAttr();
+            byte[] digest = MessageDigest.getInstance("MD5").digest(LivefyreUtil.mapToJsonString(attr).getBytes());
             return printHexBinary(digest);
         } catch (NoSuchAlgorithmException e) {
             throw new LivefyreException("Failure creating checksum." + e);
@@ -116,7 +117,7 @@ public class Collection implements LfCore {
      * 
      * @return JSONObject.
      */
-    public JSONObject getCollectionContent() {
+    public JsonObject getCollectionContent() {
         String b64articleId = Base64.encodeBase64URLSafeString(articleId.getBytes());
         if (b64articleId.length() % 4 != 0) {
             b64articleId = b64articleId + StringUtils.repeat("=", 4 - (b64articleId.length() % 4));
@@ -128,43 +129,33 @@ public class Collection implements LfCore {
         if (response.getStatus() != 200) {
             throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
         }
-        return new JSONObject(response.getEntity(String.class));
-    }
-
-    /* Protected/private methods */
-    protected boolean isValidFullUrl(String url) {
-        try {
-            new URL(url);
-        } catch (MalformedURLException e) {
-            return false;
-        }
-        return true;
+        Gson gson = new Gson();
+        return gson.fromJson(response.getEntity(String.class), JsonObject.class);
     }
     
-    private JSONObject getJson() {
+    private Map<String, Object> getAttr() {
         Map<String, Object> attr = Maps.newTreeMap();
         attr.putAll(options);
         attr.put("articleId", articleId);
         attr.put("url", url);
         attr.put("title", title);
-        
-        return new JSONObject(attr);
-    }
-    
-    private JSONObject getPayload() {
-        JSONObject json = new JSONObject();
-        json.put("articleId", articleId);
-        json.put("checksum", buildChecksum());
-        json.put("collectionMeta", buildCollectionMetaToken());
-        return json;
+        return attr;
     }
 
     private ClientResponse invokeCollectionApi(String method) {
         String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(site), site.getId(), method);
         ClientResponse response = Client.create().resource(uri).queryParam("sync", "1")
                 .accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, getPayload().toString());
+                .post(ClientResponse.class, getPayload());
         return response;
+    }
+    
+    private String getPayload() {
+        Map<String, Object> payload = ImmutableMap.<String, Object>of(
+            "articleId", articleId,
+            "checksum", buildChecksum(),
+            "collectionMeta", buildCollectionMetaToken());
+        return LivefyreUtil.mapToJsonString(payload);
     }
 
     private static final char[] hexCode = "0123456789abcdef".toCharArray();

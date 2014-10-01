@@ -1,4 +1,4 @@
-package com.livefyre.api.client.filter;
+package com.livefyre.api.filter;
 
 import com.livefyre.core.LfCore;
 import com.sun.jersey.api.client.ClientHandlerException;
