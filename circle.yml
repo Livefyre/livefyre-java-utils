@@ -1,13 +1,18 @@
 test:
   override:
-  - mvn clean install
-  - mvn test -Dtest=IntegrationTestSuite
-  - sudo update-alternatives --set java oraclejdk7
-  - mvn clean install
-  - mvn test -Dtest=IntegrationTestSuite
-  - sudo update-alternatives --set java oraclejdk8
-  - mvn clean install
-  - mvn test -Dtest=IntegrationTestSuite
+  # - mvn dependency:resolve
+  # - mvn test -Dtest=UnitTestSuite
+  # - mvn test -Dtest=IntegrationTestSuite
+  - sudo update-alternatives --set java Oracle JDK 7
+  # - mvn clean
+  # - mvn dependency:resolve
+  # - mvn test -Dtest=UnitTestSuite
+  # - mvn test -Dtest=IntegrationTestSuite
+  # - sudo update-alternatives --set java oraclejdk8
+  # - mvn clean
+  # - mvn dependency:resolve
+  # - mvn test -Dtest=UnitTestSuite
+  # - mvn test -Dtest=IntegrationTestSuite
 
 machine:
   timezone:
