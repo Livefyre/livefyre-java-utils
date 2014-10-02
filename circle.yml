@@ -1,10 +1,13 @@
 test:
   override:
-  - java -version
-  - JAVA_HOME=oraclejdk7 mvn test
-  # - mvn clean install
-  # post:
-  # - mvn test -Dtest=IntegrationTestSuite
+  - mvn clean install
+  - mvn test -Dtest=IntegrationTestSuite
+  - sudo update-alternatives --set java oraclejdk7
+  - mvn clean install
+  - mvn test -Dtest=IntegrationTestSuite
+  - sudo update-alternatives --set java oraclejdk8
+  - mvn clean install
+  - mvn test -Dtest=IntegrationTestSuite
 
 machine:
   timezone:
