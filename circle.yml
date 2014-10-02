@@ -1,5 +1,6 @@
 test:
   override:
+  - java -version
   - mvn test -Dtest=UnitTestSuite
   - mvn test -Dtest=IntegrationTestSuite
   #ver 1.7
@@ -7,15 +8,17 @@ test:
   - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.7.0/bin/javac
   - mvn clean
   - mvn dependency:resolve
-  - mvn test -Dtest=UnitTestSuite
-  - mvn test -Dtest=IntegrationTestSuite
+  - java -version
+  # - mvn test -Dtest=UnitTestSuite
+  # - mvn test -Dtest=IntegrationTestSuite
   #ver 1.8
   - sudo update-alternatives --set java /usr/lib/jvm/jdk1.8.0/bin/java
   - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.8.0/bin/javac
   - mvn clean
   - mvn dependency:resolve
-  - mvn test -Dtest=UnitTestSuite
-  - mvn test -Dtest=IntegrationTestSuite
+  - java -version
+  # - mvn test -Dtest=UnitTestSuite
+  # - mvn test -Dtest=IntegrationTestSuite
 
 machine:
   timezone:
