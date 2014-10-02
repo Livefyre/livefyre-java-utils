@@ -78,9 +78,9 @@ public class Collection implements LfCore {
             if (response.getStatus() == 200) {
                 return this;
             }
-            throw new LivefyreException("Error updating Livefyre collection. Status code: " + response.getStatus());
+            throw new LivefyreException(String.format("Error updating Livefyre collection. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
         }
-        throw new LivefyreException("Error creating Livefyre collection. Status code: " + response.getStatus());
+        throw new LivefyreException(String.format("Error creating Livefyre collection. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
     }
 
     /**
@@ -127,7 +127,7 @@ public class Collection implements LfCore {
         ClientResponse response = Client.create().resource(url).accept(MediaType.APPLICATION_JSON)
                 .get(ClientResponse.class);
         if (response.getStatus() != 200) {
-            throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
+            throw new LivefyreException(String.format("Error contacting Livefyre. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
         }
         Gson gson = new Gson();
         return gson.fromJson(response.getEntity(String.class), JsonObject.class);

@@ -318,7 +318,8 @@ public class PersonalizedStream {
     private static JsonObject evaluateResponse(ClientResponse response) {
         if (response.getStatus() == 500) {
             throw new LivefyreException("Livefyre appears to be down. Please see status.livefyre.com or contact us for more information.");
-        } else if (response.getStatus() >= 400) {
+        }
+        if (response.getStatus() >= 400) {
             throw new LivefyreException("Please check the contents of your request. Here is the response from our servers: " +response.getEntity(String.class));
         }
         return LivefyreUtil.stringToJson(response.getEntity(String.class));

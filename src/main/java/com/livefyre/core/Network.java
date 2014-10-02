@@ -51,7 +51,7 @@ public class Network implements LfCore {
                 .queryParam("pull_profile_url", urlTemplate)
                 .post(ClientResponse.class);
         if (response.getStatus() != 204) {
-            throw new LivefyreException(String.format("Error setting the user sync URL to %s. Please try again.", urlTemplate));
+            throw new LivefyreException(String.format("Error contacting Livefyre. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
         }
     }
     
@@ -70,7 +70,7 @@ public class Network implements LfCore {
                 .queryParam("lftoken", buildLivefyreToken())
                 .post(ClientResponse.class);
         if (response.getStatus() != 200) {
-            throw new LivefyreException(String.format("Error syncing user %s. Please try again.", userId));
+            throw new LivefyreException(String.format("Error contacting Livefyre. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
         }
         return this;
     }
