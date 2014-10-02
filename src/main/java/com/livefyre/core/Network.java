@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.livefyre.api.Domain;
+import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.sun.jersey.api.client.Client;
@@ -41,7 +42,7 @@ public class Network implements LfCore {
      * @param urlTemplate the url template to set.
      * @return true if the update was successful.
      */
-    public boolean setUserSyncUrl(String urlTemplate) {
+    public void setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
         ClientResponse response = Client.create()
@@ -49,7 +50,9 @@ public class Network implements LfCore {
                 .queryParam("actor_token", buildLivefyreToken())
                 .queryParam("pull_profile_url", urlTemplate)
                 .post(ClientResponse.class);
-        return response.getStatus() == 204;
+        if (response.getStatus() != 204) {
+            throw new LivefyreException(String.format("Error setting the user sync URL to %s. Please try again.", urlTemplate));
+        }
     }
     
     /**
@@ -58,7 +61,7 @@ public class Network implements LfCore {
      * @param userId 
      * @return true if the sync was successful.
      */
-    public boolean syncUser(String userId) {
+    public Network syncUser(String userId) {
         checkNotNull(userId);
         
         String url = String.format("%s/api/v3_0/user/%s/refresh", Domain.quill(this), userId);
@@ -66,7 +69,10 @@ public class Network implements LfCore {
                 .resource(url)
                 .queryParam("lftoken", buildLivefyreToken())
                 .post(ClientResponse.class);
-        return response.getStatus() == 200;
+        if (response.getStatus() != 200) {
+            throw new LivefyreException(String.format("Error syncing user %s. Please try again.", userId));
+        }
+        return this;
     }
     
     /**

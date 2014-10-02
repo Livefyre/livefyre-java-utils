@@ -41,7 +41,7 @@ public class PersonalizedStreamTest extends LfTest {
     @Test
     public void testNetworkTopicApi() {
         Topic topic = (PersonalizedStream.createOrUpdateTopic(network, "1", "UNO"));
-        Topic t = PersonalizedStream.getTopic(network, topic.truncatedId());
+        Topic t = PersonalizedStream.getTopic(network, "1");
         assertNotNull(t);
         assertEquals(t.getLabel(), topic.getLabel());
         

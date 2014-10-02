@@ -1,5 +1,6 @@
 # Livefyre Java Utility Classes
 [![GitHub version](https://badge.fury.io/gh/livefyre%2Flivefyre-java-utils.png)](http://badge.fury.io/gh/livefyre%2Flivefyre-java-utils)
+[![Circle CI](https://circleci.com/gh/Livefyre/livefyre-java-utils.png?style=badge)](https://circleci.com/gh/Livefyre/livefyre-java-utils)
 
 Livefyre's official library for common server-side tasks necessary for getting Livefyre apps (comments, reviews, etc.) working on your website.
 

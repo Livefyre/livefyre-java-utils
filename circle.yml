@@ -1,8 +1,13 @@
-# deployment:
-#   production:
-#     branch: 1.4.0
-#     commands:
-#       - mvn clean deploy -DskipTests
 test:
-  post:
-    - mvn test -Dtest=IntegrationTestSuite
+  override:
+  - java -version
+  - JAVA_HOME=oraclejdk7 mvn test
+  # - mvn clean install
+  # post:
+  # - mvn test -Dtest=IntegrationTestSuite
+
+machine:
+  timezone:
+    America/Los_Angeles
+  java:
+    version: oraclejdk6

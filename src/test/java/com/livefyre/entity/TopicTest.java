@@ -41,13 +41,13 @@ public class TopicTest extends LfTest {
         JsonObject json = new JsonObject();
         json.addProperty("id", ID);
         json.addProperty("label", LABEL);
-        json.addProperty("createdAt", 100);
-        json.addProperty("modifiedAt", 1000);
+        json.addProperty("createdAt", CREATED_AT);
+        json.addProperty("modifiedAt", MODIFIED_AT);
         
         Topic topic = Topic.serializeFromJson(json);
         assertEquals(ID, topic.getId());
         assertEquals(LABEL, topic.getLabel());
-        assertEquals(100, topic.getCreatedAt().intValue());
-        assertEquals(1000, topic.getModifiedAt().intValue());
+        assertEquals(CREATED_AT, topic.getCreatedAt());
+        assertEquals(MODIFIED_AT, topic.getModifiedAt());
     }
 }

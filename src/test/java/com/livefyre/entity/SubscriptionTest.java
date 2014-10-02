@@ -25,7 +25,7 @@ public class SubscriptionTest {
         assertEquals(TYPE.name(), sub.getType());
         assertEquals(CREATED_AT, sub.getCreatedAt());
         
-        assertTrue(10000 == sub.createdAtDate().getTime());
+        assertTrue(CREATED_AT * 1000 == sub.createdAtDate().getTime());
     }
     
     @Test
