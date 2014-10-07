@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 public class Site implements LfCore {
     private Network network = null;
     private String id = null;
@@ -30,7 +32,7 @@ public class Site implements LfCore {
      * @return Collection
      */
     public Collection buildCollection(String title, String articleId, String url, Map<String, Object> options) {
-        return new Collection(this, title, articleId, url, options);
+        return new Collection(this, title, articleId, url, options == null ? Maps.<String, Object>newHashMap() : options);
     }
 
     /* Getters/Setters */

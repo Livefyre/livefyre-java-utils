@@ -45,22 +45,22 @@ public class Collection implements LfCore {
         checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
         checkArgument(LivefyreUtil.isValidFullUrl(checkNotNull(url)),
                 "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
-        if (options != null) {
-            if (options.containsKey("type") && !TYPE.contains(options.get("type"))) {
-                throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " + TYPE.toString());
-            }
-            if (options.containsKey("topics")) {
-                networkIssued = checkTopics(site.getNetwork().getUrn(), options.get("topics"));
-            }
+        if (options.containsKey("type") && !TYPE.contains(options.get("type"))) {
+            throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " + TYPE.toString());
+        }
+        if (options.containsKey("topics")) {
+            networkIssued = checkTopics(site.getNetwork().getUrn(), options.get("topics"));
+        } else {
+            networkIssued = false;
         }
 
         this.site = site;
         this.articleId = articleId;
         this.title = title;
         this.url = url;
-        this.options = options == null ? Maps.<String, Object> newHashMap() : options;
+        this.options = options;
     }
-
+    
     /**
      * Informs Livefyre to either create or update a collection based on the attributes of this Collection.
      * Makes an external API call. Returns this.
