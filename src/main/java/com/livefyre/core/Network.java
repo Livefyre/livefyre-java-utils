@@ -15,7 +15,9 @@ import com.google.gson.JsonObject;
 import com.livefyre.api.Domain;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
+import com.livefyre.model.NetworkData;
 import com.livefyre.utils.LivefyreJwtUtil;
+import com.livefyre.validators.Validator;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
@@ -24,15 +26,16 @@ public class Network implements LfCore {
     private static final String DEFAULT_USER = "system";
     private static final String ID = "{id}";
     
-    private String name = null;
-    private String key = null;
+    private NetworkData data;
     private boolean ssl = true;
-    private String networkName = null;
     
-    public Network(String name, String key) {
-        this.name = checkNotNull(name);
-        this.key = checkNotNull(key);
-        this.networkName = this.name.split("\\.")[0];
+    public Network(NetworkData data) {
+        this.data = data;
+    }
+    
+    public static Network init(String name, String key) {
+        NetworkData data = new NetworkData(name, key);
+        return new Network(Validator.validate(data));
     }
     
     /**
@@ -96,15 +99,15 @@ public class Network implements LfCore {
         checkNotNull(displayName);
         checkNotNull(expires);
         
-        Map<String, Object> data = ImmutableMap.<String, Object>of(
-            "domain", name,
+        Map<String, Object> tokenData = ImmutableMap.<String, Object>of(
+            "domain", data.getName(),
             "user_id", userId,
             "display_name", displayName,
             "expires", getExpiryInSeconds(expires)
         );
         
         try {
-            return LivefyreJwtUtil.serializeAndSign(key, data);
+            return LivefyreJwtUtil.serializeAndSign(data.getKey(), tokenData);
         } catch (InvalidKeyException e) {
             throw new TokenException("Failure creating token." +e);
         }
@@ -119,8 +122,8 @@ public class Network implements LfCore {
         checkNotNull(lfToken);
 
         try {
-            JsonObject json = LivefyreJwtUtil.decodeLivefyreJwt(key, lfToken);
-            return json.get("domain").getAsString().compareTo(name) == 0
+            JsonObject json = LivefyreJwtUtil.decodeLivefyreJwt(data.getKey(), lfToken);
+            return json.get("domain").getAsString().compareTo(data.getName()) == 0
                 && json.get("user_id").getAsString().compareTo("system") == 0
                 && json.get("expires").getAsLong() >= Calendar.getInstance().getTimeInMillis()/1000L;
         } catch (InvalidKeyException e) {
@@ -136,56 +139,19 @@ public class Network implements LfCore {
      * @return Site
      */
     public Site getSite(String siteId, String siteKey) {
-        return new Site(this, siteId, siteKey);
+        return Site.init(this, siteId, siteKey);
     }
     
-    /* Protected/private methods */
-    private long getExpiryInSeconds(double secTillExpire) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.add(Calendar.SECOND, (int) secTillExpire);
-        return cal.getTimeInMillis() / 1000L;
-    }
-    
-    /* Getters/Setters */
     public String getUrn() {
-        return "urn:livefyre:"+name;
+        return "urn:livefyre:"+data.getName();
     }
     
     public String getUserUrn(String user) {
         return getUrn()+":user="+user;
     }
-
-    public String getNetworkName() {
-        return this.networkName;
-    }
-
-    /**
-     * It is preferable to use the constructor to set the networkName.
-     */
-    public void setNetworkName(String networkName) {
-        this.networkName = networkName;
-    }
-
-    public String getName() {
-        return name;
-    }
     
-    /**
-     * It is preferable to use the constructor to set the name.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * It is preferable to use the constructor to set the key.
-     */
-    public void setKey(String key) {
-        this.key = key;
+    public String getNetworkName() {
+        return data.getName().split("\\.")[0];
     }
 
     public boolean isSsl() {
@@ -193,5 +159,21 @@ public class Network implements LfCore {
     }
 
     public void setSsl(boolean ssl) {
-        this.ssl = ssl; }
+        this.ssl = ssl;
+    }
+
+    public NetworkData getData() {
+        return data;
+    }
+    
+    public void setData(NetworkData data) {
+        this.data = data;
+    }
+
+    /* Protected/private methods */
+    private long getExpiryInSeconds(double secTillExpire) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.add(Calendar.SECOND, (int) secTillExpire);
+        return cal.getTimeInMillis() / 1000L;
+    }
 }

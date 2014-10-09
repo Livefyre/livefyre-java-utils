@@ -74,22 +74,22 @@ public class CollectionTest extends LfTest {
         assertEquals(decodedToken.get("type").getAsString(), "liveblog");
         
         // test network topics
-        List<Topic> topics = Lists.newArrayList(Topic.create(site.getNetwork(), "1", "1"));
+        List<Topic> topics = Lists.newArrayList(Topic.create(site.getData().getNetwork(), "1", "1"));
         Collection coll = site.buildCollection(TITLE, ARTICLE_ID, URL, ImmutableMap.<String, Object>of("topics", topics));
         assertTrue(coll.isNetworkIssued());
         
         token = coll.buildCollectionMetaToken();
         try {
-            LivefyreJwtUtil.decodeLivefyreJwt(site.getKey(), token);
+            LivefyreJwtUtil.decodeLivefyreJwt(site.getData().getKey(), token);
             fail("Should be encoded with network key.");
         } catch (InvalidKeyException e) {}
         
         try {
-            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(site.getNetwork().getKey(), token);
+            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(site.getData().getNetwork().getData().getKey(), token);
         } catch (InvalidKeyException e) {
             fail("Should pass when decoded with network key.");
         }
-        assertEquals(decodedToken.get("iss").getAsString(), site.getNetwork().getUrn());
+        assertEquals(decodedToken.get("iss").getAsString(), site.getData().getNetwork().getUrn());
     }
     
     @Test

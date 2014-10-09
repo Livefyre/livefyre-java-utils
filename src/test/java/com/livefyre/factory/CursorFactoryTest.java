@@ -23,7 +23,7 @@ public class CursorFactoryTest extends LfTest {
     public void testPersonalStreamCursor() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         Date date = Calendar.getInstance().getTime();
-        String psResource = String.format("urn:livefyre:%s:user=%s:personalStream", network.getName(), USER_ID);
+        String psResource = String.format("urn:livefyre:%s.fyre.co:user=%s:personalStream", network.getNetworkName(), USER_ID);
         
         TimelineCursor cursor = CursorFactory.getPersonalStreamCursor(network, USER_ID);
         assertEquals(psResource, cursor.getResource());
@@ -40,7 +40,7 @@ public class CursorFactoryTest extends LfTest {
         Date date = Calendar.getInstance().getTime();
         String topicId = "topic";
         String label = "label";
-        String tsResource = String.format("urn:livefyre:%s:topic=%s:topicStream", network.getName(), topicId);
+        String tsResource = String.format("urn:livefyre:%s.fyre.co:topic=%s:topicStream", network.getNetworkName(), topicId);
         
         Topic topic = Topic.create(network, topicId, label);
         TimelineCursor cursor = CursorFactory.getTopicStreamCursor(network, topic);

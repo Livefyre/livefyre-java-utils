@@ -25,7 +25,7 @@ public class NetworkTest extends LfTest {
     }
     
     @Test
-    @Category(IntegrationTest.class)
+    @Category(UnitTest.class)
     public void testNetworkCreation() {
         try {
             Livefyre.getNetwork("", null);
@@ -79,16 +79,16 @@ public class NetworkTest extends LfTest {
         } catch(NullPointerException e) {}
         Site site = network.getSite(SITE_ID, SITE_KEY);
         assertNotNull(site);
-        assertEquals(SITE_ID, site.getId());
-        assertEquals(SITE_KEY, site.getKey());
+        assertEquals(SITE_ID, site.getData().getId());
+        assertEquals(SITE_KEY, site.getData().getKey());
     }
     
     @Test
     @Category(UnitTest.class)
     public void testNullChecks() {
-        Network network = new Network("", "");
-        network.setName(null);
-        network.setKey(null);;
+        Network network = Network.init("", "");
+        network.getData().setName(null);
+        network.getData().setKey(null);;
         /* param checks */
         try {
             network.setUserSyncUrl(null);
@@ -128,7 +128,7 @@ public class NetworkTest extends LfTest {
             fail("network name cannot be null");
         } catch(NullPointerException e) {}
         /* key checks */
-        network.setName("");
+        network.getData().setName("");
         try {
             network.setUserSyncUrl("{id}");
             fail("network key cannot be null");

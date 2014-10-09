@@ -344,7 +344,7 @@ public class PersonalizedStream {
     private static String getUserFromToken(Network network, String userToken) {
         JsonObject json;
         try {
-            json = LivefyreJwtUtil.decodeLivefyreJwt(network.getKey(), userToken);
+            json = LivefyreJwtUtil.decodeLivefyreJwt(network.getData().getKey(), userToken);
         } catch (InvalidKeyException e1) {
             throw new IllegalArgumentException("The userToken provided does not belong to this network.");
         }

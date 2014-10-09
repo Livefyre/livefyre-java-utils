@@ -5,6 +5,5 @@ package com.livefyre.core;
  * don't want this to be overly complicated - important to distinguish difference between the two
  */
 public interface LfCore {
-    public String buildLivefyreToken();
     public String getUrn();
 }

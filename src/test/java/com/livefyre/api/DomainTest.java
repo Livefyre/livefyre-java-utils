@@ -22,7 +22,7 @@ public class DomainTest extends LfTest {
     public void setup() {
         network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         site = network.getSite(SITE_ID, SITE_KEY);
-        collection = site.buildCollection(TITLE, ARTICLE_ID, URL, null);
+        collection = site.buildCollection(TITLE, ARTICLE_ID, URL);
     }
     
     @Test
@@ -36,7 +36,7 @@ public class DomainTest extends LfTest {
         domain = Domain.quill(collection);
         assertEquals(quillDomainSsl, domain);
         
-        String quillDomain = String.format("http://quill.%s", network.getName());
+        String quillDomain = String.format("http://quill.%s.fyre.co", network.getNetworkName());
         network.setSsl(false);
         domain = Domain.quill(network);
         assertEquals(quillDomain, domain);
@@ -50,7 +50,7 @@ public class DomainTest extends LfTest {
     @Category(UnitTest.class)
     public void testBootstrap() {
         String bootstrapDomainSsl = String.format("https://%s.bootstrap.fyre.co", network.getNetworkName());
-        String bootstrapDomain = String.format("http://bootstrap.%s", network.getName());
+        String bootstrapDomain = String.format("http://bootstrap.%s.fyre.co", network.getNetworkName());
         String domain = Domain.bootstrap(network);
         assertEquals(bootstrapDomainSsl, domain);
         domain = Domain.bootstrap(site);

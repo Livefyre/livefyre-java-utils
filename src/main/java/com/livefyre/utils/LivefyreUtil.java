@@ -1,11 +1,13 @@
 package com.livefyre.utils;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.livefyre.core.Collection;
+import com.livefyre.core.LfCore;
+import com.livefyre.core.Network;
+import com.livefyre.core.Site;
 
 public class LivefyreUtil {
 
@@ -21,12 +23,13 @@ public class LivefyreUtil {
         return gson.toJson(map);
     }
 
-    public static boolean isValidFullUrl(String url) {
-        try {
-            new URL(url);
-        } catch (MalformedURLException e) {
-            return false;
+    public static Network getNetworkFromCore(LfCore core) {
+        if (core.getClass().equals(Network.class)) {
+            return (Network) core;
+        } else if (core.getClass().equals(Site.class)) {
+            return ((Site) core).getData().getNetwork();
+        } else {
+            return ((Collection) core).getData().getSite().getData().getNetwork();
         }
-        return true;
     }
 }

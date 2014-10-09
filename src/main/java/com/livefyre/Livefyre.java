@@ -7,6 +7,6 @@ public class Livefyre {
     private Livefyre() { }
 
     public static Network getNetwork(String networkName, String networkKey) {
-        return new Network(networkName, networkKey);
+        return Network.init(networkName, networkKey);
     }
 }

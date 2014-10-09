@@ -87,7 +87,7 @@ public class PersonalizedStreamTest extends LfTest {
     public void testCollectionTopicApi_network() {
         List<Topic> topics = PersonalizedStream.createOrUpdateTopics(network, topicMap);
         String collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
-        Collection collection = site.buildCollection(collectionName, collectionName, URL, null).createOrUpdate();
+        Collection collection = site.buildCollection(collectionName, collectionName, URL).createOrUpdate();
         
         List<String> topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.isEmpty());
@@ -111,7 +111,9 @@ public class PersonalizedStreamTest extends LfTest {
         assertTrue(topicIds.isEmpty());
 
         collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
-        site.buildCollection(collectionName, collectionName, URL, ImmutableMap.<String, Object>of("topics", topics)).createOrUpdate();
+        collection = site.buildCollection(collectionName, collectionName, URL);
+        collection.getData().setTopics(topics);
+        collection.createOrUpdate();
 
         PersonalizedStream.deleteTopics(network, topics);
     }

@@ -1,20 +1,19 @@
 package com.livefyre.core;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.Map;
-
-import com.google.common.collect.Maps;
+import com.livefyre.model.CollectionType;
+import com.livefyre.model.SiteData;
+import com.livefyre.validators.Validator;
 
 public class Site implements LfCore {
-    private Network network = null;
-    private String id = null;
-    private String key = null;
+    private SiteData data;
 
-    public Site(Network network, String id, String key) {
-        this.network = checkNotNull(network);
-        this.id = checkNotNull(id);
-        this.key = checkNotNull(key);
+    public Site(SiteData data) {
+        this.data = data;
+    }
+
+    public static Site init(Network network, String siteId, String siteKey) {
+        SiteData data = new SiteData(network, siteId, siteKey);
+        return new Site(Validator.validate(data));
     }
 
     /**
@@ -31,49 +30,22 @@ public class Site implements LfCore {
      * @param options map of additional params to be included with the collection.
      * @return Collection
      */
-    public Collection buildCollection(String title, String articleId, String url, Map<String, Object> options) {
-        return new Collection(this, title, articleId, url, options == null ? Maps.<String, Object>newHashMap() : options);
-    }
-
-    /* Getters/Setters */
-    public String buildLivefyreToken() {
-        return network.buildLivefyreToken();
+    public Collection buildCollection(String title, String articleId, String url) {
+        return Collection.init(this, CollectionType.LIVECOMMENTS, title, articleId, url);
     }
     
+    //build different collection types here
+
+    /* Getters/Setters */
     public String getUrn() {
-        return network.getUrn() + ":site=" + id;
+        return data.getNetwork().getUrn() + ":site=" + data.getId();
+    }
+    
+    public SiteData getData() {
+        return data;
     }
 
-    public Network getNetwork() {
-        return this.network;
-    }
-
-    /**
-     * It is preferable to use the constructor to set network.
-     */
-    public void setNetwork(Network network) {
-        this.network = network;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * It is preferable to use the constructor to set id.
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * It is preferable to use the constructor to set key.
-     */
-    public void setKey(String key) {
-        this.key = key;
+    public void setData(SiteData data) {
+        this.data = data;
     }
 }
