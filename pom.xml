@@ -158,6 +158,11 @@
 					<maxmem>256m</maxmem>
 					<!-- aggregated reports for multi-module projects -->
 					<aggregate>true</aggregate>
+					<instrumentation>
+						<excludes>
+							<exclude>com/livefyre/repackaged/**/*.class</exclude>
+						</excludes>
+					</instrumentation>
 				</configuration>
 			</plugin>
 		</plugins>
