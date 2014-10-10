@@ -2,18 +2,20 @@ package com.livefyre.core;
 
 import com.livefyre.model.CollectionType;
 import com.livefyre.model.SiteData;
-import com.livefyre.validators.Validator;
+import com.livefyre.validator.ReflectiveValidator;
 
 public class Site implements LfCore {
+    private Network network;
     private SiteData data;
 
-    public Site(SiteData data) {
+    public Site(Network network, SiteData data) {
+        this.network = network;
         this.data = data;
     }
 
     public static Site init(Network network, String siteId, String siteKey) {
-        SiteData data = new SiteData(network, siteId, siteKey);
-        return new Site(Validator.validate(data));
+        SiteData data = new SiteData(siteId, siteKey);
+        return new Site(network, ReflectiveValidator.validate(data));
     }
 
     /**
@@ -38,9 +40,17 @@ public class Site implements LfCore {
 
     /* Getters/Setters */
     public String getUrn() {
-        return data.getNetwork().getUrn() + ":site=" + data.getId();
+        return network.getUrn() + ":site=" + data.getId();
     }
     
+    public Network getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
     public SiteData getData() {
         return data;
     }

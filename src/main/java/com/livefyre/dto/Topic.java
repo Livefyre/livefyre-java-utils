@@ -1,4 +1,4 @@
-package com.livefyre.entity;
+package com.livefyre.dto;
 
 import java.util.Date;
 

@@ -17,7 +17,7 @@ import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.model.NetworkData;
 import com.livefyre.utils.LivefyreJwtUtil;
-import com.livefyre.validators.Validator;
+import com.livefyre.validator.ReflectiveValidator;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
@@ -35,7 +35,7 @@ public class Network implements LfCore {
     
     public static Network init(String name, String key) {
         NetworkData data = new NetworkData(name, key);
-        return new Network(Validator.validate(data));
+        return new Network(ReflectiveValidator.validate(data));
     }
     
     /**

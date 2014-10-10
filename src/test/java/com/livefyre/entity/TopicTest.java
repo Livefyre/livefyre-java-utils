@@ -10,6 +10,7 @@ import com.livefyre.Livefyre;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.core.Network;
+import com.livefyre.dto.Topic;
 
 @Category(UnitTest.class)
 public class TopicTest extends LfTest {

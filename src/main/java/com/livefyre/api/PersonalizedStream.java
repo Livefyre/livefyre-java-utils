@@ -17,10 +17,11 @@ import com.livefyre.api.filter.LftokenAuthFilter;
 import com.livefyre.core.Collection;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
-import com.livefyre.entity.Subscription;
-import com.livefyre.entity.Subscription.Type;
-import com.livefyre.entity.Topic;
+import com.livefyre.dto.Subscription;
+import com.livefyre.dto.Topic;
+import com.livefyre.dto.Subscription.Type;
 import com.livefyre.exceptions.LivefyreException;
+import com.livefyre.model.CursorData;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.utils.LivefyreUtil;
 import com.sun.jersey.api.client.Client;
@@ -277,16 +278,16 @@ public class PersonalizedStream {
     /**
      * This call is used specifically by the TimelineCursor class.  
      */
-    public static JsonObject getTimelineStream(LfCore core, String resource, Integer limit, String until, String since) {
+    public static JsonObject getTimelineStream(LfCore core, CursorData data, boolean isNext) {
         WebResource r = streamBuilder(core)
                 .path(TIMELINE_PATH)
-                .queryParam("limit", limit == null ? "50" : limit.toString())
-                .queryParam("resource", resource);
+                .queryParam("limit", data.getLimit().toString())
+                .queryParam("resource", data.getResource());
         
-        if (until != null) {
-            r = r.queryParam("until", until);
-        } else if (since != null) {
-            r = r.queryParam("since", since);
+        if (isNext) {
+            r = r.queryParam("since", data.getCursorTime());
+        } else {
+            r = r.queryParam("until", data.getCursorTime());
         }
         
         ClientResponse response = r.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);

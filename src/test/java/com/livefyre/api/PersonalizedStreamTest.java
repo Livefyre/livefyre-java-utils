@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -21,8 +22,9 @@ import com.livefyre.config.LfTest;
 import com.livefyre.core.Collection;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
-import com.livefyre.entity.Subscription;
-import com.livefyre.entity.Topic;
+import com.livefyre.dto.Subscription;
+import com.livefyre.dto.Topic;
+import com.livefyre.model.CursorData;
 
 @Category(IntegrationTest.class)
 public class PersonalizedStreamTest extends LfTest {
@@ -122,7 +124,7 @@ public class PersonalizedStreamTest extends LfTest {
     public void testCollectionTopicApi_site() {
         List<Topic> topics = PersonalizedStream.createOrUpdateTopics(site, topicMap);
         String collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
-        Collection collection = site.buildCollection(collectionName, collectionName, URL, null).createOrUpdate();
+        Collection collection = site.buildCollection(collectionName, collectionName, URL).createOrUpdate();
         
         int added = PersonalizedStream.addCollectionTopics(collection, topics);
         assertTrue(added == topics.size());
@@ -140,7 +142,9 @@ public class PersonalizedStreamTest extends LfTest {
         assertTrue(topicIds.isEmpty());
         
         collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
-        site.buildCollection(collectionName, collectionName, URL, ImmutableMap.<String, Object>of("topics", topics)).createOrUpdate();
+        collection = site.buildCollection(collectionName, collectionName, URL);
+        collection.getData().setTopics(topics);
+        collection.createOrUpdate();
         
         PersonalizedStream.deleteTopics(site, topics);
     }
@@ -174,7 +178,8 @@ public class PersonalizedStreamTest extends LfTest {
     @Test
     public void testTimelineStream() {
         Topic topic = PersonalizedStream.createOrUpdateTopic(network, "TOPIC", "LABEL");
-        JsonObject result = PersonalizedStream.getTimelineStream(network, topic.getId() +":topicStream", 50, null, null);
+        CursorData data = new CursorData(topic.getId() +":topicStream", 50, new Date());
+        JsonObject result = PersonalizedStream.getTimelineStream(network, data, true);
         assertNotNull(result);
         PersonalizedStream.deleteTopic(network, topic);
     }

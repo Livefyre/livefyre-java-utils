@@ -12,8 +12,8 @@ import com.livefyre.Livefyre;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.core.Network;
-import com.livefyre.entity.TimelineCursor;
-import com.livefyre.entity.Topic;
+import com.livefyre.cursor.TimelineCursor;
+import com.livefyre.dto.Topic;
 
 public class CursorFactoryTest extends LfTest {
     private static final int LIMIT = 10;
@@ -26,11 +26,11 @@ public class CursorFactoryTest extends LfTest {
         String psResource = String.format("urn:livefyre:%s.fyre.co:user=%s:personalStream", network.getNetworkName(), USER_ID);
         
         TimelineCursor cursor = CursorFactory.getPersonalStreamCursor(network, USER_ID);
-        assertEquals(psResource, cursor.getResource());
+        assertEquals(psResource, cursor.getData().getResource());
         
         cursor = CursorFactory.getPersonalStreamCursor(network, USER_ID, LIMIT, date);
-        assertEquals(psResource, cursor.getResource());
-        assertEquals(LIMIT, cursor.getLimit());
+        assertEquals(psResource, cursor.getData().getResource());
+        assertEquals(LIMIT, cursor.getData().getLimit().intValue());
     }
         
     @Test
@@ -44,10 +44,10 @@ public class CursorFactoryTest extends LfTest {
         
         Topic topic = Topic.create(network, topicId, label);
         TimelineCursor cursor = CursorFactory.getTopicStreamCursor(network, topic);
-        assertEquals(tsResource, cursor.getResource());
+        assertEquals(tsResource, cursor.getData().getResource());
         
         cursor = CursorFactory.getTopicStreamCursor(network, topic, LIMIT, date);
-        assertEquals(tsResource, cursor.getResource());
-        assertEquals(LIMIT, cursor.getLimit());
+        assertEquals(tsResource, cursor.getData().getResource());
+        assertEquals(LIMIT, cursor.getData().getLimit().intValue());
     }
 }

@@ -13,19 +13,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
-import com.livefyre.entity.Topic;
+import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.LivefyreException;
+import com.livefyre.model.CollectionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class CollectionTest extends LfTest {
-    private static final String CHECKSUM = "3631759a11c4e0671d9ab5c1c90153c9";
+    private static final String CHECKSUM = "8bcfca7fb2187b1dcb627506deceee32";
     private Site site;
     
     @Before
@@ -38,19 +38,22 @@ public class CollectionTest extends LfTest {
     public void testCreateUpdateCollection() {
         String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
 
-        Collection collection = site.buildCollection(name, name, URL, null).createOrUpdate();
+        Collection collection = site.buildCollection(name, name, URL).createOrUpdate();
         String otherId = collection.getCollectionContent().getAsJsonObject("collectionSettings").get("collectionId").getAsString();
-        assertEquals(otherId, collection.getCollectionId());
+        assertEquals(otherId, collection.getData().getCollectionId());
 
-        Collection coll1 = collection.setOptions(ImmutableMap.<String, Object>of("tags", "super")).createOrUpdate();
-        assertEquals("super", coll1.getOptions().get("tags"));
+        collection.getData().setTags("super");
+        Collection coll1 = collection.createOrUpdate();
+        assertEquals("super", coll1.getData().getTags());
     }
     
     @Test
     @Category(UnitTest.class)
     public void testCreateCollectionToken() {
-        String token = site.buildCollection("title", "testId", "http://www.livefyre.com",
-                ImmutableMap.<String,Object>of("tags", "tags", "type", "reviews")).buildCollectionMetaToken();
+        Collection collection = site.buildCollection("title", "testId", "http://www.livefyre.com");
+        collection.getData().setTags("tags").setType(CollectionType.REVIEWS);
+        
+        String token = collection.buildCollectionMetaToken();
         assertNotNull(token);
         
         JsonObject decodedToken = null;
@@ -63,7 +66,9 @@ public class CollectionTest extends LfTest {
         assertEquals(decodedToken.get("url").getAsString(), "http://www.livefyre.com");
         assertEquals(decodedToken.get("type").getAsString(), "reviews");
         
-        token = site.buildCollection(TITLE, ARTICLE_ID, URL, ImmutableMap.<String,Object>of("type", "liveblog")).buildCollectionMetaToken();
+        collection = site.buildCollection(TITLE, ARTICLE_ID, URL);
+        collection.getData().setType(CollectionType.LIVEBLOG);
+        token = collection.buildCollectionMetaToken();
         assertNotNull(token);
         try {
             decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
@@ -74,8 +79,9 @@ public class CollectionTest extends LfTest {
         assertEquals(decodedToken.get("type").getAsString(), "liveblog");
         
         // test network topics
-        List<Topic> topics = Lists.newArrayList(Topic.create(site.getData().getNetwork(), "1", "1"));
-        Collection coll = site.buildCollection(TITLE, ARTICLE_ID, URL, ImmutableMap.<String, Object>of("topics", topics));
+        List<Topic> topics = Lists.newArrayList(Topic.create(site.getNetwork(), "1", "1"));
+        Collection coll = site.buildCollection(TITLE, ARTICLE_ID, URL);
+        coll.getData().setTopics(topics);
         assertTrue(coll.isNetworkIssued());
         
         token = coll.buildCollectionMetaToken();
@@ -85,17 +91,18 @@ public class CollectionTest extends LfTest {
         } catch (InvalidKeyException e) {}
         
         try {
-            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(site.getData().getNetwork().getData().getKey(), token);
+            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(site.getNetwork().getData().getKey(), token);
         } catch (InvalidKeyException e) {
             fail("Should pass when decoded with network key.");
         }
-        assertEquals(decodedToken.get("iss").getAsString(), site.getData().getNetwork().getUrn());
+        assertEquals(decodedToken.get("iss").getAsString(), site.getNetwork().getUrn());
     }
     
     @Test
     @Category(UnitTest.class)
     public void testCollectionChecksum() {
-        Collection collection = site.buildCollection("title", "articleId", "http://livefyre.com", ImmutableMap.<String, Object>of("tags", "tags"));
+        Collection collection = site.buildCollection("title", "articleId", "http://livefyre.com");
+        collection.getData().setTags("tags");
         String checksum = collection.buildChecksum();
         assertNotNull(checksum);
         assertEquals(CHECKSUM, checksum);
@@ -104,12 +111,12 @@ public class CollectionTest extends LfTest {
     @Test
     @Category(UnitTest.class) 
     public void testGetCollectionId_fail() {
-        Collection collection = site.buildCollection(TITLE, ARTICLE_ID, URL, ImmutableMap.<String, Object>of("tags", "tags"));
+        Collection collection = site.buildCollection(TITLE, ARTICLE_ID, URL);
         try {
-            collection.getCollectionId();
+            collection.getData().getCollectionId();
             fail();
         } catch (LivefyreException e) {
-            assertEquals("Call createOrUpdate() to set the collection id.", e.getMessage());
+            assertEquals("Call createOrUpdate() on the collection to set the collection id.", e.getMessage());
         }
     }
     
@@ -117,16 +124,16 @@ public class CollectionTest extends LfTest {
     @Category(UnitTest.class)
     public void testInstantiationNullChecks() {
         try {
-            site.buildCollection(null, null, null, null);
+            site.buildCollection(null, null, null);
             fail("title cannot be null");
-        } catch(NullPointerException e) {}
+        } catch(IllegalArgumentException e) {}
         try {
-            site.buildCollection("", null, null, null);
+            site.buildCollection("", null, null);
             fail("articleId cannot be null");
-        } catch(NullPointerException e) {}
+        } catch(IllegalArgumentException e) {}
         try {
-            site.buildCollection("", "", null, null);
+            site.buildCollection("", "", null);
             fail("url cannot be null");
-        } catch(NullPointerException e) {}
+        } catch(IllegalArgumentException e) {}
     }
 }

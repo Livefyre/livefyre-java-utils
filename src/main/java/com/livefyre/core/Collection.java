@@ -3,6 +3,7 @@ package com.livefyre.core;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -13,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.livefyre.api.Domain;
+import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.exceptions.TokenException;
 import com.livefyre.model.CollectionData;
@@ -20,22 +22,24 @@ import com.livefyre.model.CollectionType;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.utils.LivefyreUtil;
-import com.livefyre.validators.Validator;
+import com.livefyre.validator.ReflectiveValidator;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class Collection implements LfCore {
     private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
 
+    private Site site;
     private CollectionData data;
     
-    public Collection(CollectionData data) {
+    public Collection(Site site, CollectionData data) {
+        this.site = site;
         this.data = data;
     }
     
     public static Collection init(Site site, CollectionType type, String title, String articleId, String url) {
-        CollectionData data = new CollectionData(site, type, title, articleId, url);
-        return new Collection(Validator.validate(data));
+        CollectionData data = new CollectionData(type, title, articleId, url);
+        return new Collection(site, ReflectiveValidator.validate(data));
     }
     
     /**
@@ -67,10 +71,11 @@ public class Collection implements LfCore {
     public String buildCollectionMetaToken() {
         try {
             Map<String, Object> json = data.asMap();
-            json.put("iss", data.isNetworkIssued() ?
-                    data.getSite().getData().getNetwork().getUrn() : data.getSite().getUrn());
-            return LivefyreJwtUtil.serializeAndSign(data.isNetworkIssued() ?
-                    data.getSite().getData().getNetwork().getData().getKey() : data.getSite().getData().getKey(), json);
+            boolean isNetworkIssued = isNetworkIssued();
+            json.put("iss", isNetworkIssued ?
+                    site.getNetwork().getUrn() : site.getUrn());
+            return LivefyreJwtUtil.serializeAndSign(isNetworkIssued ?
+                    site.getNetwork().getData().getKey() : site.getData().getKey(), json);
         } catch (InvalidKeyException e) {
             throw new TokenException(TOKEN_FAILURE_MSG + e);
         }
@@ -101,7 +106,7 @@ public class Collection implements LfCore {
         if (b64articleId.length() % 4 != 0) {
             b64articleId = b64articleId + StringUtils.repeat("=", 4 - (b64articleId.length() % 4));
         }
-        String url = String.format("%s/bs3/%s.fyre.co/%s/%s/init", Domain.bootstrap(this), data.getSite().getData().getNetwork().getNetworkName(), data.getSite().getData().getId(), b64articleId);
+        String url = String.format("%s/bs3/%s.fyre.co/%s/%s/init", Domain.bootstrap(this), site.getNetwork().getNetworkName(), site.getData().getId(), b64articleId);
 
         ClientResponse response = Client.create().resource(url).accept(MediaType.APPLICATION_JSON)
                 .get(ClientResponse.class);
@@ -113,7 +118,7 @@ public class Collection implements LfCore {
     }
 
     private ClientResponse invokeCollectionApi(String method) {
-        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), data.getSite().getData().getId(), method);
+        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), site.getData().getId(), method);
         ClientResponse response = Client.create().resource(uri).queryParam("sync", "1")
                 .accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON)
                 .post(ClientResponse.class, getPayload());
@@ -140,7 +145,31 @@ public class Collection implements LfCore {
     }
 
     public String getUrn() {
-        return String.format("%s:collection=%s", data.getSite().getUrn(), data.getCollectionId());
+        return String.format("%s:collection=%s", site.getUrn(), data.getCollectionId());
+    }
+    
+    public boolean isNetworkIssued() {
+        List<Topic> topics = data.getTopics();
+        if (topics == null || topics.isEmpty()) {
+            return false;
+        }
+
+        for (Topic topic : topics) {
+            String topicId = topic.getId();
+            String networkUrn = site.getNetwork().getUrn();
+            if (topicId.startsWith(networkUrn) && !topicId.replace(networkUrn, "").startsWith(":site=")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Site getSite() {
+        return site;
+    }
+
+    public void setSite(Site site) {
+        this.site = site;
     }
 
     public CollectionData getData() {

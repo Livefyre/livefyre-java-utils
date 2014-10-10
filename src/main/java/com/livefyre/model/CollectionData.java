@@ -3,25 +3,25 @@ package com.livefyre.model;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.Maps;
-import com.livefyre.core.Site;
-import com.livefyre.entity.Topic;
+import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.LivefyreException;
 
 public class CollectionData {
-    private Site site;
     private CollectionType type;
     private String collectionId;
     private String articleId;
     private String title;
     private String url;
-    private Boolean networkIssued;
-    private List<Topic> topics = Lists.newArrayList();
-    private String extensions = "";
     
-    public CollectionData(Site site, CollectionType type, String title, String articleId, String url) {
-        this.site = site;
+    //optional params
+    private String tags;
+    private List<Topic> topics;
+    private String extensions;
+    
+    public CollectionData(CollectionType type, String title, String articleId, String url) {
         this.type = type;
         this.articleId = articleId;
         this.title = title;
@@ -35,24 +35,18 @@ public class CollectionData {
         attr.put("type", type.toString());
         attr.put("url", url);
         
-        if (topics.size() > 0) {
+        if (StringUtils.isNotBlank(tags)) {
+            attr.put("tags", tags);
+        }
+        if (topics != null && topics.size() > 0) {
             attr.put("topics", topics);
         }
-        if (extensions.length() > 0) {
+        if (StringUtils.isNotBlank(extensions)) {
             attr.put("extensions", extensions);
         }
         return attr;
     }
 
-    public Site getSite() {
-        return site;
-    }
-
-    public CollectionData setSite(Site site) {
-        this.site = site;
-        return this;
-    }
-    
     public CollectionType getType() {
         return type;
     }
@@ -101,15 +95,12 @@ public class CollectionData {
         return this;
     }
 
-    public boolean isNetworkIssued() {
-        if (networkIssued == null) {
-            networkIssued = checkTopics();
-        }
-        return networkIssued;
+    public String getTags() {
+        return tags;
     }
 
-    public CollectionData setNetworkIssued(boolean networkIssued) {
-        this.networkIssued = networkIssued;
+    public CollectionData setTags(String tags) {
+        this.tags = tags;
         return this;
     }
 
@@ -119,7 +110,6 @@ public class CollectionData {
 
     public CollectionData setTopics(List<Topic> topics) {
         this.topics = topics;
-        this.networkIssued = null;
         return this;
     }
 
@@ -130,20 +120,5 @@ public class CollectionData {
     public CollectionData setExtensions(String extensions) {
         this.extensions = extensions;
         return this;
-    }
-
-    private boolean checkTopics() {
-        if (topics.isEmpty()) {
-            return false;
-        }
-
-        for (Topic topic : topics) {
-            String topicId = topic.getId();
-            String networkUrn = site.getData().getNetwork().getUrn();
-            if (topicId.startsWith(networkUrn) && !topicId.replace(networkUrn, "").startsWith(":site=")) {
-                return true;
-            }
-        }
-        return false;
     }
 }

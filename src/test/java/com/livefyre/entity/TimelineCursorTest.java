@@ -12,6 +12,7 @@ import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
 import com.livefyre.core.Network;
+import com.livefyre.cursor.TimelineCursor;
 import com.livefyre.factory.CursorFactory;
 
 

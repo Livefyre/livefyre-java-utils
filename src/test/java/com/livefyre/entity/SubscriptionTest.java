@@ -8,7 +8,8 @@ import org.junit.experimental.categories.Category;
 
 import com.google.gson.JsonObject;
 import com.livefyre.config.UnitTest;
-import com.livefyre.entity.Subscription.Type;
+import com.livefyre.dto.Subscription;
+import com.livefyre.dto.Subscription.Type;
 
 @Category(UnitTest.class)
 public class SubscriptionTest {

@@ -27,9 +27,9 @@ public class LivefyreUtil {
         if (core.getClass().equals(Network.class)) {
             return (Network) core;
         } else if (core.getClass().equals(Site.class)) {
-            return ((Site) core).getData().getNetwork();
+            return ((Site) core).getNetwork();
         } else {
-            return ((Collection) core).getData().getSite().getData().getNetwork();
+            return ((Collection) core).getSite().getNetwork();
         }
     }
 }

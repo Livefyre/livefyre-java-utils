@@ -30,13 +30,15 @@ public class NetworkTest extends LfTest {
         try {
             Livefyre.getNetwork("", null);
             fail("key cannot be null");
-        } catch(NullPointerException e) {}
+        } catch(IllegalArgumentException e) {}
         try {
             Livefyre.getNetwork(null, "");
             fail("name cannot be null");
-        } catch(NullPointerException e) {}
-        Network network = Livefyre.getNetwork("", "");
-        assertNotNull(network);
+        } catch(IllegalArgumentException e) {}
+        try {
+            Livefyre.getNetwork("", "");
+            fail("name and key cannot be blank");
+        } catch(IllegalArgumentException e) {}
     }
     
     @Test
@@ -86,7 +88,7 @@ public class NetworkTest extends LfTest {
     @Test
     @Category(UnitTest.class)
     public void testNullChecks() {
-        Network network = Network.init("", "");
+        Network network = Network.init(NETWORK_NAME, NETWORK_KEY);
         network.getData().setName(null);
         network.getData().setKey(null);;
         /* param checks */
