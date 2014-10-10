@@ -16,6 +16,8 @@ test:
   - mvn dependency:resolve
   - mvn test -Dtest=UnitTestSuite
   - mvn test -Dtest=IntegrationTestSuite
+  post:
+  - mvn cobertura:cobertura coveralls:report
 
 machine:
   timezone:
