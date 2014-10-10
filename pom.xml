@@ -138,6 +138,7 @@
 				<configuration>
 					<includes>
 						<include>**/UnitTestSuite.java</include>
+						<include>**/IntegrationTestSuite.java</include>
 					</includes>
 				</configuration>
 			</plugin>
