@@ -71,6 +71,12 @@
 			<version>1.8</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.googlecode.openpojo</groupId>
+			<artifactId>openpojo</artifactId>
+			<version>0.6.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
@@ -162,6 +168,7 @@
 					<instrumentation>
 						<excludes>
 							<exclude>com/livefyre/repackaged/**/*.class</exclude>
+							<exclude>com/livefyre/exception/**/*.class</exclude>
 						</excludes>
 					</instrumentation>
 				</configuration>

@@ -10,8 +10,8 @@ public class CursorData {
     
     private String resource;
     private String cursorTime;
-    private boolean next = false;
-    private boolean previous = false;
+    private Boolean next = false;
+    private Boolean previous = false;
     private Integer limit;
     
     public CursorData(String resource, Integer limit, Date startTime) {
@@ -25,51 +25,57 @@ public class CursorData {
         return resource;
     }
 
-    public void setResource(String resource) {
+    public CursorData setResource(String resource) {
         this.resource = resource;
+        return this;
     }
 
     public String getCursorTime() {
         return cursorTime;
     }
 
-    public void setCursorTime(String newTime) {
+    public CursorData setCursorTime(String newTime) {
         this.cursorTime = newTime;
+        return this;
     }
 
-    public void setCursorTime(Date newTime) {
+    public CursorData setCursorTime(Date newTime) {
         this.cursorTime = DATE_FORMAT.format(newTime);
+        return this;
     }
 
-    public boolean hasPrevious() {
+    public Boolean hasPrevious() {
         return isPrevious();
     }
 
-    public boolean isPrevious() {
+    public Boolean isPrevious() {
         return previous;
     }
 
-    public void setPrevious(boolean previous) {
+    public CursorData setPrevious(Boolean previous) {
         this.previous = previous;
+        return this;
     }
 
-    public boolean hasNext() {
+    public Boolean hasNext() {
         return isNext();
     }
 
-    public boolean isNext() {
+    public Boolean isNext() {
         return next;
     }
 
-    public void setNext(boolean next) {
+    public CursorData setNext(Boolean next) {
         this.next = next;
+        return this;
     }
 
     public Integer getLimit() {
         return limit;
     }
 
-    public void setLimit(Integer limit) {
+    public CursorData setLimit(Integer limit) {
         this.limit = limit;
+        return this;
     }
 }

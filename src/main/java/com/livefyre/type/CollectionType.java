@@ -1,4 +1,4 @@
-package com.livefyre.model;
+package com.livefyre.type;
 
 
 public enum CollectionType {

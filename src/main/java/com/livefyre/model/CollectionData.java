@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.Maps;
 import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.LivefyreException;
+import com.livefyre.type.CollectionType;
 
 public class CollectionData {
     private CollectionType type;

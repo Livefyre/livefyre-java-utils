@@ -13,15 +13,17 @@ public class NetworkData {
         return name;
     }
     
-    public void setName(String name) {
+    public NetworkData setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    public NetworkData setKey(String key) {
         this.key = key;
+        return this;
     }
 }

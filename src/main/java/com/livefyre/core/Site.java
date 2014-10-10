@@ -1,7 +1,7 @@
 package com.livefyre.core;
 
-import com.livefyre.model.CollectionType;
 import com.livefyre.model.SiteData;
+import com.livefyre.type.CollectionType;
 import com.livefyre.validator.ReflectiveValidator;
 
 public class Site implements LfCore {

@@ -108,7 +108,7 @@ public class Network implements LfCore {
         try {
             return LivefyreJwtUtil.serializeAndSign(data.getKey(), tokenData);
         } catch (InvalidKeyException e) {
-            throw new TokenException("Failure creating token." +e);
+            throw new TokenException("Failure creating token.", e);
         }
     }
     
@@ -126,7 +126,7 @@ public class Network implements LfCore {
                 && json.get("user_id").getAsString().compareTo("system") == 0
                 && json.get("expires").getAsLong() >= Calendar.getInstance().getTimeInMillis()/1000L;
         } catch (InvalidKeyException e) {
-            throw new TokenException("Failure decrypting token." +e);
+            throw new TokenException("Failure decrypting token.", e);
         }
     }
     

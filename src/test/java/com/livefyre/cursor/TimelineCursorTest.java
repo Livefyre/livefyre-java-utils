@@ -1,4 +1,4 @@
-package com.livefyre.entity;
+package com.livefyre.cursor;
 
 import static org.junit.Assert.assertNotNull;
 

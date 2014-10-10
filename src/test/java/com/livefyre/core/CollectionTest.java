@@ -21,7 +21,7 @@ import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.LivefyreException;
-import com.livefyre.model.CollectionType;
+import com.livefyre.type.CollectionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 
 public class CollectionTest extends LfTest {
