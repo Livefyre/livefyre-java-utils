@@ -40,10 +40,9 @@ public class Network implements LfCore {
     
     /**
      * Updates the user sync url. Makes an external API call. 
+     * http://answers.livefyre.com/developers/user-auth/remote-profiles/#ping-for-pull.
      * 
-     * @see http://answers.livefyre.com/developers/user-auth/remote-profiles/#ping-for-pull.
      * @param urlTemplate the url template to set.
-     * @return true if the update was successful.
      */
     public void setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);

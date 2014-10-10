@@ -46,7 +46,7 @@ public class Collection implements LfCore {
      * Informs Livefyre to either create or update a collection based on the attributes of this Collection.
      * Makes an external API call. Returns this.
      * 
-     * @returns Collection
+     * @return Collection
      */
     public Collection createOrUpdate() {
         ClientResponse response = invokeCollectionApi("create");

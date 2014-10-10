@@ -29,7 +29,6 @@ public class Site implements LfCore {
      * @param articleId the articleId for the collection
      * @param title title for the collection.
      * @param url url for the collection.
-     * @param options map of additional params to be included with the collection.
      * @return Collection
      */
     public Collection buildCollection(String title, String articleId, String url) {
