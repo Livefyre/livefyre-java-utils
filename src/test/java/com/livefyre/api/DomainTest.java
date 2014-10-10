@@ -22,7 +22,7 @@ public class DomainTest extends LfTest {
     public void setup() {
         network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         site = network.getSite(SITE_ID, SITE_KEY);
-        collection = site.buildCollection(TITLE, ARTICLE_ID, URL);
+        collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
     }
     
     @Test

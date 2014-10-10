@@ -38,7 +38,7 @@ public class CollectionTest extends LfTest {
     public void testCreateUpdateCollection() {
         String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
 
-        Collection collection = site.buildCollection(name, name, URL).createOrUpdate();
+        Collection collection = site.buildLiveCommentsCollection(name, name, URL).createOrUpdate();
         String otherId = collection.getCollectionContent().getAsJsonObject("collectionSettings").get("collectionId").getAsString();
         assertEquals(otherId, collection.getData().getCollectionId());
 
@@ -50,7 +50,7 @@ public class CollectionTest extends LfTest {
     @Test
     @Category(UnitTest.class)
     public void testCreateCollectionToken() {
-        Collection collection = site.buildCollection("title", "testId", "http://www.livefyre.com");
+        Collection collection = site.buildLiveCommentsCollection("title", "testId", "http://www.livefyre.com");
         collection.getData().setTags("tags").setType(CollectionType.REVIEWS);
         
         String token = collection.buildCollectionMetaToken();
@@ -66,7 +66,7 @@ public class CollectionTest extends LfTest {
         assertEquals(decodedToken.get("url").getAsString(), "http://www.livefyre.com");
         assertEquals(decodedToken.get("type").getAsString(), "reviews");
         
-        collection = site.buildCollection(TITLE, ARTICLE_ID, URL);
+        collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
         collection.getData().setType(CollectionType.LIVEBLOG);
         token = collection.buildCollectionMetaToken();
         assertNotNull(token);
@@ -80,7 +80,7 @@ public class CollectionTest extends LfTest {
         
         // test network topics
         List<Topic> topics = Lists.newArrayList(Topic.create(site.getNetwork(), "1", "1"));
-        Collection coll = site.buildCollection(TITLE, ARTICLE_ID, URL);
+        Collection coll = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
         coll.getData().setTopics(topics);
         assertTrue(coll.isNetworkIssued());
         
@@ -101,7 +101,7 @@ public class CollectionTest extends LfTest {
     @Test
     @Category(UnitTest.class)
     public void testCollectionChecksum() {
-        Collection collection = site.buildCollection("title", "articleId", "http://livefyre.com");
+        Collection collection = site.buildLiveCommentsCollection("title", "articleId", "http://livefyre.com");
         collection.getData().setTags("tags");
         String checksum = collection.buildChecksum();
         assertNotNull(checksum);
@@ -111,7 +111,7 @@ public class CollectionTest extends LfTest {
     @Test
     @Category(UnitTest.class) 
     public void testGetCollectionId_fail() {
-        Collection collection = site.buildCollection(TITLE, ARTICLE_ID, URL);
+        Collection collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
         try {
             collection.getData().getCollectionId();
             fail();
@@ -124,15 +124,15 @@ public class CollectionTest extends LfTest {
     @Category(UnitTest.class)
     public void testInstantiationNullChecks() {
         try {
-            site.buildCollection(null, null, null);
+            site.buildLiveCommentsCollection(null, null, null);
             fail("title cannot be null");
         } catch(IllegalArgumentException e) {}
         try {
-            site.buildCollection("", null, null);
+            site.buildLiveCommentsCollection("", null, null);
             fail("articleId cannot be null");
         } catch(IllegalArgumentException e) {}
         try {
-            site.buildCollection("", "", null);
+            site.buildLiveCommentsCollection("", "", null);
             fail("url cannot be null");
         } catch(IllegalArgumentException e) {}
     }

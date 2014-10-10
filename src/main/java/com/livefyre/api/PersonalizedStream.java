@@ -19,9 +19,9 @@ import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
 import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
-import com.livefyre.dto.Subscription.Type;
 import com.livefyre.exception.LivefyreException;
 import com.livefyre.model.CursorData;
+import com.livefyre.type.SubscriptionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.utils.LivefyreUtil;
 import com.sun.jersey.api.client.Client;
@@ -337,7 +337,7 @@ public class PersonalizedStream {
     private static List<Subscription> buildSubscriptions(List<Topic> topics, String userUrn) {
         List<Subscription> subscriptions = Lists.newArrayList();
         for (Topic topic : topics) {
-            subscriptions.add(new Subscription(topic.getId(), userUrn, Type.personalStream, null));
+            subscriptions.add(new Subscription(topic.getId(), userUrn, SubscriptionType.PERSONAL_STREAM, null));
         }
         return subscriptions;
     }

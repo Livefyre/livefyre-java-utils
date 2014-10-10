@@ -3,6 +3,7 @@ package com.livefyre.dto;
 import java.util.Date;
 
 import com.google.gson.JsonObject;
+import com.livefyre.type.SubscriptionType;
 
 public class Subscription {
     private String to;
@@ -12,10 +13,10 @@ public class Subscription {
 
     public Subscription() { }
 
-    public Subscription(String to, String by, Type type, Integer createdAt) {
+    public Subscription(String to, String by, SubscriptionType type, Integer createdAt) {
         this.to = to;
         this.by = by;
-        this.type = type.name();
+        this.type = type.toString();
         this.createdAt = createdAt;
     }
 
@@ -23,7 +24,7 @@ public class Subscription {
         return new Subscription(
             json.get("to").getAsString(),
             json.get("by").getAsString(),
-            Type.valueOf(json.get("type").getAsString()),
+            SubscriptionType.valueOf(json.get("type").getAsString()),
             json.get("createdAt").getAsInt());
     }
 
@@ -53,7 +54,7 @@ public class Subscription {
     }
 
     public void setType(String type) {
-        Type.valueOf(type);
+        SubscriptionType.valueOf(type);
         this.type = type;
     }
 
@@ -63,11 +64,5 @@ public class Subscription {
 
     public void setCreatedAt(Integer createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public enum Type {
-        personalStream;
-
-        private Type() { }
     }
 }

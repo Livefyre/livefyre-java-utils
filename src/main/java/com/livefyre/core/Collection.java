@@ -117,33 +117,6 @@ public class Collection implements LfCore {
         return gson.fromJson(response.getEntity(String.class), JsonObject.class);
     }
 
-    private ClientResponse invokeCollectionApi(String method) {
-        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), site.getData().getId(), method);
-        ClientResponse response = Client.create().resource(uri).queryParam("sync", "1")
-                .accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, getPayload());
-        return response;
-    }
-    
-    private String getPayload() {
-        Map<String, Object> payload = ImmutableMap.<String, Object>of(
-            "articleId", data.getArticleId(),
-            "checksum", buildChecksum(),
-            "collectionMeta", buildCollectionMetaToken());
-        return LivefyreUtil.mapToJsonString(payload);
-    }
-
-    private static final char[] hexCode = "0123456789abcdef".toCharArray();
-
-    private String printHexBinary(byte[] data) {
-        StringBuilder r = new StringBuilder(data.length * 2);
-        for (byte b : data) {
-            r.append(hexCode[(b >> 4) & 0xF]);
-            r.append(hexCode[(b & 0xF)]);
-        }
-        return r.toString();
-    }
-
     public String getUrn() {
         return String.format("%s:collection=%s", site.getUrn(), data.getCollectionId());
     }
@@ -178,5 +151,32 @@ public class Collection implements LfCore {
     
     public void setData(CollectionData data) {
         this.data = data;
+    }
+
+    private ClientResponse invokeCollectionApi(String method) {
+        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), site.getData().getId(), method);
+        ClientResponse response = Client.create().resource(uri).queryParam("sync", "1")
+                .accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON)
+                .post(ClientResponse.class, getPayload());
+        return response;
+    }
+    
+    private String getPayload() {
+        Map<String, Object> payload = ImmutableMap.<String, Object>of(
+            "articleId", data.getArticleId(),
+            "checksum", buildChecksum(),
+            "collectionMeta", buildCollectionMetaToken());
+        return LivefyreUtil.mapToJsonString(payload);
+    }
+
+    private static final char[] hexCode = "0123456789abcdef".toCharArray();
+
+    private String printHexBinary(byte[] data) {
+        StringBuilder r = new StringBuilder(data.length * 2);
+        for (byte b : data) {
+            r.append(hexCode[(b >> 4) & 0xF]);
+            r.append(hexCode[(b & 0xF)]);
+        }
+        return r.toString();
     }
 }

@@ -2,13 +2,13 @@ package com.livefyre.type;
 
 
 public enum CollectionType {
-    REVIEWS("reviews"),
-    SIDENOTES("sidenotes"),
-    RATINGS("ratings"),
     COUNTING("counting"),
     LIVEBLOG("liveblog"),
     LIVECHAT("livechat"),
-    LIVECOMMENTS("livecomments");
+    LIVECOMMENTS("livecomments"),
+    RATINGS("ratings"),
+    REVIEWS("reviews"),
+    SIDENOTES("sidenotes");
     
     private String type;
     

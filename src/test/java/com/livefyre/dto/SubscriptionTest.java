@@ -2,20 +2,20 @@ package com.livefyre.dto;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.google.gson.JsonObject;
 import com.livefyre.config.UnitTest;
-import com.livefyre.dto.Subscription;
-import com.livefyre.dto.Subscription.Type;
+import com.livefyre.type.SubscriptionType;
 
 @Category(UnitTest.class)
 public class SubscriptionTest {
     private final static String TO = "to";
     private final static String BY = "by";
-    private final static Type TYPE = Type.personalStream;
+    private final static SubscriptionType TYPE = SubscriptionType.PERSONAL_STREAM;
     private final static Integer CREATED_AT = 10;
     
     @Test
@@ -23,7 +23,7 @@ public class SubscriptionTest {
         Subscription sub = new Subscription(TO, BY, TYPE, CREATED_AT);
         assertEquals(TO, sub.getTo());
         assertEquals(BY, sub.getBy());
-        assertEquals(TYPE.name(), sub.getType());
+        assertEquals(TYPE.toString(), sub.getType());
         assertEquals(CREATED_AT, sub.getCreatedAt());
         
         assertTrue(CREATED_AT * 1000 == sub.createdAtDate().getTime());
@@ -42,5 +42,19 @@ public class SubscriptionTest {
         assertEquals(BY, sub.getBy());
         assertEquals(TYPE.name(), sub.getType());
         assertEquals(CREATED_AT, sub.getCreatedAt());
+    }
+    
+    @Test
+    public void testSetType() {
+        Subscription sub = new Subscription(TO, BY, TYPE, CREATED_AT);
+        try {
+            sub.setType("bad type");
+            fail("should throw an exception");
+        } catch (IllegalArgumentException e) {}
+        
+        sub.setType("personalStream");
+        
+        
+        
     }
 }

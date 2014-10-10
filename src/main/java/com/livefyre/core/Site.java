@@ -18,6 +18,35 @@ public class Site implements LfCore {
         return new Site(network, ReflectiveValidator.validate(data));
     }
 
+    /* Default collection type */
+    public Collection buildLiveCommentsCollection(String title, String articleId, String url) {
+        return buildCollection(title, articleId, url, CollectionType.LIVECOMMENTS);
+    }
+    
+    public Collection buildLiveBlogCollection(String title, String articleId, String url) {
+        return buildCollection(title, articleId, url, CollectionType.LIVEBLOG);
+    }
+    
+    public Collection buildLiveChatCollection(String title, String articleId, String url) {
+        return buildCollection(title, articleId, url, CollectionType.LIVECHAT);
+    }
+    
+    public Collection buildCountingCollection(String title, String articleId, String url) {
+        return buildCollection(title, articleId, url, CollectionType.COUNTING);
+    }
+    
+    public Collection buildRatingsCollection(String title, String articleId, String url) {
+        return buildCollection(title, articleId, url, CollectionType.RATINGS);
+    }
+    
+    public Collection buildReviewsCollection(String title, String articleId, String url) {
+        return buildCollection(title, articleId, url, CollectionType.REVIEWS);
+    }
+    
+    public Collection buildSidenotesCollection(String title, String articleId, String url) {
+        return buildCollection(title, articleId, url, CollectionType.SIDENOTES);
+    }
+    
     /**
      * Creates and returns a Collection object. Be sure to call createOrUpdate() on it to inform Livefyre to
      * complete creation and any updates.
@@ -31,8 +60,8 @@ public class Site implements LfCore {
      * @param url url for the collection.
      * @return Collection
      */
-    public Collection buildCollection(String title, String articleId, String url) {
-        return Collection.init(this, CollectionType.LIVECOMMENTS, title, articleId, url);
+    public Collection buildCollection(String title, String articleId, String url, CollectionType type) {
+        return Collection.init(this, type, title, articleId, url);
     }
     
     //build different collection types here
