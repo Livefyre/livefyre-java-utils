@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class CursorData {
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    protected static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     
     private String resource;
     private String cursorTime;
@@ -44,10 +44,6 @@ public class CursorData {
         return this;
     }
 
-    public Boolean hasPrevious() {
-        return isPrevious();
-    }
-
     public Boolean isPrevious() {
         return previous;
     }
@@ -55,10 +51,6 @@ public class CursorData {
     public CursorData setPrevious(Boolean previous) {
         this.previous = previous;
         return this;
-    }
-
-    public Boolean hasNext() {
-        return isNext();
     }
 
     public Boolean isNext() {

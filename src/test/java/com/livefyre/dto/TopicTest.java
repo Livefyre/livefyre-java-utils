@@ -1,6 +1,9 @@
 package com.livefyre.dto;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Date;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -10,14 +13,14 @@ import com.livefyre.Livefyre;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.core.Network;
-import com.livefyre.dto.Topic;
 
 @Category(UnitTest.class)
 public class TopicTest extends LfTest {
-    private static String ID = "id";
-    private static String LABEL = "label";
-    private static Integer CREATED_AT = 10;
-    private static Integer MODIFIED_AT = 1000;
+    private static final int DATE_MULTIPLIER = 1000;
+    private static final String ID = "id";
+    private static final String LABEL = "label";
+    private static final Integer CREATED_AT = 10;
+    private static final Integer MODIFIED_AT = 1000;
     
     @Test
     public void testInit() {
@@ -35,6 +38,8 @@ public class TopicTest extends LfTest {
         assertEquals(network.getUrn()+":topic="+ID, topic.getId());
         assertEquals(LABEL, topic.getLabel());
         assertEquals(ID, topic.truncatedId());
+        assertEquals(new Date(topic.getCreatedAt() * DATE_MULTIPLIER), topic.createdAtDate());
+        assertEquals(new Date(topic.getModifiedAt() * DATE_MULTIPLIER), topic.modifiedAtDate());
     }
     
     @Test
@@ -50,5 +55,14 @@ public class TopicTest extends LfTest {
         assertEquals(LABEL, topic.getLabel());
         assertEquals(CREATED_AT, topic.getCreatedAt());
         assertEquals(MODIFIED_AT, topic.getModifiedAt());
+    }
+    
+    @Test
+    public void testGenerateUrn() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        String urn = Topic.generateUrn(network, ID);
+        
+        assertNotNull(urn);
+        assertEquals(network.getUrn()+":topic="+ID, urn);
     }
 }

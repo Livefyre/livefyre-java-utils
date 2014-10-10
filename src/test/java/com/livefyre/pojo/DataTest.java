@@ -1,17 +1,14 @@
 package com.livefyre.pojo;
 
-import java.util.List;
+import java.lang.reflect.ParameterizedType;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-import com.livefyre.config.UnitTest;
+import com.livefyre.config.LfTest;
 import com.openpojo.reflection.PojoClass;
-import com.openpojo.reflection.filters.FilterPackageInfo;
 import com.openpojo.reflection.impl.PojoClassFactory;
 import com.openpojo.validation.PojoValidator;
-import com.openpojo.validation.affirm.Affirm;
 import com.openpojo.validation.rule.impl.GetterMustExistRule;
 import com.openpojo.validation.rule.impl.NoNestedClassRule;
 import com.openpojo.validation.rule.impl.NoPrimitivesRule;
@@ -21,20 +18,15 @@ import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 
-@Category(UnitTest.class)
-public class DataTest {
-    private static final int EXPECTED_CLASS_COUNT = 4;
+public abstract class DataTest<T> extends LfTest {
+    Class<T> typeParameterClass;
 
-    // The package to test
-    private static final String POJO_PACKAGE = "com.livefyre.model";
-
-    private List<PojoClass> pojoClasses;
     private PojoValidator pojoValidator;
-
+    
     @Before
+    @SuppressWarnings("unchecked")
     public void setup() {
-        pojoClasses = PojoClassFactory.getPojoClasses(POJO_PACKAGE, new FilterPackageInfo());
-
+        typeParameterClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         pojoValidator = new PojoValidator();
 
         // Create Rules to validate structure for POJO_PACKAGE
@@ -51,14 +43,8 @@ public class DataTest {
     }
 
     @Test
-    public void ensureExpectedPojoCount() {
-        Affirm.affirmEquals("Classes added / removed?", EXPECTED_CLASS_COUNT, pojoClasses.size());
-    }
-
-    @Test
     public void testPojoStructureAndBehavior() {
-        for (PojoClass pojoClass : pojoClasses) {
-            pojoValidator.runValidation(pojoClass);
-        }
+        PojoClass pojoClass = PojoClassFactory.getPojoClass(typeParameterClass);
+        pojoValidator.runValidation(pojoClass);
     }
 }

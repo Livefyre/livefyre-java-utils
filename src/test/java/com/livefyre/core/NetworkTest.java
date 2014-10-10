@@ -74,11 +74,11 @@ public class NetworkTest extends LfTest {
         try {
             network.getSite(SITE_ID, null);
             fail("siteKey cannot be null");
-        } catch(NullPointerException e) {}
+        } catch(IllegalArgumentException e) {}
         try {
             network.getSite(null, SITE_KEY);
             fail("siteId cannot be null");
-        } catch(NullPointerException e) {}
+        } catch(IllegalArgumentException e) {}
         Site site = network.getSite(SITE_ID, SITE_KEY);
         assertNotNull(site);
         assertEquals(SITE_ID, site.getData().getId());
