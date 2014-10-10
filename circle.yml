@@ -3,21 +3,21 @@ test:
   - mvn test -Dtest=UnitTestSuite
   - mvn test -Dtest=IntegrationTestSuite
   #ver 1.7
-  - sudo update-alternatives --set java /usr/lib/jvm/jdk1.7.0/bin/java
-  - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.7.0/bin/javac
-  - mvn clean
-  - mvn dependency:resolve
-  - mvn test -Dtest=UnitTestSuite
-  - mvn test -Dtest=IntegrationTestSuite
-  #ver 1.8
-  - sudo update-alternatives --set java /usr/lib/jvm/jdk1.8.0/bin/java
-  - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.8.0/bin/javac
-  - mvn clean
-  - mvn dependency:resolve
-  - mvn test -Dtest=UnitTestSuite
-  - mvn test -Dtest=IntegrationTestSuite
+  # - sudo update-alternatives --set java /usr/lib/jvm/jdk1.7.0/bin/java
+  # - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.7.0/bin/javac
+  # - mvn clean
+  # - mvn dependency:resolve
+  # - mvn test -Dtest=UnitTestSuite
+  # - mvn test -Dtest=IntegrationTestSuite
+  # #ver 1.8
+  # - sudo update-alternatives --set java /usr/lib/jvm/jdk1.8.0/bin/java
+  # - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.8.0/bin/javac
+  # - mvn clean
+  # - mvn dependency:resolve
+  # - mvn test -Dtest=UnitTestSuite
+  # - mvn test -Dtest=IntegrationTestSuite
   post:
-  - mvn cobertura:cobertura coveralls:report
+  - mvn clean cobertura:cobertura coveralls:cobertura
 
 machine:
   timezone:
