@@ -38,6 +38,9 @@ public class TopicTest extends LfTest {
         assertEquals(network.getUrn()+":topic="+ID, topic.getId());
         assertEquals(LABEL, topic.getLabel());
         assertEquals(ID, topic.truncatedId());
+        
+        topic.setCreatedAt(100);
+        topic.setModifiedAt(200);
         assertEquals(new Date(topic.getCreatedAt() * DATE_MULTIPLIER), topic.createdAtDate());
         assertEquals(new Date(topic.getModifiedAt() * DATE_MULTIPLIER), topic.modifiedAtDate());
     }

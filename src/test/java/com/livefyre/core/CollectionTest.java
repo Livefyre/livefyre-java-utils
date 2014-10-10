@@ -20,7 +20,7 @@ import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.dto.Topic;
-import com.livefyre.exceptions.LivefyreException;
+import com.livefyre.exception.LivefyreException;
 import com.livefyre.type.CollectionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 

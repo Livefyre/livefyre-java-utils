@@ -20,7 +20,7 @@ import com.livefyre.core.Network;
 import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
 import com.livefyre.dto.Subscription.Type;
-import com.livefyre.exceptions.LivefyreException;
+import com.livefyre.exception.LivefyreException;
 import com.livefyre.model.CursorData;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.utils.LivefyreUtil;
