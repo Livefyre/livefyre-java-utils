@@ -92,7 +92,7 @@ public class Collection implements LfCore {
             byte[] digest = MessageDigest.getInstance("MD5").digest(LivefyreUtil.mapToJsonString(attr).getBytes());
             return printHexBinary(digest);
         } catch (NoSuchAlgorithmException e) {
-            throw new LivefyreException("Failure creating checksum." + e);
+            throw new LivefyreException("This should never happen." + e);
         }
     }
 

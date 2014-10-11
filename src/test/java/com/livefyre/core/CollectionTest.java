@@ -17,17 +17,18 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
-import com.livefyre.config.LfTest;
+import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.dto.Topic;
 import com.livefyre.exception.LivefyreException;
 import com.livefyre.type.CollectionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 
-public class CollectionTest extends LfTest {
+public class CollectionTest extends PojoTest<Collection> {
     private static final String CHECKSUM = "8bcfca7fb2187b1dcb627506deceee32";
     private Site site;
     
+    @Override
     @Before
     public void setup() {
         site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
@@ -135,5 +136,13 @@ public class CollectionTest extends LfTest {
             site.buildLiveCommentsCollection("", "", null);
             fail("url cannot be null");
         } catch(IllegalArgumentException e) {}
+    }
+    
+    @Test
+    @Category(UnitTest.class)
+    public void testGetUrn() {
+        Collection collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
+        collection.getData().setCollectionId("ID");
+        assertEquals(site.getUrn()+":collection=ID", collection.getUrn());
     }
 }

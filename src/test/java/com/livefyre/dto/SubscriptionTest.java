@@ -40,7 +40,7 @@ public class SubscriptionTest extends PojoTest<Subscription> {
         Subscription sub = Subscription.serializeFromJson(json);
         assertEquals(TO, sub.getTo());
         assertEquals(BY, sub.getBy());
-        assertEquals(TYPE.name(), sub.getType());
+        assertEquals(TYPE.toString(), sub.getType());
         assertEquals(CREATED_AT, sub.getCreatedAt());
     }
 }

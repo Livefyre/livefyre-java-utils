@@ -10,10 +10,10 @@ import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
-import com.livefyre.config.LfTest;
+import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
 
-public class NetworkTest extends LfTest {
+public class NetworkTest extends PojoTest<Network> {
     private static final String USER_SYNC_URL = "<USER-SYNC-URL {id}>";
     
     @Test
