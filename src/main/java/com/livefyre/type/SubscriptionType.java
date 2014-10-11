@@ -22,6 +22,6 @@ public enum SubscriptionType {
             }
           }
         }
-        return null;
+        throw new IllegalArgumentException("No constant with text " +text +" found!");
     }
 }

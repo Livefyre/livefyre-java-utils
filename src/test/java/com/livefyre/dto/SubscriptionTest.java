@@ -34,7 +34,7 @@ public class SubscriptionTest extends PojoTest<Subscription> {
         JsonObject json = new JsonObject();
         json.addProperty(TO, TO);
         json.addProperty(BY, BY);
-        json.addProperty("type", TYPE.name());
+        json.addProperty("type", TYPE.toString());
         json.addProperty("createdAt", CREATED_AT);
         
         Subscription sub = Subscription.serializeFromJson(json);

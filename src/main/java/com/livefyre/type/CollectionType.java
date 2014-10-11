@@ -29,6 +29,6 @@ public enum CollectionType {
             }
           }
         }
-        return null;
+        throw new IllegalArgumentException("No constant with text " +text +" found!");
     }
 }
