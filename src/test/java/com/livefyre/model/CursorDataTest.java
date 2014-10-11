@@ -8,11 +8,11 @@ import java.util.Date;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
-import com.livefyre.pojo.DataTest;
 
 @Category(UnitTest.class)
-public class CursorDataTest extends DataTest<CursorData> {
+public class CursorDataTest extends PojoTest<CursorData> {
     @Test
     public void testSetDate() {
         CursorData data = new CursorData(null, null, new Date());

@@ -8,11 +8,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
+import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
-import com.livefyre.pojo.DataTest;
 import com.livefyre.type.CollectionType;
 
-public class SiteTest extends DataTest<Site> {
+public class SiteTest extends PojoTest<Site> {
     @Test
     @Category(UnitTest.class)
     public void testBuildCollection() {
@@ -61,7 +61,7 @@ public class SiteTest extends DataTest<Site> {
         assertEquals(CollectionType.SIDENOTES, collection.getData().getType());
         
         collection = site.buildCollection(TITLE, ARTICLE_ID, URL, CollectionType.COUNTING);
-        assertEquals(CollectionType.LIVECOMMENTS, collection.getData().getType());
+        assertEquals(CollectionType.COUNTING, collection.getData().getType());
     }
     
     @Test

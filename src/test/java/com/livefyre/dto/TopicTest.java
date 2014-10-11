@@ -10,12 +10,12 @@ import org.junit.experimental.categories.Category;
 
 import com.google.gson.JsonObject;
 import com.livefyre.Livefyre;
-import com.livefyre.config.LfTest;
+import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.core.Network;
 
 @Category(UnitTest.class)
-public class TopicTest extends LfTest {
+public class TopicTest extends PojoTest<Topic> {
     private static final int DATE_MULTIPLIER = 1000;
     private static final String ID = "id";
     private static final String LABEL = "label";

@@ -24,7 +24,7 @@ public class Subscription {
         return new Subscription(
             json.get("to").getAsString(),
             json.get("by").getAsString(),
-            SubscriptionType.valueOf(json.get("type").getAsString()),
+            SubscriptionType.fromString(json.get("type").getAsString()),
             json.get("createdAt").getAsInt());
     }
 
@@ -54,7 +54,6 @@ public class Subscription {
     }
 
     public void setType(String type) {
-        SubscriptionType.valueOf(type);
         this.type = type;
     }
 

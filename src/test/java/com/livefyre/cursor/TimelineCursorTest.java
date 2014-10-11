@@ -11,13 +11,12 @@ import org.junit.experimental.categories.Category;
 import com.google.gson.JsonObject;
 import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
-import com.livefyre.config.LfTest;
+import com.livefyre.config.PojoTest;
 import com.livefyre.core.Network;
-import com.livefyre.cursor.TimelineCursor;
 import com.livefyre.factory.CursorFactory;
 
 
-public class TimelineCursorTest extends LfTest {
+public class TimelineCursorTest extends PojoTest<TimelineCursor> {
     @Test
     @Category(IntegrationTest.class)
     @Ignore

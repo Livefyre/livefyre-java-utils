@@ -10,13 +10,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import com.google.common.collect.Lists;
+import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.dto.Topic;
-import com.livefyre.pojo.DataTest;
 import com.livefyre.type.CollectionType;
 
 @Category(UnitTest.class)
-public class CollectionDataTest extends DataTest<CollectionData> {
+public class CollectionDataTest extends PojoTest<CollectionData> {
     @Test
     public void testAsMap() {
         CollectionData data = new CollectionData(CollectionType.LIVECOMMENTS, TITLE, ARTICLE_ID, URL);

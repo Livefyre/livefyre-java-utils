@@ -20,4 +20,15 @@ public enum CollectionType {
     public String toString() {
         return type;
     }
+    
+    public static CollectionType fromString(String text) {
+        if (text != null) {
+          for (CollectionType c : CollectionType.values()) {
+            if (text.equalsIgnoreCase(c.toString())) {
+              return c;
+            }
+          }
+        }
+        return null;
+    }
 }

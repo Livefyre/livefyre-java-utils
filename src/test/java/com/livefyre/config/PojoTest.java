@@ -1,11 +1,10 @@
-package com.livefyre.pojo;
+package com.livefyre.config;
 
 import java.lang.reflect.ParameterizedType;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.livefyre.config.LfTest;
 import com.openpojo.reflection.PojoClass;
 import com.openpojo.reflection.impl.PojoClassFactory;
 import com.openpojo.validation.PojoValidator;
@@ -18,7 +17,7 @@ import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 
-public abstract class DataTest<T> extends LfTest {
+public abstract class PojoTest<T> extends LfTest {
     Class<T> typeParameterClass;
 
     private PojoValidator pojoValidator;
