@@ -1,5 +1,6 @@
 package com.livefyre.cursor;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import com.google.gson.JsonObject;
@@ -22,8 +23,10 @@ public class TimelineCursor {
         this.data = data;
     }
     
-    public static TimelineCursor init(LfCore core, String resource, int limit, Date startTime) {
-        CursorData data = new CursorData(resource, limit, startTime);
+    public static TimelineCursor init(LfCore core, String resource, Integer limit, Date startTime) {
+        int l = limit == null ? 50 : limit;
+        Date d = startTime == null ? Calendar.getInstance().getTime() : startTime;
+        CursorData data = new CursorData(resource, l, d);
         return new TimelineCursor(core, ReflectiveValidator.validate(data));
     }
 

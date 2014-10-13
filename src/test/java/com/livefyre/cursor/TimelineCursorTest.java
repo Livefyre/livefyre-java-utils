@@ -1,8 +1,10 @@
 package com.livefyre.cursor;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -12,9 +14,12 @@ import com.google.gson.JsonObject;
 import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.PojoTest;
+import com.livefyre.config.UnitTest;
 import com.livefyre.core.Network;
 import com.livefyre.factory.CursorFactory;
-
+import com.livefyre.model.CursorData;
+import com.livefyre.validator.CursorValidator;
+import com.livefyre.validator.Validator;
 
 public class TimelineCursorTest extends PojoTest<TimelineCursor> {
     @Test
@@ -27,5 +32,29 @@ public class TimelineCursorTest extends PojoTest<TimelineCursor> {
         ch.next();
         JsonObject json = ch.previous();
         assertNotNull(json);
+    }
+    
+    @Test
+    @Category(UnitTest.class)
+    public void testInit() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        try {
+            TimelineCursor.init(network, null, null, null);
+            fail("resource cannot be null");
+        } catch (IllegalArgumentException e) {}
+        
+        Validator<CursorData> v = new CursorValidator();
+        try {
+            new CursorData(null, null, null);
+            fail("date can never be null in this instance");
+        } catch (NullPointerException e) {}
+        
+        CursorData data = new CursorData(null, null, new Date());
+        try {
+            data.setCursorTime("");
+            v.validate(data);
+            fail("none of these fields should be null");
+        }
+        catch (IllegalArgumentException e) {}
     }
 }

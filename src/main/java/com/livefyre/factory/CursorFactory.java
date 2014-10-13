@@ -22,8 +22,8 @@ public class CursorFactory {
         return getPersonalStreamCursor(network, user, 50, Calendar.getInstance().getTime());
     }
     
-    public static TimelineCursor getPersonalStreamCursor(Network network, String user, Integer limit, Date date) {
-        String resource = network.getUserUrn(user) + ":personalStream";
+    public static TimelineCursor getPersonalStreamCursor(Network network, String userId, Integer limit, Date date) {
+        String resource = network.getUserUrn(userId) + ":personalStream";
         return TimelineCursor.init(network, resource, limit, date);
     }
 }
