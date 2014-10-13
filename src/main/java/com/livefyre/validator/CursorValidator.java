@@ -10,13 +10,6 @@ public class CursorValidator implements Validator<CursorData> {
         if (StringUtils.isBlank(data.getResource())) {
             reason.append("\n Resource is null or blank.");
         }
-        //these two should never ever happen.
-        if (data.getLimit() == null) {
-            reason.append("\n Limit is null.");
-        }
-        if (StringUtils.isBlank(data.getCursorTime())) {
-            reason.append("\n Time is null or blank.");
-        }
         
         if (reason.length() > 0) {
             return reason.insert(0, "Problems with your collection input:").toString();
