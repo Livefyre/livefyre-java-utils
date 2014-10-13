@@ -1,6 +1,7 @@
 package com.livefyre.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -21,6 +22,7 @@ import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.dto.Topic;
 import com.livefyre.exception.LivefyreException;
+import com.livefyre.exception.api.ApiException;
 import com.livefyre.type.CollectionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 
@@ -28,7 +30,6 @@ public class CollectionTest extends PojoTest<Collection> {
     private static final String CHECKSUM = "8bcfca7fb2187b1dcb627506deceee32";
     private Site site;
     
-    @Override
     @Before
     public void setup() {
         site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
@@ -46,6 +47,19 @@ public class CollectionTest extends PojoTest<Collection> {
         collection.getData().setTags("super");
         Collection coll1 = collection.createOrUpdate();
         assertEquals("super", coll1.getData().getTags());
+    }
+
+    @Test
+    @Category(IntegrationTest.class)
+    public void testGetCollectionContent_fail() {
+        String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
+        Collection collection = site.buildLiveCommentsCollection(name, name, URL);
+        collection.getSite().getData().setId("0");
+        try {
+            collection.getCollectionContent();
+            fail("this should not work");
+        }
+        catch(ApiException e) {}
     }
     
     @Test
@@ -136,6 +150,27 @@ public class CollectionTest extends PojoTest<Collection> {
             site.buildLiveCommentsCollection("", "", null);
             fail("url cannot be null");
         } catch(IllegalArgumentException e) {}
+        try {
+            site.buildCollection(TITLE, ARTICLE_ID, URL, null);
+            fail("type cannot be null");
+        } catch(IllegalArgumentException e) {}
+    }
+    
+    @Test
+    @Category(UnitTest.class)
+    public void testNetworkIssued() {
+        Collection collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
+        assertFalse(collection.isNetworkIssued());
+        
+        List<Topic> topics = Lists.<Topic>newArrayList();
+        collection.getData().setTopics(topics);
+        assertFalse(collection.isNetworkIssued());
+        
+        topics.add(Topic.create(site, "1", "FAIL"));
+        assertFalse(collection.isNetworkIssued());
+
+        topics.add(Topic.create(site.getNetwork(), "2", "PASS"));
+        assertTrue(collection.isNetworkIssued());
     }
     
     @Test

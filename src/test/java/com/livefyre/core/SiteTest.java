@@ -22,6 +22,10 @@ public class SiteTest extends PojoTest<Site> {
             fail("titles longer than 255 char are not allowed");
         } catch (IllegalArgumentException e) {}
         try {
+            site.buildLiveCommentsCollection("", "", "");
+            fail("url cannot be blank");
+        } catch (IllegalArgumentException e) {}
+        try {
             site.buildLiveCommentsCollection("", "", "tet.com");
             fail("url must start with valid url scheme (http:// or https://)");
         } catch (IllegalArgumentException e) {}

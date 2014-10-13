@@ -2,8 +2,8 @@ package com.livefyre.config;
 
 import java.lang.reflect.ParameterizedType;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.openpojo.reflection.PojoClass;
 import com.openpojo.reflection.impl.PojoClassFactory;
@@ -17,16 +17,17 @@ import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 
-public abstract class PojoTest<T> extends LfTest {
-    Class<T> typeParameterClass;
-
-    private PojoValidator pojoValidator;
-    
-    @Before
+public class PojoTest<T> extends LfTest {
+    @Test
+    @Category(UnitTest.class)
     @SuppressWarnings("unchecked")
-    public void setup() {
-        typeParameterClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        pojoValidator = new PojoValidator();
+    public void testPojoStructureAndBehavior() {
+        if (this.getClass() == PojoTest.class) {
+            return;
+        }
+        Class<T> typeParameterClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        
+        PojoValidator pojoValidator = new PojoValidator();
 
         // Create Rules to validate structure for POJO_PACKAGE
         pojoValidator.addRule(new NoPublicFieldsRule());
@@ -39,10 +40,7 @@ public abstract class PojoTest<T> extends LfTest {
         // Create Testers to validate behaviour for POJO_PACKAGE
         pojoValidator.addTester(new SetterTester());
         pojoValidator.addTester(new GetterTester());
-    }
-
-    @Test
-    public void testPojoStructureAndBehavior() {
+        
         PojoClass pojoClass = PojoClassFactory.getPojoClass(typeParameterClass);
         pojoValidator.runValidation(pojoClass);
     }

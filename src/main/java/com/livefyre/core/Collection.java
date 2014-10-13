@@ -108,8 +108,8 @@ public class Collection implements LfCore {
 
         ClientResponse response = Client.create().resource(url).accept(MediaType.APPLICATION_JSON)
                 .get(ClientResponse.class);
-        if (response.getStatus() != 200) {
-            throw new LivefyreException(String.format("Error contacting Livefyre. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
+        if (response.getStatus() >= 400) {
+            throw new ApiException(response.getStatus());
         }
         Gson gson = new Gson();
         return gson.fromJson(response.getEntity(String.class), JsonObject.class);

@@ -168,7 +168,7 @@
 					<instrumentation>
 						<excludes>
 							<exclude>com/livefyre/repackaged/**/*.class</exclude>
-							<exclude>com/livefyre/exception/*/*.class</exclude>
+							<exclude>com/livefyre/exception/**/*.class</exclude>
 							<exclude>com/livefyre/type/*.class</exclude>
 						</excludes>
 					</instrumentation>
