@@ -16,12 +16,12 @@ public enum SubscriptionType {
     
     public static SubscriptionType fromString(String text) {
         if (text != null) {
-          for (SubscriptionType e : SubscriptionType.values()) {
-            if (text.equalsIgnoreCase(e.toString())) {
-              return e;
+            for (SubscriptionType e : SubscriptionType.values()) {
+                if (text.equalsIgnoreCase(e.toString())) {
+                    return e;
+                }
             }
-          }
         }
-        throw new IllegalArgumentException("No constant with text " +text +" found!");
+        throw new IllegalArgumentException("No constant with text " + text + " found!");
     }
 }

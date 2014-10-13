@@ -151,7 +151,7 @@ public class PersonalizedStreamTest extends LfTest {
     
     @Test
     public void testSubscriberApi() {
-        String userToken = network.buildUserAuthToken(USER_ID, USER_ID + "@" + NETWORK_NAME, Network.DEFAULT_EXPIRES);
+        String userToken = network.buildUserAuthToken(USER_ID, USER_ID + "@" + NETWORK_NAME, DEFAULT_EXPIRES);
         List<Topic> topics = PersonalizedStream.createOrUpdateTopics(network, topicMap);
         
         List<Subscription> su = PersonalizedStream.getSubscriptions(network, USER_ID);

@@ -12,6 +12,7 @@ import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
+import com.livefyre.exception.TokenException;
 
 public class NetworkTest extends PojoTest<Network> {
     private static final String USER_SYNC_URL = "<USER-SYNC-URL {id}>";
@@ -65,6 +66,12 @@ public class NetworkTest extends PojoTest<Network> {
         
         assertNotNull(token);
         assertTrue(network.validateLivefyreToken(token));
+        
+        network.getData().setKey("blah");
+        try {
+            network.validateLivefyreToken(token);
+            fail("This should not work.");
+        } catch (TokenException e) {}
     }
     
     @Test
@@ -83,6 +90,25 @@ public class NetworkTest extends PojoTest<Network> {
         assertNotNull(site);
         assertEquals(SITE_ID, site.getData().getId());
         assertEquals(SITE_KEY, site.getData().getKey());
+    }
+    
+    @Test
+    @Category(UnitTest.class)
+    public void testGetUrns() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        String urn = network.getUrn();
+        assertEquals("urn:livefyre:"+NETWORK_NAME, urn);
+        
+        urn = network.getUserUrn(USER_ID);
+        assertEquals("urn:livefyre:"+NETWORK_NAME+":user="+USER_ID, urn);
+    }
+    
+    @Test
+    @Category(UnitTest.class) 
+    public void testNetworkName() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        String networkName = network.getNetworkName();
+        assertEquals(NETWORK_NAME.split("\\.")[0], networkName);
     }
     
     @Test

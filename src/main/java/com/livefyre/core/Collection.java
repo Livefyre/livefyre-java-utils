@@ -17,6 +17,7 @@ import com.livefyre.api.Domain;
 import com.livefyre.dto.Topic;
 import com.livefyre.exception.LivefyreException;
 import com.livefyre.exception.TokenException;
+import com.livefyre.exception.api.ApiException;
 import com.livefyre.model.CollectionData;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.type.CollectionType;
@@ -27,8 +28,6 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class Collection implements LfCore {
-    private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
-
     private Site site;
     private CollectionData data;
     
@@ -59,9 +58,8 @@ public class Collection implements LfCore {
             if (response.getStatus() == 200) {
                 return this;
             }
-            throw new LivefyreException(String.format("Error updating Livefyre collection. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
         }
-        throw new LivefyreException(String.format("Error creating Livefyre collection. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
+        throw new ApiException(response.getStatus());
     }
 
     /**
@@ -77,7 +75,7 @@ public class Collection implements LfCore {
             return LivefyreJwtUtil.serializeAndSign(isNetworkIssued ?
                     site.getNetwork().getData().getKey() : site.getData().getKey(), json);
         } catch (InvalidKeyException e) {
-            throw new TokenException(TOKEN_FAILURE_MSG + e);
+            throw new TokenException(e);
         }
     }
 

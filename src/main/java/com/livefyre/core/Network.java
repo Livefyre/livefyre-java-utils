@@ -13,8 +13,8 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.livefyre.api.Domain;
-import com.livefyre.exception.LivefyreException;
 import com.livefyre.exception.TokenException;
+import com.livefyre.exception.api.ApiException;
 import com.livefyre.model.NetworkData;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.validator.ReflectiveValidator;
@@ -22,12 +22,12 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 
 public class Network implements LfCore {
-    public static final double DEFAULT_EXPIRES = 86400.0;
+    private static final double DEFAULT_EXPIRES = 86400.0;
     private static final String DEFAULT_USER = "system";
     private static final String ID = "{id}";
     
     private NetworkData data;
-    private boolean ssl = true;
+    private Boolean ssl = true;
     
     public Network(NetworkData data) {
         this.data = data;
@@ -52,8 +52,8 @@ public class Network implements LfCore {
                 .queryParam("actor_token", buildLivefyreToken())
                 .queryParam("pull_profile_url", urlTemplate)
                 .post(ClientResponse.class);
-        if (response.getStatus() != 204) {
-            throw new LivefyreException(String.format("Error contacting Livefyre. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
+        if (response.getStatus() >= 400) {
+            throw new ApiException(response.getStatus());
         }
     }
     
@@ -71,8 +71,8 @@ public class Network implements LfCore {
                 .resource(url)
                 .queryParam("lftoken", buildLivefyreToken())
                 .post(ClientResponse.class);
-        if (response.getStatus() != 200) {
-            throw new LivefyreException(String.format("Error contacting Livefyre. Status code: %s \n Reason: %s", response.getStatus(), response.getEntity(String.class)));
+        if (response.getStatus() >= 400) {
+            throw new ApiException(response.getStatus());
         }
         return this;
     }
@@ -108,7 +108,7 @@ public class Network implements LfCore {
         try {
             return LivefyreJwtUtil.serializeAndSign(data.getKey(), tokenData);
         } catch (InvalidKeyException e) {
-            throw new TokenException("Failure creating token.", e);
+            throw new TokenException(e);
         }
     }
     
@@ -126,7 +126,7 @@ public class Network implements LfCore {
                 && json.get("user_id").getAsString().compareTo("system") == 0
                 && json.get("expires").getAsLong() >= Calendar.getInstance().getTimeInMillis()/1000L;
         } catch (InvalidKeyException e) {
-            throw new TokenException("Failure decrypting token.", e);
+            throw new TokenException(e);
         }
     }
     
@@ -153,11 +153,11 @@ public class Network implements LfCore {
         return data.getName().split("\\.")[0];
     }
 
-    public boolean isSsl() {
+    public Boolean isSsl() {
         return ssl;
     }
 
-    public void setSsl(boolean ssl) {
+    public void setSsl(Boolean ssl) {
         this.ssl = ssl;
     }
 

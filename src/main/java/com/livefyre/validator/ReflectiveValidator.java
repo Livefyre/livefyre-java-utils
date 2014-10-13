@@ -20,7 +20,7 @@ public class ReflectiveValidator {
                 message = (String) obj;
             }
         } catch (Exception e) {
-            throw new LivefyreException("Something that should've worked went horribly wrong. Contact us at tools@livefyre.com and attach: ", e);
+            throw new LivefyreException("Something went horribly wrong. Contact us at tools@livefyre.com and attach: ", e);
         }
         
         if (StringUtils.isNotBlank(message)) {

@@ -16,6 +16,7 @@ public class LfTest {
     protected String ARTICLE_ID = "<ARTICLE-ID>";
     protected final static String TITLE = "JavaTest";
     protected final static String URL = "http://answers.livefyre.com/JAVA";
+    protected final static Double DEFAULT_EXPIRES = 86400.00;
     
     public LfTest() {
         setPropValues(LfEnvironments.PROD);

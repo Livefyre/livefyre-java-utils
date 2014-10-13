@@ -19,7 +19,7 @@ import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
 import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
-import com.livefyre.exception.LivefyreException;
+import com.livefyre.exception.api.ApiException;
 import com.livefyre.model.CursorData;
 import com.livefyre.type.SubscriptionType;
 import com.livefyre.utils.LivefyreJwtUtil;
@@ -317,11 +317,8 @@ public class PersonalizedStream {
     }
     
     private static JsonObject evaluateResponse(ClientResponse response) {
-        if (response.getStatus() == 500) {
-            throw new LivefyreException("Livefyre appears to be down. Please see status.livefyre.com or contact us for more information.");
-        }
         if (response.getStatus() >= 400) {
-            throw new LivefyreException("Please check the contents of your request. Here is the response from our servers: " +response.getEntity(String.class));
+            throw new ApiException(response.getStatus());
         }
         return LivefyreUtil.stringToJson(response.getEntity(String.class));
     }
