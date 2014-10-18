@@ -64,7 +64,7 @@ public class SiteTest extends PojoTest<Site> {
         collection = site.buildSidenotesCollection(TITLE, ARTICLE_ID, URL);
         assertEquals(CollectionType.SIDENOTES, collection.getData().getType());
         
-        collection = site.buildCollection(TITLE, ARTICLE_ID, URL, CollectionType.COUNTING);
+        collection = site.buildCollection(CollectionType.COUNTING, TITLE, ARTICLE_ID, URL);
         assertEquals(CollectionType.COUNTING, collection.getData().getType());
     }
     

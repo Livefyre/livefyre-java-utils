@@ -4,9 +4,9 @@ public class SiteData {
     private String id;
     private String key;
 
-    public SiteData(String siteId, String siteKey) {
-        this.id = siteId;
-        this.key = siteKey;
+    public SiteData(String id, String key) {
+        this.id = id;
+        this.key = key;
     }
 
     public String getId() {

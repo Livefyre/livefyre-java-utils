@@ -13,8 +13,8 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.livefyre.api.Domain;
+import com.livefyre.exception.ApiException;
 import com.livefyre.exception.TokenException;
-import com.livefyre.exception.api.ApiException;
 import com.livefyre.model.NetworkData;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.validator.ReflectiveValidator;
@@ -145,7 +145,7 @@ public class Network implements LfCore {
         return "urn:livefyre:"+data.getName();
     }
     
-    public String getUserUrn(String user) {
+    public String getUrnForUser(String user) {
         return getUrn()+":user="+user;
     }
     

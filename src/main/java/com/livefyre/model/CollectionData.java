@@ -12,7 +12,7 @@ import com.livefyre.type.CollectionType;
 
 public class CollectionData {
     private CollectionType type;
-    private String collectionId;
+    private String id;
     private String articleId;
     private String title;
     private String url;
@@ -57,15 +57,15 @@ public class CollectionData {
         return this;
     }
     
-    public String getCollectionId() {
-        if (collectionId == null) {
-            throw new LivefyreException("Call createOrUpdate() on the collection to set the collection id.");
+    public String getId() {
+        if (id == null) {
+            throw new LivefyreException("Call createOrUpdate() on the collection to set the id.");
         }
-        return collectionId;
+        return id;
     }
     
-    public CollectionData setCollectionId(String collectionId) {
-        this.collectionId = collectionId;
+    public CollectionData setId(String id) {
+        this.id = id;
         return this;
     }
 

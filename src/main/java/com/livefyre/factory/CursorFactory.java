@@ -23,7 +23,7 @@ public class CursorFactory {
     }
     
     public static TimelineCursor getPersonalStreamCursor(Network network, String userId, Integer limit, Date date) {
-        String resource = network.getUserUrn(userId) + ":personalStream";
+        String resource = network.getUrnForUser(userId) + ":personalStream";
         return TimelineCursor.init(network, resource, limit, date);
     }
 }

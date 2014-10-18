@@ -38,5 +38,13 @@ public class TimelineCursorTest extends PojoTest<TimelineCursor> {
             TimelineCursor.init(network, null, null, null);
             fail("resource cannot be null");
         } catch (IllegalArgumentException e) {}
+        try {
+            TimelineCursor.init(network, "resource", null, null);
+            fail("limit cannot be null");
+        } catch (IllegalArgumentException e) {}
+        try {
+            TimelineCursor.init(network, "resource", 50, null);
+            fail("time cannot be null");
+        } catch (IllegalArgumentException e) {}
     }
 }

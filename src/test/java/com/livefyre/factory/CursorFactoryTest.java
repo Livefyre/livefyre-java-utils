@@ -24,8 +24,6 @@ public class CursorFactoryTest extends LfTest {
     public void testPersonalStreamCursor() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
-        CursorFactory.getPersonalStreamCursor(network, USER_ID, 50, null);
-        CursorFactory.getPersonalStreamCursor(network, USER_ID, null, Calendar.getInstance().getTime());
         try {
             CursorFactory.getPersonalStreamCursor(null, null, null, null);
             fail("network cannot be null");
@@ -69,8 +67,5 @@ public class CursorFactoryTest extends LfTest {
         cursor = CursorFactory.getTopicStreamCursor(network, topic, LIMIT, date);
         assertEquals(tsResource, cursor.getData().getResource());
         assertEquals(LIMIT, cursor.getData().getLimit().intValue());
-        
-        CursorFactory.getTopicStreamCursor(network, topic, 50, null);
-        CursorFactory.getTopicStreamCursor(network, topic, null, Calendar.getInstance().getTime());
     }
 }

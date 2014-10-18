@@ -1,13 +1,5 @@
 package com.livefyre.api;
 
-import java.security.InvalidKeyException;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -19,7 +11,7 @@ import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
 import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
-import com.livefyre.exception.api.ApiException;
+import com.livefyre.exception.ApiException;
 import com.livefyre.model.CursorData;
 import com.livefyre.type.SubscriptionType;
 import com.livefyre.utils.LivefyreJwtUtil;
@@ -29,6 +21,12 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
+import org.apache.commons.lang.StringUtils;
+
+import javax.ws.rs.core.MediaType;
+import java.security.InvalidKeyException;
+import java.util.List;
+import java.util.Map;
 
 public class PersonalizedStream {
 
@@ -189,7 +187,7 @@ public class PersonalizedStream {
     /* Subscription API */
     public static List<Subscription> getSubscriptions(Network network, String userId) {
         ClientResponse response = builder(network)
-                .path(String.format(USER_SUBSCRIPTION_PATH, network.getUserUrn(userId)))
+                .path(String.format(USER_SUBSCRIPTION_PATH, network.getUrnForUser(userId)))
                 .accept(MediaType.APPLICATION_JSON)
                 .get(ClientResponse.class);
         JsonObject content = evaluateResponse(response);
@@ -206,7 +204,7 @@ public class PersonalizedStream {
     
     public static int addSubscriptions(Network network, String userToken, List<Topic> topics) {
         String userId = getUserFromToken(network, userToken);
-        String userUrn = network.getUserUrn(userId);
+        String userUrn = network.getUrnForUser(userId);
         String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn)));
 
         ClientResponse response = builder(network, userToken)
@@ -222,7 +220,7 @@ public class PersonalizedStream {
     
     public static Map<String, Integer> replaceSubscriptions(Network network, String userToken, List<Topic> topics) {
         String userId = getUserFromToken(network, userToken);
-        String userUrn = network.getUserUrn(userId);
+        String userUrn = network.getUrnForUser(userId);
         String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("subscriptions", buildSubscriptions(topics, userUrn)));
 
         ClientResponse response = builder(network, userToken)
@@ -241,7 +239,7 @@ public class PersonalizedStream {
 
     public static int removeSubscriptions(Network network, String userToken, List<Topic> topics) {
         String userId = getUserFromToken(network, userToken);
-        String userUrn = network.getUserUrn(userId);
+        String userUrn = network.getUrnForUser(userId);
         String form = LivefyreUtil.mapToJsonString(ImmutableMap.<String, Object>of("delete", buildSubscriptions(topics, userUrn)));
 
         ClientResponse response = builder(network, userToken)
@@ -334,7 +332,7 @@ public class PersonalizedStream {
     private static List<Subscription> buildSubscriptions(List<Topic> topics, String userUrn) {
         List<Subscription> subscriptions = Lists.newArrayList();
         for (Topic topic : topics) {
-            subscriptions.add(new Subscription(topic.getId(), userUrn, SubscriptionType.PERSONAL_STREAM, null));
+            subscriptions.add(new Subscription(topic.getId(), userUrn, SubscriptionType.personalStream, null));
         }
         return subscriptions;
     }

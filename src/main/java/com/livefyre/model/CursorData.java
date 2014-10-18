@@ -18,7 +18,7 @@ public class CursorData {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
         this.resource = resource;
         this.limit = limit;
-        this.cursorTime = DATE_FORMAT.format(startTime);
+        this.cursorTime = startTime == null ? null: DATE_FORMAT.format(startTime);
     }
 
     public String getResource() {

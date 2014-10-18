@@ -15,9 +15,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.livefyre.api.Domain;
 import com.livefyre.dto.Topic;
+import com.livefyre.exception.ApiException;
 import com.livefyre.exception.LivefyreException;
 import com.livefyre.exception.TokenException;
-import com.livefyre.exception.api.ApiException;
 import com.livefyre.model.CollectionData;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.type.CollectionType;
@@ -50,7 +50,7 @@ public class Collection implements LfCore {
     public Collection createOrUpdate() {
         ClientResponse response = invokeCollectionApi("create");
         if (response.getStatus() == 200) {
-            data.setCollectionId(LivefyreUtil.stringToJson(response.getEntity(String.class))
+            data.setId(LivefyreUtil.stringToJson(response.getEntity(String.class))
                     .getAsJsonObject("data").get("collectionId").getAsString());
             return this;
         } else if (response.getStatus() == 409) {
@@ -116,7 +116,7 @@ public class Collection implements LfCore {
     }
 
     public String getUrn() {
-        return String.format("%s:collection=%s", site.getUrn(), data.getCollectionId());
+        return String.format("%s:collection=%s", site.getUrn(), data.getId());
     }
     
     public boolean isNetworkIssued() {

@@ -103,7 +103,7 @@ public class NetworkTest extends PojoTest<Network> {
         String urn = network.getUrn();
         assertEquals("urn:livefyre:"+NETWORK_NAME, urn);
         
-        urn = network.getUserUrn(USER_ID);
+        urn = network.getUrnForUser(USER_ID);
         assertEquals("urn:livefyre:"+NETWORK_NAME+":user="+USER_ID, urn);
     }
     

@@ -1,5 +1,7 @@
 package com.livefyre.utils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -31,5 +33,14 @@ public class LivefyreUtil {
         } else {
             return ((Collection) core).getSite().getNetwork();
         }
+    }
+
+    public static boolean isValidFullUrl(String url) {
+        try {
+            new URL(url);
+        } catch (MalformedURLException e) {
+            return false;
+        }
+        return true;
     }
 }

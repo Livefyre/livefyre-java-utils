@@ -1,6 +1,5 @@
-package com.livefyre.exception.api;
+package com.livefyre.exception;
 
-import com.livefyre.exception.LivefyreException;
 
 
 public class ApiException extends LivefyreException {

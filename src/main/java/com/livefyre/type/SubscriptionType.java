@@ -1,27 +1,27 @@
 package com.livefyre.type;
 
 public enum SubscriptionType {
-    PERSONAL_STREAM("personalStream");
+    personalStream(1);
 
-    String type;
+    int val;
     
-    private SubscriptionType(String type) {
-        this.type = type;
+    private SubscriptionType(int val) {
+        this.val = val;
     }
     
     @Override
     public String toString() {
-        return type;
+        return name();
     }
     
-    public static SubscriptionType fromString(String text) {
-        if (text != null) {
+    public static SubscriptionType fromNum(Integer num) {
+        if (num != null) {
             for (SubscriptionType e : SubscriptionType.values()) {
-                if (text.equalsIgnoreCase(e.toString())) {
+                if (num == e.val) {
                     return e;
                 }
             }
         }
-        throw new IllegalArgumentException("No constant with text " + text + " found!");
+        throw new IllegalArgumentException("No constant with value " + num + " found!");
     }
 }

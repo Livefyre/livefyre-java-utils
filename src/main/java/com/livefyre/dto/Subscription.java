@@ -21,10 +21,17 @@ public class Subscription {
     }
 
     public static Subscription serializeFromJson(JsonObject json) {
+        SubscriptionType type;
+        try {
+            type = SubscriptionType.valueOf(json.get("type").getAsString());
+        } catch (IllegalArgumentException e) {
+            type = SubscriptionType.fromNum(json.get("type").getAsInt());
+        }
+        
         return new Subscription(
             json.get("to").getAsString(),
             json.get("by").getAsString(),
-            SubscriptionType.fromString(json.get("type").getAsString()),
+            type,
             json.get("createdAt").getAsInt());
     }
 

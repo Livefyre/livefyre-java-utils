@@ -1,11 +1,9 @@
 package com.livefyre.validator;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.livefyre.model.CollectionData;
+import com.livefyre.utils.LivefyreUtil;
 
 public class CollectionValidator implements Validator<CollectionData> {
     public String validate(CollectionData data) {
@@ -20,7 +18,7 @@ public class CollectionValidator implements Validator<CollectionData> {
         }
         if (StringUtils.isBlank(data.getUrl())) {
             reason.append("\n URL is null or blank.");
-        } else if (!isValidFullUrl(data.getUrl())) {
+        } else if (!LivefyreUtil.isValidFullUrl(data.getUrl())) {
             reason.append("\n URL is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
         }
         if (data.getType() == null) {
@@ -31,14 +29,5 @@ public class CollectionValidator implements Validator<CollectionData> {
             return reason.insert(0, "Problems with your collection input:").toString();
         }
         return null;
-    }
-
-    private static boolean isValidFullUrl(String url) {
-        try {
-            new URL(url);
-        } catch (MalformedURLException e) {
-            return false;
-        }
-        return true;
     }
 }

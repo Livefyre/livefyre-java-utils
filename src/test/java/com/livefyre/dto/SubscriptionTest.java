@@ -2,6 +2,7 @@ package com.livefyre.dto;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -15,7 +16,7 @@ import com.livefyre.type.SubscriptionType;
 public class SubscriptionTest extends PojoTest<Subscription> {
     private final static String TO = "to";
     private final static String BY = "by";
-    private final static SubscriptionType TYPE = SubscriptionType.PERSONAL_STREAM;
+    private final static SubscriptionType TYPE = SubscriptionType.personalStream;
     private final static Integer CREATED_AT = 10;
     
     @Test
@@ -42,5 +43,15 @@ public class SubscriptionTest extends PojoTest<Subscription> {
         assertEquals(BY, sub.getBy());
         assertEquals(TYPE.toString(), sub.getType());
         assertEquals(CREATED_AT, sub.getCreatedAt());
+        
+
+        json.addProperty("type", 1);
+        sub = Subscription.serializeFromJson(json);
+        
+        try {
+            json.addProperty("type", 0);
+            sub = Subscription.serializeFromJson(json);
+            fail("this should throw an error");
+        } catch (IllegalArgumentException e) {}
     }
 }

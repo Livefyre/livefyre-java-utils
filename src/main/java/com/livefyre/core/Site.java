@@ -20,31 +20,31 @@ public class Site implements LfCore {
 
     /* Default collection type */
     public Collection buildLiveCommentsCollection(String title, String articleId, String url) {
-        return buildCollection(title, articleId, url, CollectionType.LIVECOMMENTS);
+        return buildCollection(CollectionType.LIVECOMMENTS, title, articleId, url);
     }
     
     public Collection buildLiveBlogCollection(String title, String articleId, String url) {
-        return buildCollection(title, articleId, url, CollectionType.LIVEBLOG);
+        return buildCollection(CollectionType.LIVEBLOG, title, articleId, url);
     }
     
     public Collection buildLiveChatCollection(String title, String articleId, String url) {
-        return buildCollection(title, articleId, url, CollectionType.LIVECHAT);
+        return buildCollection(CollectionType.LIVECHAT, title, articleId, url);
     }
     
     public Collection buildCountingCollection(String title, String articleId, String url) {
-        return buildCollection(title, articleId, url, CollectionType.COUNTING);
+        return buildCollection(CollectionType.COUNTING, title, articleId, url);
     }
     
     public Collection buildRatingsCollection(String title, String articleId, String url) {
-        return buildCollection(title, articleId, url, CollectionType.RATINGS);
+        return buildCollection(CollectionType.RATINGS, title, articleId, url);
     }
     
     public Collection buildReviewsCollection(String title, String articleId, String url) {
-        return buildCollection(title, articleId, url, CollectionType.REVIEWS);
+        return buildCollection(CollectionType.REVIEWS, title, articleId, url);
     }
     
     public Collection buildSidenotesCollection(String title, String articleId, String url) {
-        return buildCollection(title, articleId, url, CollectionType.SIDENOTES);
+        return buildCollection(CollectionType.SIDENOTES, title, articleId, url);
     }
     
     /**
@@ -60,7 +60,7 @@ public class Site implements LfCore {
      * @param url url for the collection.
      * @return Collection
      */
-    public Collection buildCollection(String title, String articleId, String url, CollectionType type) {
+    public Collection buildCollection(CollectionType type, String title, String articleId, String url) {
         return Collection.init(this, type, title, articleId, url);
     }
     
