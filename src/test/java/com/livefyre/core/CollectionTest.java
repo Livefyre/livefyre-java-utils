@@ -134,7 +134,7 @@ public class CollectionTest extends PojoTest<Collection> {
             collection.getData().getId();
             fail();
         } catch (LivefyreException e) {
-            assertEquals("Call createOrUpdate() on the collection to set the collection id.", e.getMessage());
+            assertEquals("Call createOrUpdate() on the collection to set the id.", e.getMessage());
         }
     }
     
