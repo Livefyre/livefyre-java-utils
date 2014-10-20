@@ -1,32 +1,33 @@
-package com.livefyre.exception;
+package com.livefyre.exceptions;
 
-public class LivefyreException extends RuntimeException {
+public class TokenException extends LivefyreException {
     private static final long serialVersionUID = -4370654756303707640L;
+    private static final String TOKEN_FAILURE_MSG = "Issue creating/decrypting LivefyreToken.";
 
-    /** Constructs a new Livefyre exception with {@code null} as its
+    /** Constructs a new token exception with {@code null} as its
      * detail message.  The cause is not initialized, and may subsequently be
      * initialized by a call to {@link #initCause}.
      */
-    public LivefyreException() {
+    public TokenException() {
         super();
     }
 
-    /** Constructs a new Livefyre exception with the specified detail message.
+    /** Constructs a new token exception with the specified detail message.
      * The cause is not initialized, and may subsequently be initialized by a
      * call to {@link #initCause}.
      *
      * @param   message   the detail message. The detail message is saved for
      *          later retrieval by the {@link #getMessage()} method.
      */
-    public LivefyreException(String message) {
+    public TokenException(String message) {
         super(message);
     }
 
     /**
-     * Constructs a new Livefyre exception with the specified detail message and
+     * Constructs a new token exception with the specified detail message and
      * cause.  <p>Note that the detail message associated with
      * {@code cause} is <i>not</i> automatically incorporated in
-     * this Livefyre exception's detail message.
+     * this token exception's detail message.
      *
      * @param  message the detail message (which is saved for later retrieval
      *         by the {@link #getMessage()} method).
@@ -35,14 +36,14 @@ public class LivefyreException extends RuntimeException {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public LivefyreException(String message, Throwable cause) {
+    public TokenException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    /** Constructs a new Livefyre exception with the specified cause and a
+    /** Constructs a new token exception with the specified cause and a
      * detail message of <tt>(cause==null ? null : cause.toString())</tt>
      * (which typically contains the class and detail message of
-     * <tt>cause</tt>).  This constructor is useful for Livefyre exceptions
+     * <tt>cause</tt>).  This constructor is useful for token exceptions
      * that are little more than wrappers for other throwables.
      *
      * @param  cause the cause (which is saved for later retrieval by the
@@ -50,7 +51,7 @@ public class LivefyreException extends RuntimeException {
      *         permitted, and indicates that the cause is nonexistent or
      *         unknown.)
      */
-    public LivefyreException(Throwable cause) {
-        super(cause);
+    public TokenException(Throwable cause) {
+        super(TOKEN_FAILURE_MSG, cause);
     }
 }

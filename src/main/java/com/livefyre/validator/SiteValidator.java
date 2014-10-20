@@ -8,10 +8,10 @@ public class SiteValidator implements Validator<SiteData> {
     public String validate(SiteData data) {
         StringBuilder reason = new StringBuilder();
         if (StringUtils.isBlank(data.getId())) {
-            reason.append("\n Site id is null or blank.");
+            reason.append("\n ID is null or blank.");
         }
         if (StringUtils.isBlank(data.getKey())) {
-            reason.append("\n Site key is null.");
+            reason.append("\n Key is null or blank.");
         }
 
         if (reason.length() > 0) {

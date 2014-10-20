@@ -33,7 +33,7 @@ public class TimelineCursor {
      * @return JSONObject
      */
     public JsonObject next() {
-        JsonObject responseData = PersonalizedStream.getTimelineStream(core, data, true);
+        JsonObject responseData = PersonalizedStream.getTimelineStream(this, true);
         JsonObject cursor = responseData.getAsJsonObject("meta").getAsJsonObject("cursor");
 
         data.setNext(cursor.get("hasNext").getAsBoolean());
@@ -50,7 +50,7 @@ public class TimelineCursor {
      * @return JSONObject
      */
     public JsonObject previous() {
-        JsonObject responseData = PersonalizedStream.getTimelineStream(core, data, false);
+        JsonObject responseData = PersonalizedStream.getTimelineStream(this, false);
         JsonObject cursor = responseData.getAsJsonObject("meta").getAsJsonObject("cursor");
 
         data.setPrevious(cursor.get("hasPrev").getAsBoolean());

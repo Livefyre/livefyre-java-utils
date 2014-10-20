@@ -21,8 +21,8 @@ import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
 import com.livefyre.dto.Topic;
-import com.livefyre.exception.ApiException;
-import com.livefyre.exception.LivefyreException;
+import com.livefyre.exceptions.ApiException;
+import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.type.CollectionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 

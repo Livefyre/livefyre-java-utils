@@ -1,5 +1,13 @@
 package com.livefyre.api;
 
+import java.security.InvalidKeyException;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -9,10 +17,10 @@ import com.livefyre.api.filter.LftokenAuthFilter;
 import com.livefyre.core.Collection;
 import com.livefyre.core.LfCore;
 import com.livefyre.core.Network;
+import com.livefyre.cursor.TimelineCursor;
 import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
-import com.livefyre.exception.ApiException;
-import com.livefyre.model.CursorData;
+import com.livefyre.exceptions.ApiException;
 import com.livefyre.type.SubscriptionType;
 import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.utils.LivefyreUtil;
@@ -21,12 +29,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
-import org.apache.commons.lang.StringUtils;
-
-import javax.ws.rs.core.MediaType;
-import java.security.InvalidKeyException;
-import java.util.List;
-import java.util.Map;
 
 public class PersonalizedStream {
 
@@ -276,16 +278,16 @@ public class PersonalizedStream {
     /**
      * This call is used specifically by the TimelineCursor class.  
      */
-    public static JsonObject getTimelineStream(LfCore core, CursorData data, boolean isNext) {
-        WebResource r = streamBuilder(core)
+    public static JsonObject getTimelineStream(TimelineCursor cursor, boolean isNext) {
+        WebResource r = streamBuilder(cursor.getCore())
                 .path(TIMELINE_PATH)
-                .queryParam("limit", data.getLimit().toString())
-                .queryParam("resource", data.getResource());
+                .queryParam("limit", cursor.getData().getLimit().toString())
+                .queryParam("resource", cursor.getData().getResource());
         
         if (isNext) {
-            r = r.queryParam("since", data.getCursorTime());
+            r = r.queryParam("since", cursor.getData().getCursorTime());
         } else {
-            r = r.queryParam("until", data.getCursorTime());
+            r = r.queryParam("until", cursor.getData().getCursorTime());
         }
         
         ClientResponse response = r.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);

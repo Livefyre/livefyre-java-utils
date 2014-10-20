@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.livefyre.exception.LivefyreException;
+import com.livefyre.exceptions.LivefyreException;
 
 public class ReflectiveValidator {
     public static <T> T validate(T data) {

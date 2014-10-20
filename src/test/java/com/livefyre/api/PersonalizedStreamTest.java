@@ -22,9 +22,9 @@ import com.livefyre.config.LfTest;
 import com.livefyre.core.Collection;
 import com.livefyre.core.Network;
 import com.livefyre.core.Site;
+import com.livefyre.cursor.TimelineCursor;
 import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
-import com.livefyre.model.CursorData;
 
 @Category(IntegrationTest.class)
 public class PersonalizedStreamTest extends LfTest {
@@ -178,8 +178,8 @@ public class PersonalizedStreamTest extends LfTest {
     @Test
     public void testTimelineStream() {
         Topic topic = PersonalizedStream.createOrUpdateTopic(network, "TOPIC", "LABEL");
-        CursorData data = new CursorData(topic.getId() +":topicStream", 50, new Date());
-        JsonObject result = PersonalizedStream.getTimelineStream(network, data, true);
+        TimelineCursor cursor = TimelineCursor.init(network, topic.getId() +":topicStream", 50, new Date());
+        JsonObject result = PersonalizedStream.getTimelineStream(cursor, true);
         assertNotNull(result);
         PersonalizedStream.deleteTopic(network, topic);
     }

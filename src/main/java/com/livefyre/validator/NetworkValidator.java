@@ -8,12 +8,12 @@ public class NetworkValidator implements Validator<NetworkData> {
     public String validate(NetworkData data) {
         StringBuilder reason = new StringBuilder();
         if (StringUtils.isBlank(data.getName())) {
-            reason.append("\n Network name is null or blank.");
+            reason.append("\n Name is null or blank.");
         } else if (!data.getName().endsWith(".fyre.co")) {
-            reason.append("\n Network name should end with '.fyre.co'.");
+            reason.append("\n Name should end with '.fyre.co'.");
         }
         if (StringUtils.isBlank(data.getKey())) {
-            reason.append("\n Network key is null or blank.");
+            reason.append("\n Key is null or blank.");
         }
 
         if (reason.length() > 0) {

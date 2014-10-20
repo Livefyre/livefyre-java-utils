@@ -12,7 +12,7 @@ import com.livefyre.Livefyre;
 import com.livefyre.config.IntegrationTest;
 import com.livefyre.config.PojoTest;
 import com.livefyre.config.UnitTest;
-import com.livefyre.exception.TokenException;
+import com.livefyre.exceptions.TokenException;
 
 public class NetworkTest extends PojoTest<Network> {
     private static final String USER_SYNC_URL = "<USER-SYNC-URL {id}>";

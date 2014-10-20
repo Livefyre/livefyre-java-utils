@@ -1,4 +1,4 @@
-package com.livefyre.exception;
+package com.livefyre.exceptions;
 
 
 
