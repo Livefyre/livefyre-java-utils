@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Calendar;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -20,7 +19,6 @@ import com.livefyre.factory.CursorFactory;
 public class TimelineCursorTest extends PojoTest<TimelineCursor> {
     @Test
     @Category(IntegrationTest.class)
-    @Ignore
     public void testApiCalls() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         TimelineCursor ch = CursorFactory.getPersonalStreamCursor(network, USER_ID, 50, Calendar.getInstance().getTime());

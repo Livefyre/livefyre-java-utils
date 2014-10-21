@@ -1,6 +1,6 @@
 === 2.0.0 2014-10-13
 
-* Refactored Collection related methods into it's own class.
+* Refactored Collection related methods into its own class.
 * Split tests into unit/integration stages.
 * Removed JSON library in favor of Google gson.
 * Restructured the library.
