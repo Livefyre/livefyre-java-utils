@@ -11,7 +11,6 @@ public class LfTest {
     protected String NETWORK_KEY = "<NETWORK-KEY>";
     protected String SITE_ID = "<SITE-ID>";
     protected String SITE_KEY = "<SITE-KEY>";
-    protected String COLLECTION_ID = "<COLLECTION-ID>";
     protected String USER_ID = "<USER-ID>";
     protected String ARTICLE_ID = "<ARTICLE-ID>";
     protected final static String TITLE = "JavaTest";
@@ -33,7 +32,6 @@ public class LfTest {
             NETWORK_KEY = prop.getProperty(prefix+"NETWORK_KEY");
             SITE_ID = prop.getProperty(prefix+"SITE_ID");
             SITE_KEY = prop.getProperty(prefix+"SITE_KEY");
-            COLLECTION_ID = prop.getProperty(prefix+"COLLECTION_ID");
             USER_ID = prop.getProperty(prefix+"USER_ID");
             ARTICLE_ID = prop.getProperty(prefix+"ARTICLE_ID");
             return;
@@ -49,7 +47,6 @@ public class LfTest {
             NETWORK_KEY = sys.get("NETWORK_KEY");
             SITE_ID = sys.get("SITE_ID");
             SITE_KEY = sys.get("SITE_KEY");
-            COLLECTION_ID = sys.get("COLLECTION_ID");
             USER_ID = sys.get("USER_ID");
             ARTICLE_ID = sys.get("ARTICLE_ID");
         } catch (NullPointerException e) {

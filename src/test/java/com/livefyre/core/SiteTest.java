@@ -15,27 +15,20 @@ import com.livefyre.type.CollectionType;
 public class SiteTest extends PojoTest<Site> {
     @Test
     @Category(UnitTest.class)
-    public void testBuildCollection() {
-        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
+    public void testGetSite() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         try {
-            site.buildLiveCommentsCollection("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "");
-            fail("titles longer than 255 char are not allowed");
-        } catch (IllegalArgumentException e) {}
+            Site.init(network, SITE_ID, null);
+            fail("siteKey cannot be null");
+        } catch(IllegalArgumentException e) {}
         try {
-            site.buildLiveCommentsCollection("", "", "");
-            fail("url cannot be blank");
-        } catch (IllegalArgumentException e) {}
-        try {
-            site.buildLiveCommentsCollection("", "", "tet.com");
-            fail("url must start with valid url scheme (http:// or https://)");
-        } catch (IllegalArgumentException e) {}
-        try {
-            site.buildLiveCommentsCollection("", "", "tet.com/");
-            fail("url must be a valid domain");
-        } catch (IllegalArgumentException e) {}
-
-        Collection collection  = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
-        assertNotNull(collection);
+            Site.init(network, null, SITE_KEY);
+            fail("siteId cannot be null");
+        } catch(IllegalArgumentException e) {}
+        Site site = network.getSite(SITE_ID, SITE_KEY);
+        assertNotNull(site);
+        assertEquals(SITE_ID, site.getData().getId());
+        assertEquals(SITE_KEY, site.getData().getKey());
     }
     
     @Test

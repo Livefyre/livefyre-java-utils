@@ -40,10 +40,6 @@ public class NetworkTest extends PojoTest<Network> {
             Livefyre.getNetwork("", "");
             fail("name and key cannot be blank");
         } catch(IllegalArgumentException e) {}
-        try {
-            Livefyre.getNetwork("blah", NETWORK_KEY);
-            fail("name must end in fyre.co");
-        } catch(IllegalArgumentException e) {}
     }
     
     @Test
@@ -76,24 +72,6 @@ public class NetworkTest extends PojoTest<Network> {
             network.validateLivefyreToken(token);
             fail("This should not work.");
         } catch (TokenException e) {}
-    }
-    
-    @Test
-    @Category(UnitTest.class)
-    public void testGetSite() {
-        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-        try {
-            network.getSite(SITE_ID, null);
-            fail("siteKey cannot be null");
-        } catch(IllegalArgumentException e) {}
-        try {
-            network.getSite(null, SITE_KEY);
-            fail("siteId cannot be null");
-        } catch(IllegalArgumentException e) {}
-        Site site = network.getSite(SITE_ID, SITE_KEY);
-        assertNotNull(site);
-        assertEquals(SITE_ID, site.getData().getId());
-        assertEquals(SITE_KEY, site.getData().getKey());
     }
     
     @Test

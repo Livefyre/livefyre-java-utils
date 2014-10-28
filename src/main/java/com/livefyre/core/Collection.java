@@ -125,9 +125,9 @@ public class Collection implements LfCore {
             return false;
         }
 
+        String networkUrn = site.getNetwork().getUrn();
         for (Topic topic : topics) {
             String topicId = topic.getId();
-            String networkUrn = site.getNetwork().getUrn();
             if (topicId.startsWith(networkUrn) && !topicId.replace(networkUrn, "").startsWith(":site=")) {
                 return true;
             }

@@ -34,6 +34,31 @@ public class CollectionTest extends PojoTest<Collection> {
     public void setup() {
         site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
     }
+    
+    @Test
+    @Category(UnitTest.class)
+    public void testBuildCollection() {
+        Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
+        try {
+            Collection.init(site, CollectionType.LIVECOMMENTS, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "");
+            fail("titles longer than 255 char are not allowed");
+        } catch (IllegalArgumentException e) {}
+        try {
+            Collection.init(site, CollectionType.LIVECOMMENTS, "", "", "");
+            fail("url cannot be blank");
+        } catch (IllegalArgumentException e) {}
+        try {
+            Collection.init(site, CollectionType.LIVECOMMENTS, "", "", "tet.com");
+            fail("url must start with valid url scheme (http:// or https://)");
+        } catch (IllegalArgumentException e) {}
+        try {
+            Collection.init(site, CollectionType.LIVECOMMENTS, "", "", "tet.com/");
+            fail("url must be a valid domain");
+        } catch (IllegalArgumentException e) {}
+
+        Collection collection  = Collection.init(site, CollectionType.LIVECOMMENTS, TITLE, ARTICLE_ID, URL);
+        assertNotNull(collection);
+    }
 
     @Test
     @Category(IntegrationTest.class)
