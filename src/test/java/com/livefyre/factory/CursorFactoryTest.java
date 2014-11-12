@@ -52,7 +52,7 @@ public class CursorFactoryTest extends LfTest {
         } catch (NullPointerException e) {}
         try {
             CursorFactory.getTopicStreamCursor(network, null, null, null);
-            fail("network cannot be null");
+            fail("topic cannot be null");
         } catch (NullPointerException e) {}
         
         Date date = Calendar.getInstance().getTime();

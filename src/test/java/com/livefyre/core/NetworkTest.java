@@ -40,6 +40,10 @@ public class NetworkTest extends PojoTest<Network> {
             Livefyre.getNetwork("", "");
             fail("name and key cannot be blank");
         } catch(IllegalArgumentException e) {}
+        try {
+            Livefyre.getNetwork("bad-network.com", NETWORK_KEY);
+            fail("name must end in fyre.co");
+        } catch(IllegalArgumentException e) {}
     }
     
     @Test

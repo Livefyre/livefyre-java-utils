@@ -77,7 +77,7 @@ public class ApiException extends LivefyreException {
         NOT_AUTHORIZED(403, "The server understood the request, but is refusing to fulfill it. Error code 403."),
         RESOURCE_NOT_FOUND(404, "The requested resource was not found. Error code 404."),
         SERVER_ERROR(500, "Livefyre appears to be down. Please see status.livefyre.com or contact us for more information. Error code 500."),
-        NOT_IMPLEMENTED(501, "The reuqested functionality is not currently supported. Error code 501."),
+        NOT_IMPLEMENTED(501, "The requested functionality is not currently supported. Error code 501."),
         BAD_GATEWAY(502, "The server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request at this time. Error code 502."),
         SERVER_UNAVAILABLE(503, "The service is undergoing scheduled maintenance, and will be available again shortly. Error code 503.");
         
