@@ -36,14 +36,14 @@ public class SiteTest extends PojoTest<Site> {
     public void testBuildCollectionTypes() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         
-        Collection collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
-        assertEquals(CollectionType.LIVECOMMENTS, collection.getData().getType());
+        Collection collection = site.buildCommentsCollection(TITLE, ARTICLE_ID, URL);
+        assertEquals(CollectionType.COMMENTS, collection.getData().getType());
         
-        collection = site.buildLiveBlogCollection(TITLE, ARTICLE_ID, URL);
-        assertEquals(CollectionType.LIVEBLOG, collection.getData().getType());
+        collection = site.buildBlogCollection(TITLE, ARTICLE_ID, URL);
+        assertEquals(CollectionType.BLOG, collection.getData().getType());
         
-        collection = site.buildLiveChatCollection(TITLE, ARTICLE_ID, URL);
-        assertEquals(CollectionType.LIVECHAT, collection.getData().getType());
+        collection = site.buildChatCollection(TITLE, ARTICLE_ID, URL);
+        assertEquals(CollectionType.CHAT, collection.getData().getType());
         
         collection = site.buildCountingCollection(TITLE, ARTICLE_ID, URL);
         assertEquals(CollectionType.COUNTING, collection.getData().getType());

@@ -62,7 +62,7 @@ public class NetworkTest extends PojoTest<Network> {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
         try {
-            network.buildUserAuthToken("fjaowie.123", "", 1.0);
+            network.buildUserAuthToken("fjaowie@123", "", 1.0);
             fail("userid must be alphanumeric");
         } catch (IllegalArgumentException e) {}
         
@@ -117,11 +117,11 @@ public class NetworkTest extends PojoTest<Network> {
             fail("userId cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", null, null);
+            network.buildUserAuthToken("-", null, null);
             fail("displayName cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", "", null);
+            network.buildUserAuthToken("_", "", null);
             fail("epires cannot be null");
         } catch(NullPointerException e) {}
         try {
@@ -138,7 +138,7 @@ public class NetworkTest extends PojoTest<Network> {
             fail("network name cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", "", 0.0);
+            network.buildUserAuthToken(".", "", 0.0);
             fail("network name cannot be null");
         } catch(NullPointerException e) {}
         /* key checks */
@@ -148,7 +148,7 @@ public class NetworkTest extends PojoTest<Network> {
             fail("network key cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", "", 0.0);
+            network.buildUserAuthToken("aB-f_a.123D", "", 0.0);
             fail("network key cannot be null");
         } catch(NullPointerException e) {}
         try {

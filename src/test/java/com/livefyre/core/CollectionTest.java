@@ -40,23 +40,23 @@ public class CollectionTest extends PojoTest<Collection> {
     public void testBuildCollection() {
         Site site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
         try {
-            Collection.init(site, CollectionType.LIVECOMMENTS, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "");
+            Collection.init(site, CollectionType.COMMENTS, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456", "", "");
             fail("titles longer than 255 char are not allowed");
         } catch (IllegalArgumentException e) {}
         try {
-            Collection.init(site, CollectionType.LIVECOMMENTS, "", "", "");
+            Collection.init(site, CollectionType.COMMENTS, "", "", "");
             fail("url cannot be blank");
         } catch (IllegalArgumentException e) {}
         try {
-            Collection.init(site, CollectionType.LIVECOMMENTS, "", "", "tet.com");
+            Collection.init(site, CollectionType.COMMENTS, "", "", "tet.com");
             fail("url must start with valid url scheme (http:// or https://)");
         } catch (IllegalArgumentException e) {}
         try {
-            Collection.init(site, CollectionType.LIVECOMMENTS, "", "", "tet.com/");
+            Collection.init(site, CollectionType.COMMENTS, "", "", "tet.com/");
             fail("url must be a valid domain");
         } catch (IllegalArgumentException e) {}
 
-        Collection collection  = Collection.init(site, CollectionType.LIVECOMMENTS, TITLE, ARTICLE_ID, URL);
+        Collection collection  = Collection.init(site, CollectionType.COMMENTS, TITLE, ARTICLE_ID, URL);
         assertNotNull(collection);
     }
 
@@ -65,7 +65,7 @@ public class CollectionTest extends PojoTest<Collection> {
     public void testCreateUpdateCollection() {
         String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
 
-        Collection collection = site.buildLiveCommentsCollection(name, name, URL).createOrUpdate();
+        Collection collection = site.buildCommentsCollection(name, name, URL).createOrUpdate();
         String otherId = collection.getCollectionContent().getAsJsonObject("collectionSettings").get("collectionId").getAsString();
         assertEquals(otherId, collection.getData().getId());
 
@@ -81,7 +81,7 @@ public class CollectionTest extends PojoTest<Collection> {
     @Category(IntegrationTest.class)
     public void testGetCollectionContent_fail() {
         String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
-        Collection collection = site.buildLiveCommentsCollection(name, name, URL);
+        Collection collection = site.buildCommentsCollection(name, name, URL);
         collection.getSite().getData().setId("0");
         try {
             collection.getCollectionContent();
@@ -93,7 +93,7 @@ public class CollectionTest extends PojoTest<Collection> {
     @Test
     @Category(UnitTest.class)
     public void testCreateCollectionToken() {
-        Collection collection = site.buildLiveCommentsCollection("title", "testId", "http://www.livefyre.com");
+        Collection collection = site.buildCommentsCollection("title", "testId", "http://www.livefyre.com");
         collection.getData().setTags("tags").setType(CollectionType.REVIEWS);
         
         String token = collection.buildCollectionMetaToken();
@@ -109,8 +109,8 @@ public class CollectionTest extends PojoTest<Collection> {
         assertEquals(decodedToken.get("url").getAsString(), "http://www.livefyre.com");
         assertEquals(decodedToken.get("type").getAsString(), "reviews");
         
-        collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
-        collection.getData().setType(CollectionType.LIVEBLOG);
+        collection = site.buildCommentsCollection(TITLE, ARTICLE_ID, URL);
+        collection.getData().setType(CollectionType.BLOG);
         token = collection.buildCollectionMetaToken();
         assertNotNull(token);
         try {
@@ -123,7 +123,7 @@ public class CollectionTest extends PojoTest<Collection> {
         
         // test network topics
         List<Topic> topics = Lists.newArrayList(Topic.create(site.getNetwork(), "1", "1"));
-        Collection coll = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
+        Collection coll = site.buildCommentsCollection(TITLE, ARTICLE_ID, URL);
         coll.getData().setTopics(topics);
         assertTrue(coll.isNetworkIssued());
         
@@ -144,7 +144,7 @@ public class CollectionTest extends PojoTest<Collection> {
     @Test
     @Category(UnitTest.class)
     public void testCollectionChecksum() {
-        Collection collection = site.buildLiveCommentsCollection("title", "articleId", "http://livefyre.com");
+        Collection collection = site.buildCommentsCollection("title", "articleId", "http://livefyre.com");
         collection.getData().setTags("tags");
         String checksum = collection.buildChecksum();
         assertNotNull(checksum);
@@ -154,7 +154,7 @@ public class CollectionTest extends PojoTest<Collection> {
     @Test
     @Category(UnitTest.class) 
     public void testGetCollectionId_fail() {
-        Collection collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
+        Collection collection = site.buildCommentsCollection(TITLE, ARTICLE_ID, URL);
         try {
             collection.getData().getId();
             fail();
@@ -167,15 +167,15 @@ public class CollectionTest extends PojoTest<Collection> {
     @Category(UnitTest.class)
     public void testInstantiationNullChecks() {
         try {
-            site.buildLiveCommentsCollection(null, null, null);
+            site.buildCommentsCollection(null, null, null);
             fail("title cannot be null");
         } catch(IllegalArgumentException e) {}
         try {
-            site.buildLiveCommentsCollection("", null, null);
+            site.buildCommentsCollection("", null, null);
             fail("articleId cannot be null");
         } catch(IllegalArgumentException e) {}
         try {
-            site.buildLiveCommentsCollection("", "", null);
+            site.buildCommentsCollection("", "", null);
             fail("url cannot be null");
         } catch(IllegalArgumentException e) {}
         try {
@@ -187,7 +187,7 @@ public class CollectionTest extends PojoTest<Collection> {
     @Test
     @Category(UnitTest.class)
     public void testNetworkIssued() {
-        Collection collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
+        Collection collection = site.buildCommentsCollection(TITLE, ARTICLE_ID, URL);
         assertFalse(collection.isNetworkIssued());
         
         List<Topic> topics = Lists.<Topic>newArrayList();
@@ -204,7 +204,7 @@ public class CollectionTest extends PojoTest<Collection> {
     @Test
     @Category(UnitTest.class)
     public void testGetUrn() {
-        Collection collection = site.buildLiveCommentsCollection(TITLE, ARTICLE_ID, URL);
+        Collection collection = site.buildCommentsCollection(TITLE, ARTICLE_ID, URL);
         collection.getData().setId("ID");
         assertEquals(site.getUrn()+":collection=ID", collection.getUrn());
     }

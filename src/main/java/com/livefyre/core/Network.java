@@ -7,8 +7,7 @@ import java.security.InvalidKeyException;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.TimeZone;
-
-import org.apache.commons.lang.StringUtils;
+import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
@@ -25,6 +24,7 @@ public class Network implements LfCore {
     private static final double DEFAULT_EXPIRES = 86400.0;
     private static final String DEFAULT_USER = "system";
     private static final String ID = "{id}";
+    private static final String ALPHA_DASH_UNDER_DOT_REGEX = "^[a-zZA-Z0-9_\\.-]+$";
     
     private NetworkData data;
     private Boolean ssl = true;
@@ -94,7 +94,8 @@ public class Network implements LfCore {
      * @return String
      */
     public String buildUserAuthToken(String userId, String displayName, Double expires) {
-        checkArgument(StringUtils.isAlphanumeric(checkNotNull(userId)), "userId is not alphanumeric.");
+        Pattern pattern = Pattern.compile(ALPHA_DASH_UNDER_DOT_REGEX);
+        checkArgument(pattern.matcher(checkNotNull(userId)).find(), "userId is not alphanumeric.");
         checkNotNull(displayName);
         checkNotNull(expires);
         

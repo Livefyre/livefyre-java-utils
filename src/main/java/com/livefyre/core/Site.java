@@ -19,16 +19,16 @@ public class Site implements LfCore {
     }
 
     /* Default collection type */
-    public Collection buildLiveCommentsCollection(String title, String articleId, String url) {
-        return buildCollection(CollectionType.LIVECOMMENTS, title, articleId, url);
+    public Collection buildBlogCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.BLOG, title, articleId, url);
     }
-    
-    public Collection buildLiveBlogCollection(String title, String articleId, String url) {
-        return buildCollection(CollectionType.LIVEBLOG, title, articleId, url);
+
+    public Collection buildChatCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.CHAT, title, articleId, url);
     }
-    
-    public Collection buildLiveChatCollection(String title, String articleId, String url) {
-        return buildCollection(CollectionType.LIVECHAT, title, articleId, url);
+
+    public Collection buildCommentsCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.COMMENTS, title, articleId, url);
     }
     
     public Collection buildCountingCollection(String title, String articleId, String url) {

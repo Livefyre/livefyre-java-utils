@@ -19,14 +19,14 @@ import com.livefyre.type.CollectionType;
 public class CollectionDataTest extends PojoTest<CollectionData> {
     @Test
     public void testAsMap() {
-        CollectionData data = new CollectionData(CollectionType.LIVECOMMENTS, TITLE, ARTICLE_ID, URL);
+        CollectionData data = new CollectionData(CollectionType.COMMENTS, TITLE, ARTICLE_ID, URL);
         Map<String, Object> map = data.asMap();
         
         assertNotNull(map);
         assertEquals(TITLE, map.get("title"));
         assertEquals(ARTICLE_ID, map.get("articleId"));
         assertEquals(URL, map.get("url"));
-        assertEquals(CollectionType.LIVECOMMENTS.toString(), map.get("type"));
+        assertEquals(CollectionType.COMMENTS.toString(), map.get("type"));
         
         String tags = "TAGS";
         String extensions = "EXTENSIONS";
@@ -41,7 +41,7 @@ public class CollectionDataTest extends PojoTest<CollectionData> {
         assertEquals(TITLE, map.get("title"));
         assertEquals(ARTICLE_ID, map.get("articleId"));
         assertEquals(URL, map.get("url"));
-        assertEquals(CollectionType.LIVECOMMENTS.toString(), map.get("type"));
+        assertEquals(CollectionType.COMMENTS.toString(), map.get("type"));
         assertEquals(tags, map.get("tags"));
         assertEquals(extensions, map.get("extensions"));
         assertEquals(topics, map.get("topics"));
