@@ -1,42 +1,53 @@
 package com.livefyre.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
-import com.livefyre.config.LfTest;
+import com.livefyre.config.IntegrationTest;
+import com.livefyre.config.PojoTest;
+import com.livefyre.config.UnitTest;
+import com.livefyre.exceptions.TokenException;
 
-public class NetworkTest extends LfTest {
+public class NetworkTest extends PojoTest<Network> {
     private static final String USER_SYNC_URL = "<USER-SYNC-URL {id}>";
     
     @Test
-    @Ignore
+    @Category(IntegrationTest.class)
     public void testSetUserSync() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-        
-        assertTrue(network.setUserSyncUrl(USER_SYNC_URL));
-        assertTrue(network.syncUser(USER_ID));
+        network.setUserSyncUrl(USER_SYNC_URL);
+        network.syncUser(USER_ID);
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testNetworkCreation() {
         try {
             Livefyre.getNetwork("", null);
             fail("key cannot be null");
-        } catch(NullPointerException e) {}
+        } catch(IllegalArgumentException e) {}
         try {
             Livefyre.getNetwork(null, "");
             fail("name cannot be null");
-        } catch(NullPointerException e) {}
-        Network network = Livefyre.getNetwork("", "");
-        assertNotNull(network);
+        } catch(IllegalArgumentException e) {}
+        try {
+            Livefyre.getNetwork("", "");
+            fail("name and key cannot be blank");
+        } catch(IllegalArgumentException e) {}
+        try {
+            Livefyre.getNetwork("bad-network.com", NETWORK_KEY);
+            fail("name must end in fyre.co");
+        } catch(IllegalArgumentException e) {}
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testNetworkSetUserSyncId() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         try {
@@ -46,11 +57,12 @@ public class NetworkTest extends LfTest {
     }
     
     @Test
+    @Category(UnitTest.class)
     public void testNetworkUserToken() {
         Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
         
         try {
-            network.buildUserAuthToken("fjaowie.123", "", 1.0);
+            network.buildUserAuthToken("fjaowie@123", "", 1.0);
             fail("userid must be alphanumeric");
         } catch (IllegalArgumentException e) {}
         
@@ -58,13 +70,39 @@ public class NetworkTest extends LfTest {
         
         assertNotNull(token);
         assertTrue(network.validateLivefyreToken(token));
+        
+        network.getData().setKey("blah");
+        try {
+            network.validateLivefyreToken(token);
+            fail("This should not work.");
+        } catch (TokenException e) {}
     }
     
     @Test
+    @Category(UnitTest.class)
+    public void testGetUrns() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        String urn = network.getUrn();
+        assertEquals("urn:livefyre:"+NETWORK_NAME, urn);
+        
+        urn = network.getUrnForUser(USER_ID);
+        assertEquals("urn:livefyre:"+NETWORK_NAME+":user="+USER_ID, urn);
+    }
+    
+    @Test
+    @Category(UnitTest.class) 
+    public void testNetworkName() {
+        Network network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        String networkName = network.getNetworkName();
+        assertEquals(NETWORK_NAME.split("\\.")[0], networkName);
+    }
+    
+    @Test
+    @Category(UnitTest.class)
     public void testNullChecks() {
-        Network network = new Network("", "");
-        network.setName(null);
-        network.setKey(null);;
+        Network network = Network.init(NETWORK_NAME, NETWORK_KEY);
+        network.getData().setName(null);
+        network.getData().setKey(null);;
         /* param checks */
         try {
             network.setUserSyncUrl(null);
@@ -79,11 +117,11 @@ public class NetworkTest extends LfTest {
             fail("userId cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", null, null);
+            network.buildUserAuthToken("-", null, null);
             fail("displayName cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", "", null);
+            network.buildUserAuthToken("_", "", null);
             fail("epires cannot be null");
         } catch(NullPointerException e) {}
         try {
@@ -100,17 +138,17 @@ public class NetworkTest extends LfTest {
             fail("network name cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", "", 0.0);
+            network.buildUserAuthToken(".", "", 0.0);
             fail("network name cannot be null");
         } catch(NullPointerException e) {}
         /* key checks */
-        network.setName("");
+        network.getData().setName("");
         try {
             network.setUserSyncUrl("{id}");
             fail("network key cannot be null");
         } catch(NullPointerException e) {}
         try {
-            network.buildUserAuthToken("", "", 0.0);
+            network.buildUserAuthToken("aB-f_a.123D", "", 0.0);
             fail("network key cannot be null");
         } catch(NullPointerException e) {}
         try {

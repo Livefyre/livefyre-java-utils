@@ -1,3 +1,14 @@
+=== 2.0.0 2014-10-13
+
+* Refactored Collection related methods into its own class.
+* Split tests into unit/integration stages.
+* Removed JSON library in favor of Google gson.
+* Restructured the library.
+* Divided models/validators from core functions.
+* Added more tests and coverage.
+* Added requirements to have fyre.co at end of network name.
+* Made user auth check allow dash, underscore, and dots.
+
 === 1.3.5 2014-09-02
 
 * Added createOrUpdateCollection method.

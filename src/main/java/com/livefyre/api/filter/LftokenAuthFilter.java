@@ -1,6 +1,7 @@
-package com.livefyre.api.client.filter;
+package com.livefyre.api.filter;
 
 import com.livefyre.core.LfCore;
+import com.livefyre.utils.LivefyreUtil;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
@@ -17,7 +18,7 @@ public class LftokenAuthFilter extends ClientFilter {
     
     @Override
     public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
-        cr.getHeaders().add("Authorization", "lftoken " + (userToken == null ? core.buildLivefyreToken() : userToken));
+        cr.getHeaders().add("Authorization", "lftoken " + (userToken == null ? LivefyreUtil.getNetworkFromCore(core).buildLivefyreToken() : userToken));
         
         return getNext().handle(cr);
     }

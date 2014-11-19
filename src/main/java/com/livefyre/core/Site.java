@@ -1,212 +1,89 @@
 package com.livefyre.core;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.livefyre.api.client.Domain;
-import com.livefyre.exceptions.LivefyreException;
-import com.livefyre.exceptions.TokenException;
-import com.livefyre.repackaged.apache.commons.Base64;
-import com.livefyre.utils.LivefyreJwtUtil;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
+import com.livefyre.model.SiteData;
+import com.livefyre.type.CollectionType;
+import com.livefyre.validator.ReflectiveValidator;
 
 public class Site implements LfCore {
-    private static final String TOKEN_FAILURE_MSG = "Failure creating token.";
-    private static final ImmutableList<String> TYPE = ImmutableList.of(
-        "reviews", "sidenotes", "ratings", "counting",
-        "liveblog", "livechat", "livecomments", ""
-    );
+    private Network network;
+    private SiteData data;
 
-    private Network network = null;
-    private String id = null;
-    private String key = null;
+    public Site(Network network, SiteData data) {
+        this.network = network;
+        this.data = data;
+    }
 
-    public Site(Network network, String id, String key) {
-        this.network = checkNotNull(network);
-        this.id = checkNotNull(id);
-        this.key = checkNotNull(key);
+    public static Site init(Network network, String siteId, String siteKey) {
+        SiteData data = new SiteData(siteId, siteKey);
+        return new Site(network, ReflectiveValidator.validate(data));
+    }
+
+    /* Default collection type */
+    public Collection buildBlogCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.BLOG, title, articleId, url);
+    }
+
+    public Collection buildChatCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.CHAT, title, articleId, url);
+    }
+
+    public Collection buildCommentsCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.COMMENTS, title, articleId, url);
+    }
+    
+    public Collection buildCountingCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.COUNTING, title, articleId, url);
+    }
+    
+    public Collection buildRatingsCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.RATINGS, title, articleId, url);
+    }
+    
+    public Collection buildReviewsCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.REVIEWS, title, articleId, url);
+    }
+    
+    public Collection buildSidenotesCollection(String title, String articleId, String url) {
+        return buildCollection(CollectionType.SIDENOTES, title, articleId, url);
     }
     
     /**
-     * This method allows a variety of parameters/options to be passed in as a map.  Some examples are 'tags', 'type', 'extensions',
-     * 'tags', etc.  Please refer to http://answers.livefyre.com/developers/getting-started/tokens/collectionmeta/ for more info.
+     * Creates and returns a Collection object. Be sure to call createOrUpdate() on it to inform Livefyre to
+     * complete creation and any updates.
      * 
-     * @param extras map of additional params to be included into the collection meta token.
+     * Options accepts a map of key/value pairs for your Collection. Some examples are 'tags',
+     * 'type', 'extensions', 'tags', etc. Please refer to
+     * http://answers.livefyre.com/developers/getting-started/tokens/collectionmeta/ for more info.
+     *
+     * @param articleId the articleId for the collection
+     * @param title title for the collection.
+     * @param url url for the collection.
+     * @return Collection
      */
-    public String buildCollectionMetaToken(String title, String articleId, String url, Map<String, Object> options) {
-        checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
-        checkNotNull(articleId);
-        checkArgument(isValidFullUrl(checkNotNull(url)), "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
-        
-        Map<String, Object> o = options == null ? Maps.<String, Object>newHashMap() : options;
+    public Collection buildCollection(CollectionType type, String title, String articleId, String url) {
+        return Collection.init(this, type, title, articleId, url);
+    }
+    
+    //build different collection types here
 
-        if (o.containsKey("type") && !TYPE.contains(o.get("type"))) {
-            throw new IllegalArgumentException("type is not a recognized type. should be one of these types: " +TYPE.toString());
-        }
-        
-        Map<String, Object> data = Maps.newHashMap(o);
-        data.put("url", url);
-        data.put("title", title);
-        data.put("articleId", articleId);
-        
-        try {
-            return LivefyreJwtUtil.encodeLivefyreJwt(key, data);
-        } catch (InvalidKeyException e) {
-            throw new TokenException(TOKEN_FAILURE_MSG + e);
-        }
-    }
-    
-    @Deprecated
-    /** Use buildChecksum(String, String, Map) instead. */
-    public String buildChecksum(String title, String url, String tags) {
-        return buildChecksum(title, url, ImmutableMap.<String, Object>of("tags", tags));
-    }
-
-    public String buildChecksum(String title, String url, Map<String, Object> options) {
-        checkArgument(checkNotNull(title).length() <= 255, "title is longer than 255 characters.");
-        checkArgument(isValidFullUrl(checkNotNull(url)),
-            "url is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
-
-        Map<String, Object> attr = Maps.newTreeMap();
-        attr.put("title", title);
-        attr.put("url", url);
-        if (options != null) { 
-            attr.putAll(options);
-        }
-        
-        try {
-            JSONObject json = new JSONObject(attr);
-            byte[] digest = MessageDigest.getInstance("MD5").digest(json.toString().getBytes());
-            return printHexBinary(digest);
-        } catch (NoSuchAlgorithmException e) {
-            throw new LivefyreException("Failure creating checksum." + e);
-        }
-    }
-    
-    public String createCollection(String title, String articleId, String url, Map<String, Object> options) {
-        String payload = getPayload(title, articleId, url, options);
-        
-        ClientResponse response = modifyCollection(payload, "create");
-        if (response.getStatus() == 200) {
-            return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
-        } else if (response.getStatus() == 409) {
-            throw new LivefyreException("Error creating collection. Collection already exists.");
-        }
-        throw new LivefyreException("Error creating collection. Status code: " + response.getStatus());
-    }
-    
-    public String createOrUpdateCollection(String title, String articleId, String url, Map<String, Object> options) {
-        String payload = getPayload(title, articleId, url, options);
-        
-        ClientResponse response = modifyCollection(payload, "create");
-        if (response.getStatus() == 200) {
-            return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
-        }
-        if (response.getStatus() != 409) {
-            throw new LivefyreException("Error creating collection. Status code: " + response.getStatus());
-        }
-        
-        response = modifyCollection(payload, "update");
-        if (response.getStatus() == 200) {
-            return new JSONObject(response.getEntity(String.class)).getJSONObject("data").getString("collectionId");
-        }
-        throw new LivefyreException("Error updating collection. Status code: " + response.getStatus());
-    }
-    
-    public JSONObject getCollectionContentJson(String articleId) {
-        return new JSONObject(getCollectionContent(articleId));
-    }
-
-    public String getCollectionContent(String articleId) {
-        checkNotNull(articleId);
-
-        String b64articleId = Base64.encodeBase64URLSafeString(articleId.getBytes());
-        if (b64articleId.length() % 4 != 0) { 
-            b64articleId = b64articleId + StringUtils.repeat("=", 4 - (b64articleId.length() % 4));
-        }
-        String url = String.format("%s/bs3/%s/%s/%s/init", Domain.bootstrap(this), network.getName(), id, b64articleId);
-
-        ClientResponse response = Client.create()
-                .resource(url)
-                .accept(MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
-        if (response.getStatus() != 200) {
-            throw new LivefyreException("Error contacting Livefyre. Status code: " + response.getStatus());
-        }
-        return response.getEntity(String.class);
-    }
-
-    public String getCollectionId(String articleId) {
-        JSONObject collection = getCollectionContentJson(articleId);
-        return collection.getJSONObject("collectionSettings").getString("collectionId");
-    }
-    
-    /* Helper methods */
-    public String getUrn() {
-        return network.getUrn()+":site="+id;
-    }
-    
-    protected boolean isValidFullUrl(String url) {
-        try {
-            new URL(url);
-        } catch (MalformedURLException e) {
-            return false;
-        }
-        return true;
-    }
-    
-    private String getPayload(String title, String articleId, String url, Map<String, Object> options) {
-        String token = buildCollectionMetaToken(title, articleId, url, options);
-        String checksum =  buildChecksum(title, url, options);
-        String form = new JSONObject(ImmutableMap.<String, String>of("articleId", articleId, "collectionMeta", token, "checksum", checksum)).toString();
-        return form;
-    }
-    
-    private ClientResponse modifyCollection(String payload, String method) {
-        String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), id, method);
-        ClientResponse response = Client.create()
-                .resource(uri)
-                .queryParam("sync", "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, payload);
-        return response;
-    }
-    
-    private static final char[] hexCode = "0123456789abcdef".toCharArray();
-    
-    private String printHexBinary(byte[] data) {
-        StringBuilder r = new StringBuilder(data.length * 2);
-        for (byte b : data) {
-            r.append(hexCode[(b >> 4) & 0xF]);
-            r.append(hexCode[(b & 0xF)]);
-        }
-        return r.toString();
-    }
-    
     /* Getters/Setters */
-    public String buildLivefyreToken() { return network.buildLivefyreToken(); }
-    public String getNetworkName() { return network.getNetworkName(); }
-    public Network getNetwork() { return this.network; }
-    protected void setNetwork(Network network) { this.network = network; }
-    public String getId() { return id; }
-    protected void setId(String id) { this.id = id; }
-    public String getKey() { return key; }
-    protected void setKey(String key) { this.key = key; }
+    public String getUrn() {
+        return network.getUrn() + ":site=" + data.getId();
+    }
+    
+    public Network getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
+    public SiteData getData() {
+        return data;
+    }
+
+    public void setData(SiteData data) {
+        this.data = data;
+    }
 }

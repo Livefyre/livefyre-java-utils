@@ -6,3 +6,5 @@ target
 Makefile
 
 test.properties
+*.iml
+.idea

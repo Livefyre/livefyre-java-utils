@@ -1,5 +1,7 @@
 # Livefyre Java Utility Classes
 [![GitHub version](https://badge.fury.io/gh/livefyre%2Flivefyre-java-utils.png)](http://badge.fury.io/gh/livefyre%2Flivefyre-java-utils)
+[![Circle CI](https://circleci.com/gh/Livefyre/livefyre-java-utils.png?style=badge)](https://circleci.com/gh/Livefyre/livefyre-java-utils)
+[![Coverage Status](https://img.shields.io/coveralls/Livefyre/livefyre-java-utils.svg)](https://coveralls.io/r/Livefyre/livefyre-java-utils)
 
 Livefyre's official library for common server-side tasks necessary for getting Livefyre apps (comments, reviews, etc.) working on your website.
 
@@ -12,78 +14,10 @@ Add this dependency to your project's POM:
     <dependency>
       <groupId>com.livefyre</groupId>
       <artifactId>utils</artifactId>
-      <version>1.3.5</version>
+      <version>2.0.0</version>
     </dependency>
 
-## Usage
-
-Instantiating a network object:
-
-```Java
-Network network = Livefyre.getNetwork("networkName", "networkKey");
-```
-
-Building a Livefyre token:
-
-```Java
-network.buildLivefyreToken();
-```
-
-Building a user auth token:
-
-```Java
-network.buildUserAuthToken("userId", "displayName", expires);
-```
-
-To validate a Livefyre token:
-
-```Java
-network.validateLivefyreToken("lfToken");
-```
-
-To send Livefyre a user sync url and then have Livefyre pull user data from that url:
-
-```Java
-network.setUserSyncUrl("urlTemplate");
-network.syncUser("userId");
-```
-
-Instantiating a site object:
-
-```Java
-Site site = network.getSite("siteId", "siteKey");
-```
-
-Building a collection meta token:
-*The {options} argument is optional.*
-
-```Java
-site.buildCollectionMetaToken("title", "articleId", "url", {options});
-```
-
-Building a checksum:
-*The "tags" argument is optional.*
-
-```Java
-site.buildChecksum("title", "url", "tags");
-```
-
-To retrieve content collection data:
-
-```Java
-site.getCollectionContent("articleId");
-
-// The following method does the same as previous, but provides the data as a JsonObject.
-JsonObject jsonObject = site.getCollectionContentJson("articleId");
-```
-
-To get a content collection's id:
-
-```Java
-site.getCollectionId("articleId");
-```
-
-## Additional Documentation
+## Documentation
 
 Located [here](http://answers.livefyre.com/developers/libraries).
 

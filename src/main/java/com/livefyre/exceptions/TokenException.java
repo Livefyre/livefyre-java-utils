@@ -1,7 +1,8 @@
 package com.livefyre.exceptions;
 
-public class TokenException extends RuntimeException {
+public class TokenException extends LivefyreException {
     private static final long serialVersionUID = -4370654756303707640L;
+    private static final String TOKEN_FAILURE_MSG = "Issue creating/decrypting LivefyreToken.";
 
     /** Constructs a new token exception with {@code null} as its
      * detail message.  The cause is not initialized, and may subsequently be
@@ -51,6 +52,6 @@ public class TokenException extends RuntimeException {
      *         unknown.)
      */
     public TokenException(Throwable cause) {
-        super(cause);
+        super(TOKEN_FAILURE_MSG, cause);
     }
 }

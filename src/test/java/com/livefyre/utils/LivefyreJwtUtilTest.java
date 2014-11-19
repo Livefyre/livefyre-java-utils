@@ -7,18 +7,20 @@ import static org.junit.Assert.fail;
 import java.security.InvalidKeyException;
 import java.util.Map;
 
-import org.json.JSONObject;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonObject;
 import com.livefyre.config.LfTest;
+import com.livefyre.config.UnitTest;
 
+@Category(UnitTest.class)
 public class LivefyreJwtUtilTest extends LfTest {
-
     @Test
     public void testJwtEncodeDecode() {
         String token = null;
-        JSONObject json = null;
+        JsonObject json = null;
         
         Map<String, Object> data = ImmutableMap.<String,Object>of(
             "domain", "test.fyre.com",
@@ -28,16 +30,16 @@ public class LivefyreJwtUtilTest extends LfTest {
         );
         
         try {
-            token = LivefyreJwtUtil.encodeLivefyreJwt(NETWORK_KEY, data);
+            token = LivefyreJwtUtil.serializeAndSign(NETWORK_KEY, data);
             json = LivefyreJwtUtil.decodeLivefyreJwt(NETWORK_KEY, token);
         } catch (InvalidKeyException e) {
             fail("shouldn't be an issue encoding/decoding");
         }
         assertNotNull(token);
         assertNotNull(json);
-        assertEquals("test.fyre.com", json.getString("domain"));
-        assertEquals("user", json.getString("user_id"));
-        assertEquals("superuser", json.getString("display_name"));
-        assertEquals(86400, json.getInt("expires"));
+        assertEquals("test.fyre.com", json.get("domain").getAsString());
+        assertEquals("user", json.get("user_id").getAsString());
+        assertEquals("superuser", json.get("display_name").getAsString());
+        assertEquals(86400, json.get("expires").getAsInt());
     }
 }
