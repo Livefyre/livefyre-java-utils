@@ -56,6 +56,8 @@ public class Collection implements LfCore {
         } else if (response.getStatus() == 409) {
             response = invokeCollectionApi("update");
             if (response.getStatus() == 200) {
+                data.setId(LivefyreUtil.stringToJson(response.getEntity(String.class))
+                        .getAsJsonObject("data").get("collectionId").getAsString());
                 return this;
             }
         }

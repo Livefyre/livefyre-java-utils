@@ -75,6 +75,11 @@ public class CollectionTest extends PojoTest<Collection> {
 //        JsonObject obj = coll1.getCollectionContent();
 //        assertEquals(name+"super", 
 //                obj.getAsJsonObject("collectionSettings").getAsJsonPrimitive("title").getAsString());
+        
+        String id = collection.getData().getId();
+        collection.getData().setId(null);
+        collection.createOrUpdate();
+        assertEquals(id, collection.getData().getId());
     }
 
     @Test
