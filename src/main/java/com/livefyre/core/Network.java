@@ -95,7 +95,8 @@ public class Network implements LfCore {
      */
     public String buildUserAuthToken(String userId, String displayName, Double expires) {
         Pattern pattern = Pattern.compile(ALPHA_DASH_UNDER_DOT_REGEX);
-        checkArgument(pattern.matcher(checkNotNull(userId)).find(), "userId is not alphanumeric.");
+        checkArgument(pattern.matcher(checkNotNull(userId)).find(),
+                "userId is not alphanumeric. Ensure the following regex pattern is respected %s", ALPHA_DASH_UNDER_DOT_REGEX);
         checkNotNull(displayName);
         checkNotNull(expires);
         
