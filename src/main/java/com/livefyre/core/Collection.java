@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
+import org.jose4j.base64url.Base64Url;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -17,7 +18,6 @@ import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.ApiException;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.model.CollectionData;
-import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.type.CollectionType;
 import com.livefyre.utils.LivefyreUtil;
 import com.livefyre.validator.ReflectiveValidator;
@@ -94,7 +94,7 @@ public class Collection implements LfCore {
      * @return JSONObject.
      */
     public JsonObject getCollectionContent() {
-        String b64articleId = Base64.encodeBase64URLSafeString(data.getArticleId().getBytes());
+        String b64articleId = Base64Url.encode(data.getArticleId().getBytes());
         if (b64articleId.length() % 4 != 0) {
             b64articleId = b64articleId + StringUtils.repeat("=", 4 - (b64articleId.length() % 4));
         }
