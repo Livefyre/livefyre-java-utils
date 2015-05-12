@@ -1,6 +1,5 @@
 package com.livefyre.core;
 
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -17,11 +16,9 @@ import com.livefyre.api.Domain;
 import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.ApiException;
 import com.livefyre.exceptions.LivefyreException;
-import com.livefyre.exceptions.TokenException;
 import com.livefyre.model.CollectionData;
 import com.livefyre.repackaged.apache.commons.Base64;
 import com.livefyre.type.CollectionType;
-import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.utils.LivefyreUtil;
 import com.livefyre.validator.ReflectiveValidator;
 import com.sun.jersey.api.client.Client;
@@ -69,16 +66,11 @@ public class Collection implements LfCore {
      * @return String.
      */
     public String buildCollectionMetaToken() {
-        try {
-            Map<String, Object> json = data.asMap();
-            boolean isNetworkIssued = isNetworkIssued();
-            json.put("iss", isNetworkIssued ?
-                    site.getNetwork().getUrn() : site.getUrn());
-            return LivefyreJwtUtil.serializeAndSign(isNetworkIssued ?
-                    site.getNetwork().getData().getKey() : site.getData().getKey(), json);
-        } catch (InvalidKeyException e) {
-            throw new TokenException(e);
-        }
+        Map<String, Object> claims = data.asMap();
+        boolean isNetworkIssued = isNetworkIssued();
+        claims.put("iss", isNetworkIssued ? site.getNetwork().getUrn() : site.getUrn());
+        return LivefyreUtil.serializeAndSign(claims, isNetworkIssued ?
+                site.getNetwork().getData().getKey() : site.getData().getKey());
     }
 
     /**

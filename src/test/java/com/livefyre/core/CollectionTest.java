@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.security.InvalidKeyException;
 import java.util.Calendar;
 import java.util.List;
 
@@ -23,8 +22,9 @@ import com.livefyre.config.UnitTest;
 import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.ApiException;
 import com.livefyre.exceptions.LivefyreException;
+import com.livefyre.exceptions.TokenException;
 import com.livefyre.type.CollectionType;
-import com.livefyre.utils.LivefyreJwtUtil;
+import com.livefyre.utils.LivefyreUtil;
 
 public class CollectionTest extends PojoTest<Collection> {
     private static final String CHECKSUM = "8bcfca7fb2187b1dcb627506deceee32";
@@ -105,11 +105,7 @@ public class CollectionTest extends PojoTest<Collection> {
         assertNotNull(token);
         
         JsonObject decodedToken = null;
-        try {
-            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
-        } catch (InvalidKeyException e) {
-            fail("shouldn't fail");
-        }
+        decodedToken = LivefyreUtil.decodeJwt(token, SITE_KEY);
         
         assertEquals(decodedToken.get("url").getAsString(), "http://www.livefyre.com");
         assertEquals(decodedToken.get("type").getAsString(), "reviews");
@@ -118,11 +114,7 @@ public class CollectionTest extends PojoTest<Collection> {
         collection.getData().setType(CollectionType.BLOG);
         token = collection.buildCollectionMetaToken();
         assertNotNull(token);
-        try {
-            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(SITE_KEY, token);
-        } catch (InvalidKeyException e) {
-            fail("shouldn't fail");
-        }
+        decodedToken = LivefyreUtil.decodeJwt(token, SITE_KEY);
         
         assertEquals(decodedToken.get("type").getAsString(), "liveblog");
         
@@ -134,15 +126,11 @@ public class CollectionTest extends PojoTest<Collection> {
         
         token = coll.buildCollectionMetaToken();
         try {
-            LivefyreJwtUtil.decodeLivefyreJwt(site.getData().getKey(), token);
+            LivefyreUtil.decodeJwt(token, site.getData().getKey());
             fail("Should be encoded with network key.");
-        } catch (InvalidKeyException e) {}
+        } catch (TokenException e) {}
         
-        try {
-            decodedToken = LivefyreJwtUtil.decodeLivefyreJwt(site.getNetwork().getData().getKey(), token);
-        } catch (InvalidKeyException e) {
-            fail("Should pass when decoded with network key.");
-        }
+        decodedToken = LivefyreUtil.decodeJwt(token, site.getNetwork().getData().getKey());
         assertEquals(decodedToken.get("iss").getAsString(), site.getNetwork().getUrn());
     }
     

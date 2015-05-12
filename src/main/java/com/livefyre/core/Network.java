@@ -3,7 +3,6 @@ package com.livefyre.core;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.security.InvalidKeyException;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.TimeZone;
@@ -13,9 +12,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.livefyre.api.Domain;
 import com.livefyre.exceptions.ApiException;
-import com.livefyre.exceptions.TokenException;
 import com.livefyre.model.NetworkData;
-import com.livefyre.utils.LivefyreJwtUtil;
+import com.livefyre.utils.LivefyreUtil;
 import com.livefyre.validator.ReflectiveValidator;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -96,24 +94,20 @@ public class Network implements LfCore {
     public String buildUserAuthToken(String userId, String displayName, Double expires) {
         Pattern pattern = Pattern.compile(ALPHA_DASH_UNDER_DOT_REGEX);
         checkArgument(pattern.matcher(checkNotNull(userId)).find(),
-                "userId is not alphanumeric. Ensure the following regex pattern is respected %s", ALPHA_DASH_UNDER_DOT_REGEX);
+                "userId is not valid. be sure the userId matches the following pattern: %s", ALPHA_DASH_UNDER_DOT_REGEX);
         checkNotNull(displayName);
         checkNotNull(expires);
-        
-        Map<String, Object> tokenData = ImmutableMap.<String, Object>of(
-            "domain", data.getName(),
-            "user_id", userId,
-            "display_name", displayName,
-            "expires", getExpiryInSeconds(expires)
-        );
-        
-        try {
-            return LivefyreJwtUtil.serializeAndSign(data.getKey(), tokenData);
-        } catch (InvalidKeyException e) {
-            throw new TokenException(e);
-        }
+
+        Map<String, Object> claims = ImmutableMap.<String, Object>of(
+                "domain", data.getName(),
+                "user_id", userId,
+                "display_name", displayName,
+                "expires", getExpiryInSeconds(expires)
+            );
+
+        return LivefyreUtil.serializeAndSign(claims, data.getKey());
     }
-    
+
     /**
      * Checks to see if the passed in system token is still valid.
      * 
@@ -122,14 +116,10 @@ public class Network implements LfCore {
     public boolean validateLivefyreToken(String lfToken) {
         checkNotNull(lfToken);
 
-        try {
-            JsonObject json = LivefyreJwtUtil.decodeLivefyreJwt(data.getKey(), lfToken);
-            return json.get("domain").getAsString().compareTo(data.getName()) == 0
-                && json.get("user_id").getAsString().compareTo("system") == 0
-                && json.get("expires").getAsLong() >= Calendar.getInstance().getTimeInMillis()/1000L;
-        } catch (InvalidKeyException e) {
-            throw new TokenException(e);
-        }
+        JsonObject json = LivefyreUtil.decodeJwt(lfToken, data.getKey());
+        return json.get("domain").getAsString().compareTo(data.getName()) == 0
+            && json.get("user_id").getAsString().compareTo("system") == 0
+            && json.get("expires").getAsLong() >= Calendar.getInstance().getTimeInMillis()/1000L;
     }
     
     /**

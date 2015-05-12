@@ -1,6 +1,5 @@
 package com.livefyre.api;
 
-import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,6 @@ import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.ApiException;
 import com.livefyre.type.SubscriptionType;
-import com.livefyre.utils.LivefyreJwtUtil;
 import com.livefyre.utils.LivefyreUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -340,12 +338,7 @@ public class PersonalizedStream {
     }
 
     private static String getUserFromToken(Network network, String userToken) {
-        JsonObject json;
-        try {
-            json = LivefyreJwtUtil.decodeLivefyreJwt(network.getData().getKey(), userToken);
-        } catch (InvalidKeyException e1) {
-            throw new IllegalArgumentException("The userToken provided does not belong to this network.");
-        }
+        JsonObject json = LivefyreUtil.decodeJwt(userToken, network.getData().getKey());
         return json.get("user_id").getAsString();
     }
 }
