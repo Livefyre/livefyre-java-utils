@@ -273,9 +273,7 @@ public class PersonalizedStream {
         return subscriptions;
     }
     
-    /**
-     * This call is used specifically by the TimelineCursor class.  
-     */
+    /* This call is used specifically by the TimelineCursor class. */
     public static JsonObject getTimelineStream(TimelineCursor cursor, boolean isNext) {
         WebResource r = streamBuilder(cursor.getCore())
                 .path(TIMELINE_PATH)

@@ -63,6 +63,7 @@ public class Collection implements LfCore {
 
     /**
      * Generates a collection meta token representing this collection.
+     * 
      * @return String.
      */
     public String buildCollectionMetaToken() {

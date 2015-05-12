@@ -55,9 +55,11 @@ public class Site implements LfCore {
      * 'type', 'extensions', 'tags', etc. Please refer to
      * http://answers.livefyre.com/developers/getting-started/tokens/collectionmeta/ for more info.
      *
-     * @param articleId the articleId for the collection
+     * @param type the type of the collection.
+     * @param articleId the articleId for the collection.
      * @param title title for the collection.
      * @param url url for the collection.
+     * 
      * @return Collection
      */
     public Collection buildCollection(CollectionType type, String title, String articleId, String url) {

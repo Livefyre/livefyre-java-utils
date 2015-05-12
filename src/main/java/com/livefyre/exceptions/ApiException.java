@@ -5,7 +5,8 @@ package com.livefyre.exceptions;
 public class ApiException extends LivefyreException {
     private static final long serialVersionUID = -4648519064214052434L;
 
-    /** Constructs a new Livefyre API exception with {@code null} as its
+    /**
+     * Constructs a new Livefyre API exception with {@code null} as its
      * detail message.  The cause is not initialized, and may subsequently be
      * initialized by a call to {@link #initCause}.
      */
@@ -13,7 +14,8 @@ public class ApiException extends LivefyreException {
         super();
     }
 
-    /** Constructs a new Livefyre API exception with the specified detail message.
+    /**
+     * Constructs a new Livefyre API exception with the specified detail message.
      * The cause is not initialized, and may subsequently be initialized by a
      * call to {@link #initCause}.
      *
@@ -41,7 +43,8 @@ public class ApiException extends LivefyreException {
         super(message, cause);
     }
 
-    /** Constructs a new Livefyre API exception with the specified cause and a
+    /**
+     * Constructs a new Livefyre API exception with the specified cause and a
      * detail message of <tt>(cause==null ? null : cause.toString())</tt>
      * (which typically contains the class and detail message of
      * <tt>cause</tt>).  This constructor is useful for Livefyre API exceptions
@@ -56,16 +59,12 @@ public class ApiException extends LivefyreException {
         super(cause);
     }
 
-    /** Constructs a new Livefyre API exception with the specified cause and a
-     * detail message of <tt>(cause==null ? null : cause.toString())</tt>
-     * (which typically contains the class and detail message of
-     * <tt>cause</tt>).  This constructor is useful for Livefyre API exceptions
-     * that are little more than wrappers for other throwables.
+    /**
+     * Constructs a new Livefyre API exception with the specified statusCode.
+     * This constructor is useful for Livefyre API exceptions that are little
+     * more than wrappers for other throwables.
      *
-     * @param  cause the cause (which is saved for later retrieval by the
-     *         {@link #getCause()} method).  (A <tt>null</tt> value is
-     *         permitted, and indicates that the cause is nonexistent or
-     *         unknown.)
+     * @param  statusCode statusCode for the API exception
      */
     public ApiException(int statusCode) {
         super(ApiStatus.fromCode(statusCode).toString());

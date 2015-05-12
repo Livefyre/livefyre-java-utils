@@ -58,7 +58,7 @@ public class Network implements LfCore {
     /**
      * Informs Livefyre to fetch user information based on the user sync url. Makes an external API call.
      * 
-     * @param userId 
+     * @param userId the userId for the user to sync
      * @return true if the sync was successful.
      */
     public Network syncUser(String userId) {
@@ -77,6 +77,8 @@ public class Network implements LfCore {
     
     /**
      * Generates a user auth system token.
+     * 
+     * @return a default system token
      */
     public String buildLivefyreToken() {
         return buildUserAuthToken(DEFAULT_USER, DEFAULT_USER, DEFAULT_EXPIRES);
@@ -110,6 +112,8 @@ public class Network implements LfCore {
 
     /**
      * Checks to see if the passed in system token is still valid.
+     * 
+     * @param lfToken the system token to validate
      * 
      * @return true if the token is still valid.
      */

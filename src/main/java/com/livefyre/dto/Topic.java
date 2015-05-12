@@ -21,9 +21,7 @@ public class Topic {
         this.modifiedAt = modifiedAt;
     }
     
-    /**
-     * Use this method to generate Topic objects. Otherwise id's (urns) will not be formed properly.
-     */
+    /* Use this method to generate Topic objects. Otherwise id's (urns) will not be formed properly. */
     public static Topic create(LfCore core, String id, String label) {
         return new Topic(generateUrn(core, id), label, null, null);
     }
