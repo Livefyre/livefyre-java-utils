@@ -1,19 +1,9 @@
 test:
   override:
-  # ver 1.7
-  - sudo update-alternatives --set java /usr/lib/jvm/jdk1.7.0/bin/java
-  - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.7.0/bin/javac
   - mvn clean
   - mvn dependency:resolve
   - mvn test -Dtest=UnitTestSuite
   - mvn test -Dtest=IntegrationTestSuite
-  #ver 1.8
-  - sudo update-alternatives --set java /usr/lib/jvm/jdk1.8.0/bin/java
-  - sudo update-alternatives --set javac /usr/lib/jvm/jdk1.8.0/bin/javac
-  - mvn clean -Djava.version=1.8
-  - mvn dependency:resolve -Djava.version=1.8
-  - mvn test -Dtest=UnitTestSuite -Djava.version=1.8
-  - mvn test -Dtest=IntegrationTestSuite -Djava.version=1.8
   post:
   - mvn clean cobertura:cobertura coveralls:cobertura
 
