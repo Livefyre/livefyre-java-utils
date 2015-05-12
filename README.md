@@ -5,7 +5,7 @@
 
 Livefyre's official library for common server-side tasks necessary for getting Livefyre apps (comments, reviews, etc.) working on your website.
 
-Works with Java 1.5 and later.
+Works with Java 1.7 and later.
 
 ## Installation
 

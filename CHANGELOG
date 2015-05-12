@@ -1,7 +1,8 @@
 === 2.0.2 2015-05-12
 
 * Removed custom Livefyre JWT handler in favor of the approved JOSE4J version.
-* Updated mvn POM to be more lax on versions that it takes for dependencies. 
+* Updated mvn POM to be more lax on versions that it takes for dependencies.
+* Updated Java req. to 1.7+ due to JOSE4J.
 
 === 2.0.1 2014-12-01
 
