@@ -59,7 +59,7 @@ public class CollectionData {
     
     public String getId() {
         if (id == null) {
-            throw new LivefyreException("Call createOrUpdate() on the collection to set the id.");
+            throw new LivefyreException("Id not set. Call createOrUpdate() on the collection to set the id, or manually set it by calling setId(id) on this object.");
         }
         return id;
     }
