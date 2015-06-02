@@ -1,6 +1,6 @@
 package com.livefyre.validator;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.livefyre.model.SiteData;
 

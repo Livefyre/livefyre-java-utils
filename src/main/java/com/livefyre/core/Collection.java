@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jose4j.base64url.Base64Url;
 
 import com.google.common.collect.ImmutableMap;

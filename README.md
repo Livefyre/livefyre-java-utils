@@ -14,7 +14,7 @@ Add this dependency to your project's POM:
     <dependency>
       <groupId>com.livefyre</groupId>
       <artifactId>utils</artifactId>
-      <version>2.0.2</version>
+      <version>2.0.3</version>
     </dependency>
 
 ## Documentation
