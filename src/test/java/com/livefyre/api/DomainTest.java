@@ -39,7 +39,7 @@ public class DomainTest extends LfTest {
         domain = Domain.quill(collection);
         assertEquals(quillDomainSsl, domain);
         
-        String quillDomain = String.format("http://quill.%s.fyre.co", network.getNetworkName());
+        String quillDomain = String.format("https://quill.%s.fyre.co", network.getNetworkName());
         network.setSsl(false);
         domain = Domain.quill(network);
         assertEquals(quillDomain, domain);

@@ -34,8 +34,8 @@ public class PersonalizedStreamTest extends LfTest {
     
     @Before
     public void setup() {
-        network = Livefyre.getNetwork("client-solutions.fyre.co", "hnoVNQcTknTarpqj51WXQ6fXyAo=");
-        site = network.getSite("305768", "TCjsOlCTsmvXngV9IGdygTEG+4k=");
+        network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        site = network.getSite(SITE_ID, SITE_KEY);
         
         this.topicMap = ImmutableMap.of("1", "UNO", "2", "DOS", "3", "TRES");
     }
