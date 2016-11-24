@@ -24,7 +24,8 @@ import com.livefyre.exceptions.TokenException;
 public class LivefyreUtil {
 
     private LivefyreUtil() { }
-    
+
+    /* JSON */
     public static JsonObject stringToJson(String json) {
         Gson gson = new Gson();
         return gson.fromJson(json, JsonObject.class);
@@ -35,6 +36,7 @@ public class LivefyreUtil {
         return gson.toJson(map);
     }
 
+    /* Liveyfre Objects */
     public static Network getNetworkFromCore(LfCore core) {
         if (core.getClass().equals(Network.class)) {
             return (Network) core;
@@ -45,7 +47,13 @@ public class LivefyreUtil {
         }
     }
 
+    /* Reused Methods - Mostly string validation and checks */
     public static boolean isValidFullUrl(String url) {
+
+        //lfdj accepts this now TODO add ref: LF- Ticket
+        if (url.equals("localhost")){
+            return true;
+        }
         try {
             new URL(url);
         } catch (MalformedURLException e) {
@@ -54,6 +62,15 @@ public class LivefyreUtil {
         return true;
     }
 
+    public static boolean isNotBlank(String string) {
+        return string == null || string.trim().length() == 0;
+    }
+
+    public static String repeat(String s, int count) {
+        return count > 0 ? s + repeat(s, --count) : "";
+    }
+
+    /* JWT */
     public static String serializeAndSign(Map<String, Object> claims, String key) {
         JsonWebSignature jws = new JsonWebSignature();
         jws.setPayload(new Gson().toJson(claims));

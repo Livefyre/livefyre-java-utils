@@ -1,22 +1,20 @@
 package com.livefyre.validator;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.livefyre.model.CollectionData;
 import com.livefyre.utils.LivefyreUtil;
 
 public class CollectionValidator implements Validator<CollectionData> {
     public String validate(CollectionData data) {
         StringBuilder reason = new StringBuilder();
-        if (StringUtils.isBlank(data.getArticleId())) {
+        if (!LivefyreUtil.isNotBlank(data.getArticleId())) {
             reason.append("\n Article id is null or blank.");
         }
-        if (StringUtils.isBlank(data.getTitle())) {
+        if (!LivefyreUtil.isNotBlank(data.getTitle())) {
             reason.append("\n Title is null or blank.");
         } else if (data.getTitle().length() > 255) {
             reason.append("\n Title is longer than 255 characters.");
         }
-        if (StringUtils.isBlank(data.getUrl())) {
+        if (!LivefyreUtil.isNotBlank(data.getUrl())) {
             reason.append("\n URL is null or blank.");
         } else if (!LivefyreUtil.isValidFullUrl(data.getUrl())) {
             reason.append("\n URL is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");

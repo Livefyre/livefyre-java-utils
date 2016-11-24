@@ -1,13 +1,12 @@
 package com.livefyre.validator;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.livefyre.model.CursorData;
+import com.livefyre.utils.LivefyreUtil;
 
 public class CursorValidator implements Validator<CursorData> {
     public String validate(CursorData data) {
         StringBuilder reason = new StringBuilder();
-        if (StringUtils.isBlank(data.getResource())) {
+        if (!LivefyreUtil.isNotBlank(data.getResource())) {
             reason.append("\n Resource is null or blank.");
         }
         
@@ -15,7 +14,7 @@ public class CursorValidator implements Validator<CursorData> {
             reason.append("\n Limit is null.");
         }
         
-        if (StringUtils.isBlank(data.getCursorTime())) {
+        if (!LivefyreUtil.isNotBlank(data.getCursorTime())) {
             reason.append("\n Cursor time is null or blank");
         }
         

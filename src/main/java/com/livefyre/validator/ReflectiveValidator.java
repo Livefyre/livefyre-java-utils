@@ -2,8 +2,7 @@ package com.livefyre.validator;
 
 import java.lang.reflect.Method;
 
-import org.apache.commons.lang3.StringUtils;
-
+import com.livefyre.utils.LivefyreUtil;
 import com.livefyre.exceptions.LivefyreException;
 
 public class ReflectiveValidator {
@@ -23,7 +22,7 @@ public class ReflectiveValidator {
             throw new LivefyreException("Something went horribly wrong. Contact us at tools@livefyre.com and attach: ", e);
         }
         
-        if (StringUtils.isNotBlank(message)) {
+        if (LivefyreUtil.isNotBlank(message)) {
             throw new IllegalArgumentException(message);
         }
         

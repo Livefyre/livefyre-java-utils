@@ -3,12 +3,11 @@ package com.livefyre.model;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.Maps;
 import com.livefyre.dto.Topic;
 import com.livefyre.exceptions.LivefyreException;
 import com.livefyre.type.CollectionType;
+import com.livefyre.utils.LivefyreUtil;
 
 public class CollectionData {
     private CollectionType type;
@@ -36,13 +35,13 @@ public class CollectionData {
         attr.put("type", type.toString());
         attr.put("url", url);
         
-        if (StringUtils.isNotBlank(tags)) {
+        if (LivefyreUtil.isNotBlank(tags)) {
             attr.put("tags", tags);
         }
         if (topics != null && topics.size() > 0) {
             attr.put("topics", topics);
         }
-        if (StringUtils.isNotBlank(extensions)) {
+        if (LivefyreUtil.isNotBlank(extensions)) {
             attr.put("extensions", extensions);
         }
         return attr;

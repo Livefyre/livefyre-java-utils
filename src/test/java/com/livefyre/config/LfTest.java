@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Properties;
 
 public class LfTest {
-    protected String NETWORK_NAME = "<NETWORK-NAME>";
-    protected String NETWORK_KEY = "<NETWORK-KEY>";
-    protected String SITE_ID = "<SITE-ID>";
-    protected String SITE_KEY = "<SITE-KEY>";
+    protected String NETWORK_NAME = "client-solutions.fyre.co";
+    protected String NETWORK_KEY = "hnoVNQcTknTarpqj51WXQ6fXyAo=";
+    protected String SITE_ID = "305768";
+    protected String SITE_KEY = "TCjsOlCTsmvXngV9IGdygTEG+4k=";
     protected String USER_ID = "<USER-ID>";
     protected String ARTICLE_ID = "<ARTICLE-ID>";
     protected final static String TITLE = "JavaTest";

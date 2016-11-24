@@ -28,11 +28,14 @@ import com.livefyre.utils.LivefyreUtil;
 
 public class CollectionTest extends PojoTest<Collection> {
     private static final String CHECKSUM = "8bcfca7fb2187b1dcb627506deceee32";
+    private Network network;
     private Site site;
+
     
     @Before
     public void setup() {
-        site = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY).getSite(SITE_ID, SITE_KEY);
+        network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
+        site = network.getSite(SITE_ID, SITE_KEY);
     }
     
     @Test
@@ -65,12 +68,12 @@ public class CollectionTest extends PojoTest<Collection> {
     public void testCreateUpdateCollection() {
         String name = "JavaCreateCollection" + Calendar.getInstance().getTimeInMillis();
 
-        Collection collection = site.buildCommentsCollection(name, name, URL).createOrUpdate();
+        Collection collection = site.buildCommentsCollection(name, name, URL).createOrUpdateAsSystemUser(network);
         String otherId = collection.getCollectionContent().getAsJsonObject("collectionSettings").get("collectionId").getAsString();
         assertEquals(otherId, collection.getData().getId());
 
         collection.getData().setTitle(name+"super");
-        Collection coll1 = collection.createOrUpdate();
+        Collection coll1 = collection.createOrUpdateAsSystemUser(network);
         /* works but takes some time on the server side to update... */
 //        JsonObject obj = coll1.getCollectionContent();
 //        assertEquals(name+"super", 
@@ -78,7 +81,7 @@ public class CollectionTest extends PojoTest<Collection> {
         
         String id = collection.getData().getId();
         collection.getData().setId(null);
-        collection.createOrUpdate();
+        collection.createOrUpdateAsSystemUser(network);
         assertEquals(id, collection.getData().getId());
     }
 

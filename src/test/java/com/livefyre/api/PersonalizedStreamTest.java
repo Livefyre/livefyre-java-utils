@@ -34,8 +34,8 @@ public class PersonalizedStreamTest extends LfTest {
     
     @Before
     public void setup() {
-        network = Livefyre.getNetwork(NETWORK_NAME, NETWORK_KEY);
-        site = network.getSite(SITE_ID, SITE_KEY);
+        network = Livefyre.getNetwork("client-solutions.fyre.co", "hnoVNQcTknTarpqj51WXQ6fXyAo=");
+        site = network.getSite("305768", "TCjsOlCTsmvXngV9IGdygTEG+4k=");
         
         this.topicMap = ImmutableMap.of("1", "UNO", "2", "DOS", "3", "TRES");
     }
@@ -89,7 +89,7 @@ public class PersonalizedStreamTest extends LfTest {
     public void testCollectionTopicApi_network() {
         List<Topic> topics = PersonalizedStream.createOrUpdateTopics(network, topicMap);
         String collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
-        Collection collection = site.buildCommentsCollection(collectionName, collectionName, URL).createOrUpdate();
+        Collection collection = site.buildCommentsCollection(collectionName, collectionName, URL).createOrUpdateAsSystemUser(network);
         
         List<String> topicIds = PersonalizedStream.getCollectionTopics(collection);
         assertTrue(topicIds.isEmpty());
@@ -115,7 +115,7 @@ public class PersonalizedStreamTest extends LfTest {
         collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
         collection = site.buildCommentsCollection(collectionName, collectionName, URL);
         collection.getData().setTopics(topics);
-        collection.createOrUpdate();
+        collection.createOrUpdateAsSystemUser(network);
 
         PersonalizedStream.deleteTopics(network, topics);
     }
@@ -124,7 +124,7 @@ public class PersonalizedStreamTest extends LfTest {
     public void testCollectionTopicApi_site() {
         List<Topic> topics = PersonalizedStream.createOrUpdateTopics(site, topicMap);
         String collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
-        Collection collection = site.buildCommentsCollection(collectionName, collectionName, URL).createOrUpdate();
+        Collection collection = site.buildCommentsCollection(collectionName, collectionName, URL).createOrUpdateAsSystemUser(network);
         
         int added = PersonalizedStream.addCollectionTopics(collection, topics);
         assertTrue(added == topics.size());
@@ -144,7 +144,7 @@ public class PersonalizedStreamTest extends LfTest {
         collectionName = "JAVA PSSTREAM TEST " + Calendar.getInstance().getTimeInMillis();
         collection = site.buildCommentsCollection(collectionName, collectionName, URL);
         collection.getData().setTopics(topics);
-        collection.createOrUpdate();
+        collection.createOrUpdateAsSystemUser(network);
         
         PersonalizedStream.deleteTopics(site, topics);
     }

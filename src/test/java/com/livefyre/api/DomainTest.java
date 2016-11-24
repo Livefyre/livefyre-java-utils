@@ -1,11 +1,14 @@
 package com.livefyre.api;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import junit.framework.AssertionFailedError;
 
+import com.google.gson.JsonObject;
 import com.livefyre.Livefyre;
 import com.livefyre.config.LfTest;
 import com.livefyre.config.UnitTest;
@@ -65,5 +68,14 @@ public class DomainTest extends LfTest {
         assertEquals(bootstrapDomain, domain);
         domain = Domain.bootstrap(collection);
         assertEquals(bootstrapDomain, domain);
+    }
+
+    @Test
+    @Category(UnitTest.class)
+    public void testGettingCollectionData(){
+        collection = collection.createOrUpdateAsSystemUser(network);
+        JsonObject json = collection.getCollectionContent();
+        assertNotNull(json);
+
     }
 }
