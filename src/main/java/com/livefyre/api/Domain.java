@@ -8,12 +8,12 @@ public class Domain {
     public static String quill(LfCore core) {
         Network network = LivefyreUtil.getNetworkFromCore(core);
         return network.isSsl() ? String.format("https://%s.quill.fyre.co",
-                network.getNetworkName()) : String.format("http://quill.%s.fyre.co", network.getNetworkName());
+                network.getNetworkName()) : String.format("https://quill.%s.fyre.co", network.getNetworkName());
     }
     
     public static String bootstrap(LfCore core) {
         Network network = LivefyreUtil.getNetworkFromCore(core);
         return network.isSsl() ? String.format("https://%s.bootstrap.fyre.co",
-                network.getNetworkName()) : String.format("http://bootstrap.%s.fyre.co", network.getNetworkName());
+                network.getNetworkName()) : String.format("https://bootstrap.%s.fyre.co", network.getNetworkName());
     }
 }

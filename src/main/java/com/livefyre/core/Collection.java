@@ -2,14 +2,15 @@ package com.livefyre.core;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
-import org.apache.commons.lang3.StringUtils;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.jose4j.base64url.Base64Url;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -37,21 +38,37 @@ public class Collection implements LfCore {
         CollectionData data = new CollectionData(type, title, articleId, url);
         return new Collection(site, ReflectiveValidator.validate(data));
     }
+
+    /**
+     * Given that no LFToken is provided, one will be generated for the System user in order to perform this action.
+     *
+     * Informs Livefyre to either create or update a collection based on the attributes of this Collection.
+     * Makes an external API call. Returns this.
+     *
+     * @return Collection
+     */
+    public Collection createOrUpdateAsSystemUser(Network network)
+    {
+        //This case assumes we are to generate a system token
+        String lftoken = network.buildLivefyreToken();
+
+        return createOrUpdate(lftoken);
+    }
     
     /**
      * Informs Livefyre to either create or update a collection based on the attributes of this Collection.
-     * Makes an external API call. Returns this.
+     * Makes an external API call. Returns this. Note: This requires lftoken.
      * 
      * @return Collection
      */
-    public Collection createOrUpdate() {
-        ClientResponse response = invokeCollectionApi("create");
+    public Collection createOrUpdate(String lftoken) {
+        ClientResponse response = invokeCollectionApi("create", lftoken);
         if (response.getStatus() == 200) {
             data.setId(LivefyreUtil.stringToJson(response.getEntity(String.class))
                     .getAsJsonObject("data").get("collectionId").getAsString());
             return this;
         } else if (response.getStatus() == 409) {
-            response = invokeCollectionApi("update");
+            response = invokeCollectionApi("update", lftoken);
             if (response.getStatus() == 200) {
                 data.setId(LivefyreUtil.stringToJson(response.getEntity(String.class))
                         .getAsJsonObject("data").get("collectionId").getAsString());
@@ -97,7 +114,7 @@ public class Collection implements LfCore {
     public JsonObject getCollectionContent() {
         String b64articleId = Base64Url.encode(data.getArticleId().getBytes());
         if (b64articleId.length() % 4 != 0) {
-            b64articleId = b64articleId + StringUtils.repeat("=", 4 - (b64articleId.length() % 4));
+            b64articleId = b64articleId + LivefyreUtil.repeat("=", 4 - (b64articleId.length() % 4));
         }
         String url = String.format("%s/bs3/%s.fyre.co/%s/%s/init", Domain.bootstrap(this), site.getNetwork().getNetworkName(), site.getData().getId(), b64articleId);
 
@@ -146,9 +163,15 @@ public class Collection implements LfCore {
         this.data = data;
     }
 
-    private ClientResponse invokeCollectionApi(String method) {
+    private ClientResponse invokeCollectionApi(String method, String lftoken) {
         String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), site.getData().getId(), method);
-        ClientResponse response = Client.create().resource(uri).queryParam("sync", "1")
+
+        //construct query params
+        MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
+        queryParams.add("sync", "1");
+        queryParams.add("lftoken", lftoken);
+
+        ClientResponse response = Client.create().resource(uri).queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON)
                 .post(ClientResponse.class, getPayload());
         return response;
@@ -156,7 +179,6 @@ public class Collection implements LfCore {
     
     private String getPayload() {
         Map<String, Object> payload = ImmutableMap.<String, Object>of(
-            "articleId", data.getArticleId(),
             "checksum", buildChecksum(),
             "collectionMeta", buildCollectionMetaToken());
         return LivefyreUtil.mapToJsonString(payload);

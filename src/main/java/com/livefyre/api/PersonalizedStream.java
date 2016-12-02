@@ -5,8 +5,6 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -86,7 +84,7 @@ public class PersonalizedStream {
         for (String k : topicMap.keySet()) {
             String label = topicMap.get(k);
             
-            if (StringUtils.isEmpty(label) || label.length() > 128) {
+            if (LivefyreUtil.isBlank(label) || label.length() > 128) {
                 throw new IllegalArgumentException("Topic label is of incorrect length or empty.");
             }
             
