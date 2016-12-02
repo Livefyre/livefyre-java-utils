@@ -22,7 +22,7 @@ public class ReflectiveValidator {
             throw new LivefyreException("Something went horribly wrong. Contact us at tools@livefyre.com and attach: ", e);
         }
         
-        if (LivefyreUtil.isNotBlank(message)) {
+        if (!LivefyreUtil.isBlank(message)) {
             throw new IllegalArgumentException(message);
         }
         

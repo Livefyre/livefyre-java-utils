@@ -6,10 +6,10 @@ import com.livefyre.model.SiteData;
 public class SiteValidator implements Validator<SiteData> {
     public String validate(SiteData data) {
         StringBuilder reason = new StringBuilder();
-        if (!LivefyreUtil.isNotBlank(data.getId())) {
+        if (LivefyreUtil.isBlank(data.getId())) {
             reason.append("\n ID is null or blank.");
         }
-        if (!LivefyreUtil.isNotBlank(data.getKey())) {
+        if (LivefyreUtil.isBlank(data.getKey())) {
             reason.append("\n Key is null or blank.");
         }
 

@@ -84,7 +84,7 @@ public class PersonalizedStream {
         for (String k : topicMap.keySet()) {
             String label = topicMap.get(k);
             
-            if (!LivefyreUtil.isNotBlank(label) || label.length() > 128) {
+            if (LivefyreUtil.isBlank(label) || label.length() > 128) {
                 throw new IllegalArgumentException("Topic label is of incorrect length or empty.");
             }
             

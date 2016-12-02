@@ -35,13 +35,13 @@ public class CollectionData {
         attr.put("type", type.toString());
         attr.put("url", url);
         
-        if (LivefyreUtil.isNotBlank(tags)) {
+        if (!LivefyreUtil.isBlank(tags)) {
             attr.put("tags", tags);
         }
         if (topics != null && topics.size() > 0) {
             attr.put("topics", topics);
         }
-        if (LivefyreUtil.isNotBlank(extensions)) {
+        if (!LivefyreUtil.isBlank(extensions)) {
             attr.put("extensions", extensions);
         }
         return attr;

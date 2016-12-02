@@ -62,7 +62,7 @@ public class LivefyreUtil {
         return true;
     }
 
-    public static boolean isNotBlank(String string) {
+    public static boolean isBlank(String string) {
         return string == null || string.trim().length() == 0;
     }
 

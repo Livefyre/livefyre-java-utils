@@ -6,15 +6,15 @@ import com.livefyre.utils.LivefyreUtil;
 public class CollectionValidator implements Validator<CollectionData> {
     public String validate(CollectionData data) {
         StringBuilder reason = new StringBuilder();
-        if (!LivefyreUtil.isNotBlank(data.getArticleId())) {
+        if (LivefyreUtil.isBlank(data.getArticleId())) {
             reason.append("\n Article id is null or blank.");
         }
-        if (!LivefyreUtil.isNotBlank(data.getTitle())) {
+        if (LivefyreUtil.isBlank(data.getTitle())) {
             reason.append("\n Title is null or blank.");
         } else if (data.getTitle().length() > 255) {
             reason.append("\n Title is longer than 255 characters.");
         }
-        if (!LivefyreUtil.isNotBlank(data.getUrl())) {
+        if (LivefyreUtil.isBlank(data.getUrl())) {
             reason.append("\n URL is null or blank.");
         } else if (!LivefyreUtil.isValidFullUrl(data.getUrl())) {
             reason.append("\n URL is not a valid url. see http://www.ietf.org/rfc/rfc2396.txt");
