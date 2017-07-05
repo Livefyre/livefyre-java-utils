@@ -15,8 +15,9 @@ import com.livefyre.exceptions.ApiException;
 import com.livefyre.model.NetworkData;
 import com.livefyre.utils.LivefyreUtil;
 import com.livefyre.validator.ReflectiveValidator;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 
 public class Network implements LfCore {
     private static final double DEFAULT_EXPIRES = 86400.0;
@@ -44,12 +45,12 @@ public class Network implements LfCore {
      */
     public void setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
-        
-        ClientResponse response = Client.create()
-                .resource(String.format("%s/", Domain.quill(this)))
+        Response response = ClientBuilder.newClient().target(String.format("%s/", Domain.quill(this)))
                 .queryParam("actor_token", buildLivefyreToken())
                 .queryParam("pull_profile_url", urlTemplate)
-                .post(ClientResponse.class);
+                .request().post(Entity.text(""));
+
+        
         if (response.getStatus() >= 400) {
             throw new ApiException(response.getStatus());
         }
@@ -65,10 +66,9 @@ public class Network implements LfCore {
         checkNotNull(userId);
         
         String url = String.format("%s/api/v3_0/user/%s/refresh", Domain.quill(this), userId);
-        ClientResponse response = Client.create()
-                .resource(url)
+        Response response = ClientBuilder.newClient().target(url)
                 .queryParam("lftoken", buildLivefyreToken())
-                .post(ClientResponse.class);
+                .request().post(Entity.text(""));
         if (response.getStatus() >= 400) {
             throw new ApiException(response.getStatus());
         }

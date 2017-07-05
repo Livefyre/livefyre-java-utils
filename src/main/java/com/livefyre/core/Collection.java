@@ -21,8 +21,9 @@ import com.livefyre.model.CollectionData;
 import com.livefyre.type.CollectionType;
 import com.livefyre.utils.LivefyreUtil;
 import com.livefyre.validator.ReflectiveValidator;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 
 public class Collection implements LfCore {
     private Site site;
@@ -45,15 +46,15 @@ public class Collection implements LfCore {
      * @return Collection
      */
     public Collection createOrUpdate() {
-        ClientResponse response = invokeCollectionApi("create");
+        Response response = invokeCollectionApi("create");
         if (response.getStatus() == 200) {
-            data.setId(LivefyreUtil.stringToJson(response.getEntity(String.class))
+            data.setId(LivefyreUtil.stringToJson(response.readEntity(String.class))
                     .getAsJsonObject("data").get("collectionId").getAsString());
             return this;
         } else if (response.getStatus() == 409) {
             response = invokeCollectionApi("update");
             if (response.getStatus() == 200) {
-                data.setId(LivefyreUtil.stringToJson(response.getEntity(String.class))
+                data.setId(LivefyreUtil.stringToJson(response.readEntity(String.class))
                         .getAsJsonObject("data").get("collectionId").getAsString());
                 return this;
             }
@@ -101,15 +102,15 @@ public class Collection implements LfCore {
         }
         String url = String.format("%s/bs3/%s.fyre.co/%s/%s/init", Domain.bootstrap(this), site.getNetwork().getNetworkName(), site.getData().getId(), b64articleId);
 
-        ClientResponse response = Client.create().resource(url).accept(MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
+        Response response = ClientBuilder.newClient().target(url).request().accept(MediaType.APPLICATION_JSON).get();
         if (response.getStatus() >= 400) {
             throw new ApiException(response.getStatus());
         }
-        Gson gson = new Gson();
-        return gson.fromJson(response.getEntity(String.class), JsonObject.class);
+        Gson gson = new Gson();        
+        return gson.fromJson(response.readEntity(String.class), JsonObject.class);
     }
 
+    @Override
     public String getUrn() {
         return String.format("%s:collection=%s", site.getUrn(), data.getId());
     }
@@ -146,11 +147,14 @@ public class Collection implements LfCore {
         this.data = data;
     }
 
-    private ClientResponse invokeCollectionApi(String method) {
+    private Response invokeCollectionApi(String method) {
         String uri = String.format("%s/api/v3.0/site/%s/collection/%s/", Domain.quill(this), site.getData().getId(), method);
-        ClientResponse response = Client.create().resource(uri).queryParam("sync", "1")
-                .accept(MediaType.APPLICATION_JSON).type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, getPayload());
+        Response response = ClientBuilder.newClient()
+                .target(uri)
+                .queryParam("sync", "1")
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.json(getPayload()));
         return response;
     }
     
