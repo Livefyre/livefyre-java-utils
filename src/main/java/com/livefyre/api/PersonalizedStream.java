@@ -69,8 +69,7 @@ public class PersonalizedStream {
                 .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
                 .queryParam("limit", limit == null ? "100" : limit.toString())
                 .queryParam("offset", offset == null ? "0" : offset.toString())
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .get();
         JsonObject content = evaluateResponse(response);
         JsonArray topicsData = content.getAsJsonObject("data").getAsJsonArray("topics");
@@ -99,8 +98,7 @@ public class PersonalizedStream {
         
         Response response = builder(core)
                 .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(form));
         evaluateResponse(response);
         
@@ -114,8 +112,7 @@ public class PersonalizedStream {
         Response response = builder(core)
                 .path(String.format(MULTIPLE_TOPIC_PATH, core.getUrn()))
                 .queryParam("_method", PATCH_METHOD)
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(form));
         JsonObject content = evaluateResponse(response);
         JsonObject data = content.getAsJsonObject("data");
@@ -127,8 +124,7 @@ public class PersonalizedStream {
     public static List<String> getCollectionTopics(Collection collection) {
         Response response = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .get();
         JsonObject content = evaluateResponse(response);
         JsonArray topicData = content.getAsJsonObject("data").getAsJsonArray("topicIds");
@@ -147,8 +143,7 @@ public class PersonalizedStream {
         
         Response response = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(form));
         JsonObject content = evaluateResponse(response);
         JsonObject data = content.getAsJsonObject("data");
@@ -161,8 +156,7 @@ public class PersonalizedStream {
 
         Response response = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .put(Entity.json(form));
         JsonObject content = evaluateResponse(response);
         JsonObject data = content.getAsJsonObject("data");
@@ -179,8 +173,7 @@ public class PersonalizedStream {
         Response response = builder(collection)
                 .path(String.format(MULTIPLE_TOPIC_PATH, collection.getUrn()))
                 .queryParam("_method", PATCH_METHOD)
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(form));
         JsonObject content = evaluateResponse(response);
         JsonObject data = content.getAsJsonObject("data");
@@ -192,8 +185,7 @@ public class PersonalizedStream {
     public static List<Subscription> getSubscriptions(Network network, String userId) {
         Response response = builder(network)
                 .path(String.format(USER_SUBSCRIPTION_PATH, network.getUrnForUser(userId)))
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .get();
         JsonObject content = evaluateResponse(response);
         JsonArray subscriptionData = content.getAsJsonObject("data").getAsJsonArray("subscriptions");
@@ -214,8 +206,7 @@ public class PersonalizedStream {
 
         Response response = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(form));
         JsonObject content = evaluateResponse(response);
         JsonObject data = content.getAsJsonObject("data");
@@ -230,8 +221,7 @@ public class PersonalizedStream {
 
         Response response = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .put(Entity.json(form));
         JsonObject content = evaluateResponse(response);
         JsonObject data = content.getAsJsonObject("data");
@@ -250,8 +240,7 @@ public class PersonalizedStream {
         Response response = builder(network, userToken)
                 .path(String.format(USER_SUBSCRIPTION_PATH, userUrn))
                 .queryParam("_method", PATCH_METHOD)
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(form));
         JsonObject content = evaluateResponse(response);
         JsonObject data = content.getAsJsonObject("data");
@@ -264,8 +253,7 @@ public class PersonalizedStream {
                 .path(String.format(TOPIC_SUBSCRIPTION_PATH, topic.getId()))
                 .queryParam("limit", limit == null ? "100" : limit.toString())
                 .queryParam("offset", offset == null ? "0" : offset.toString())
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .get();
         JsonObject content = evaluateResponse(response);
         JsonArray data = content.getAsJsonObject("data").getAsJsonArray("subscriptions");

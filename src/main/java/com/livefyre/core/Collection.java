@@ -152,8 +152,7 @@ public class Collection implements LfCore {
         Response response = ClientBuilder.newClient()
                 .target(uri)
                 .queryParam("sync", "1")
-                .request()
-                .accept(MediaType.APPLICATION_JSON)
+                .request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(getPayload()));
         return response;
     }
