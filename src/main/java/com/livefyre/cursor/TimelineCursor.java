@@ -13,6 +13,7 @@ import com.livefyre.validator.ReflectiveValidator;
  * When created via a Network object, it will keep track of timelines at the network level, and
  * likewise at the site level if created via a Site object.
  */
+@Deprecated
 public class TimelineCursor {
     private LfCore core;
     private CursorData data;

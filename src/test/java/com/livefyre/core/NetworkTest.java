@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.experimental.categories.Category;
 
 import com.livefyre.Livefyre;
@@ -17,6 +18,7 @@ import com.livefyre.exceptions.TokenException;
 public class NetworkTest extends PojoTest<Network> {
     private static final String USER_SYNC_URL = "<USER-SYNC-URL {id}>";
     
+    @Ignore
     @Test
     @Category(IntegrationTest.class)
     public void testSetUserSync() {

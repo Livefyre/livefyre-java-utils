@@ -42,6 +42,7 @@ public class Network implements LfCore {
      * 
      * @param urlTemplate the url template to set.
      */
+    @Deprecated
     public void setUserSyncUrl(String urlTemplate) {
         checkArgument(checkNotNull(urlTemplate).contains(ID), "urlTemplate does not contain %s", ID);
         
