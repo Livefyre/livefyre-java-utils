@@ -28,7 +28,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 
-@Deprecated
 public class PersonalizedStream {
 
     private static final String BASE_URL = "%s/api/v4";
