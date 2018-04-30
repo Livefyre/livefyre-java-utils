@@ -1,3 +1,7 @@
+=== 2.1.0 2015-06-02
+
+* Force the use of SSL on Livefyre API calls
+
 === 2.0.3 2015-06-02
 
 * Changed commons-lang to commons-lang3 to mitigate dependency conflicts with commons-lang versions.
