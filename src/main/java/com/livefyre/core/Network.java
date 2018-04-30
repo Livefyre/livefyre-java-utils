@@ -153,6 +153,7 @@ public class Network implements LfCore {
         return ssl;
     }
 
+    @Deprecated
     public void setSsl(Boolean ssl) {
         this.ssl = ssl;
     }

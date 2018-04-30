@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import java.util.Calendar;
 
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.experimental.categories.Category;
 
 import com.google.gson.JsonObject;
@@ -16,6 +17,7 @@ import com.livefyre.config.UnitTest;
 import com.livefyre.core.Network;
 import com.livefyre.factory.CursorFactory;
 
+@Ignore
 public class TimelineCursorTest extends PojoTest<TimelineCursor> {
     @Test
     @Category(IntegrationTest.class)

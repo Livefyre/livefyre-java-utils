@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.experimental.categories.Category;
 
 import com.google.common.collect.ImmutableMap;
@@ -26,6 +27,7 @@ import com.livefyre.cursor.TimelineCursor;
 import com.livefyre.dto.Subscription;
 import com.livefyre.dto.Topic;
 
+@Ignore
 @Category(IntegrationTest.class)
 public class PersonalizedStreamTest extends LfTest {
     private Network network;
